@@ -11,6 +11,7 @@
 - `docs/design/PROJECT-AUDIT.md`
 - `docs/design/FUNCTIONAL-BASELINE.md`
 - `docs/design/REDESIGN-ROADMAP.md`
+- `docs/design/PERSONAL-UI-DESIGNER.md`
 
 ## 기능과 데이터 보호
 
