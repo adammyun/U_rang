@@ -24,7 +24,7 @@
         <div class="comparison-copy">
           <span class="option-index">A</span>
           <div><h2>Apple Maps Inspired</h2><p>지도 중심 · Floating Sidebar · Glass Controls</p></div>
-          <a href="concept-a.html">전체 화면 <span aria-hidden="true">↗</span></a>
+          <button class="preview-open" type="button" data-preview="concept-a.html" data-title="A안 · Apple Maps Inspired">전체 화면 <span aria-hidden="true">↗</span></button>
         </div>
       </article>
       <article class="comparison-card">
@@ -32,7 +32,7 @@
         <div class="comparison-copy">
           <span class="option-index">B</span>
           <div><h2>Editorial Memory Journal</h2><p>사진 중심 · 지도 + 감성적인 기록 레이아웃</p></div>
-          <a href="concept-b.html">전체 화면 <span aria-hidden="true">↗</span></a>
+          <button class="preview-open" type="button" data-preview="concept-b.html" data-title="B안 · Editorial Memory Journal">전체 화면 <span aria-hidden="true">↗</span></button>
         </div>
       </article>
       <article class="comparison-card">
@@ -40,10 +40,19 @@
         <div class="comparison-copy">
           <span class="option-index">C</span>
           <div><h2>Spatial Memory Experience</h2><p>전체 화면 지도 · 상황에 따라 나타나는 패널</p></div>
-          <a href="concept-c.html">전체 화면 <span aria-hidden="true">↗</span></a>
+          <button class="preview-open" type="button" data-preview="concept-c.html" data-title="C안 · Spatial Memory Experience">전체 화면 <span aria-hidden="true">↗</span></button>
         </div>
       </article>
     </main>
     <footer class="comparison-footer">독립 UI 탐색물 · 기존 애플리케이션 소스와 런타임에는 연결되지 않습니다.</footer>
+    <section class="fullscreen-preview" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="fullscreen-title">
+      <header>
+        <strong id="fullscreen-title">시안 전체 화면</strong>
+        <a class="fullscreen-new-tab" href="concept-a.html" target="_blank" rel="noopener">새 탭에서 열기 ↗</a>
+        <button class="fullscreen-close" type="button" aria-label="전체 화면 닫기">닫기 <span aria-hidden="true">×</span></button>
+      </header>
+      <iframe title="선택한 디자인 시안 전체 화면"></iframe>
+    </section>
+    <script src="comparison.js"></script>
   </body>
 </html>
