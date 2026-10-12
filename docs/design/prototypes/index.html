@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="여운 UI 디자인 시스템 방향 세 가지 비교" />
+    <title>여운 — 디자인 방향 비교</title>
+    <style>
+      * { box-sizing: border-box; }
+      :root { font-family: Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #18221d; background: #ecefe9; }
+      body { margin: 0; min-width: 320px; }
+      header { max-width: 1480px; margin: 0 auto; padding: 54px 32px 31px; display: flex; align-items: end; gap: 30px; }
+      header div { max-width: 700px; }
+      .eyebrow { display: block; color: #536d60; font-size: 11px; font-weight: 800; letter-spacing: .2em; margin-bottom: 16px; }
+      h1 { margin: 0; font: 500 clamp(34px, 5vw, 64px)/1.08 Georgia, "Noto Serif KR", serif; letter-spacing: -.05em; }
+      header p { margin: 0 0 6px auto; max-width: 470px; color: #667169; line-height: 1.7; font-size: 14px; }
+      main { max-width: 1480px; margin: 0 auto; padding: 0 32px 55px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+      article { background: white; border: 1px solid rgba(55,72,62,.14); border-radius: 25px; padding: 14px; box-shadow: 0 20px 50px rgba(35,48,40,.08); }
+      .frame { height: 610px; border-radius: 17px; overflow: hidden; background: #dce1db; border: 1px solid rgba(20,30,24,.1); }
+      iframe { width: 100%; height: 100%; border: 0; }
+      .info { padding: 19px 8px 8px; }
+      .info-top { display: flex; align-items: center; gap: 10px; }
+      .letter { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-weight: 800; font-size: 12px; }
+      article:nth-child(1) .letter { background: #eee9dd; color: #2f5a4a; }
+      article:nth-child(2) .letter { background: #e5edff; color: #2458e6; }
+      article:nth-child(3) .letter { background: #262940; color: #a99fff; }
+      h2 { margin: 0; font-size: 18px; letter-spacing: -.025em; }
+      .info p { min-height: 42px; color: #6b756e; font-size: 12px; line-height: 1.7; }
+      .swatches { display: flex; gap: 5px; margin: 13px 0 18px; }
+      .swatches i { width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px rgba(30,40,34,.1); }
+      a { display: inline-flex; align-items: center; gap: 7px; color: inherit; font-weight: 700; font-size: 12px; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 3px; }
+      a:focus-visible { outline: 3px solid #2458e6; outline-offset: 4px; }
+      footer { text-align: center; color: #778078; font-size: 11px; padding: 0 20px 38px; }
+      @media (max-width: 1040px) { header { display: block; } header p { margin: 20px 0 0; } main { grid-template-columns: 1fr; max-width: 560px; } .frame { height: 700px; } }
+      @media (max-width: 560px) { header { padding: 35px 18px 24px; } main { padding: 0 12px 40px; } article { padding: 8px; border-radius: 19px; } .frame { height: 620px; } .info { padding: 18px 10px 10px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <span class="eyebrow">PERSONAL DESIGN SYSTEM · DIRECTION STUDY</span>
+        <h1>하나의 기능,<br />세 가지 인상.</h1>
+      </div>
+      <p>현재 여운의 검색, 지도, 마커, 공개 기억 목록과 핵심 CTA를 같은 구조로 유지한 채 시각 정체성만 달리한 비교 시안입니다. 각 화면을 직접 눌러 상호작용해 볼 수 있습니다.</p>
+    </header>
+    <main>
+      <article>
+        <div class="frame"><iframe src="quiet-archive.html" title="Quiet Archive 모바일 시안"></iframe></div>
+        <div class="info">
+          <div class="info-top"><span class="letter">A</span><h2>Quiet Archive · 여백의 기록</h2></div>
+          <p>따뜻한 종이, 편집물의 리듬과 차분한 기록 감성. 현재 여운과 가장 자연스럽게 이어집니다.</p>
+          <div class="swatches"><i style="background:#2f5a4a"></i><i style="background:#c6533f"></i><i style="background:#f5f0e6"></i><i style="background:#1e2a24"></i></div>
+          <a href="quiet-archive.html">전체 화면으로 보기 <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article>
+        <div class="frame"><iframe src="civic-atlas.html" title="Civic Atlas 모바일 시안"></iframe></div>
+        <div class="info">
+          <div class="info-top"><span class="letter">B</span><h2>Civic Atlas · 도시 아틀라스</h2></div>
+          <p>지도와 정보를 빠르게 읽는 구조적 UI. 다양한 도구형 웹사이트에 가장 넓게 재사용할 수 있습니다.</p>
+          <div class="swatches"><i style="background:#2458e6"></i><i style="background:#14243a"></i><i style="background:#f2a33a"></i><i style="background:#f3f6fa"></i></div>
+          <a href="civic-atlas.html">전체 화면으로 보기 <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article>
+        <div class="frame"><iframe src="afterglow-layers.html" title="Afterglow Layers 모바일 시안"></iframe></div>
+        <div class="info">
+          <div class="info-top"><span class="letter">C</span><h2>Afterglow Layers · 잔광의 레이어</h2></div>
+          <p>밤의 지도와 감정의 빛을 겹친 몰입형 방향. 가장 강한 브랜드 인상을 만듭니다.</p>
+          <div class="swatches"><i style="background:#7467f0"></i><i style="background:#121827"></i><i style="background:#ff7a68"></i><i style="background:#73d7c7"></i></div>
+          <a href="afterglow-layers.html">전체 화면으로 보기 <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+    </main>
+    <footer>정적 디자인 탐색물 · 실제 애플리케이션과 데이터에는 연결되지 않습니다.</footer>
+  </body>
+</html>
