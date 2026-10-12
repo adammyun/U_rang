@@ -29,3 +29,24 @@ test('메인 기억 지도를 표시하고 화면을 캡처한다', async ({ pag
     fullPage: true,
   });
 });
+
+test('지도 조정과 장소 기억 열람이 동작한다', async ({ page }) => {
+  await page.goto('./');
+
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  await expect(
+    page.getByRole('heading', { name: '지도를 어떻게 보여드릴까요?' }),
+  ).toBeVisible();
+
+  const detailMode = page.getByRole('button', { name: /^상세/ });
+  await detailMode.click();
+  await expect(detailMode).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '지도 조정 닫기' }).click();
+
+  const marker = page.locator('.raster-memory-marker').first();
+  await expect(marker).toBeVisible({ timeout: 20_000 });
+  await marker.click();
+  await expect(page.getByLabel('장소의 기억 목록')).toBeVisible();
+  await page.getByRole('button', { name: '장소 기억 닫기' }).click();
+  await expect(page.getByLabel('장소의 기억 목록')).toBeHidden();
+});

@@ -15,6 +15,7 @@ import {
   setPagesAuthenticated,
 } from '@/src/lib/runtime';
 import '@/app/globals.css';
+import '@/app/main-screen-v2.css';
 
 document.documentElement.dataset.yeounRuntime = 'pages';
 
@@ -150,4 +151,3 @@ function PagesApp() {
 }
 
 createRoot(document.getElementById('root')!).render(<PagesApp />);
-
