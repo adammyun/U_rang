@@ -17,6 +17,7 @@ import {
 import '@/app/globals.css';
 import '@/app/main-screen-v2.css';
 import '@/app/spatial-live.css';
+import '@/app/memory-atlas.css';
 
 document.documentElement.dataset.yeounRuntime = 'pages';
 

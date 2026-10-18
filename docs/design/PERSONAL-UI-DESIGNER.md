@@ -4,7 +4,7 @@
 
 ## 목표와 기준 문서
 
-기존 지도 기반 기억 기록 기능과 개인정보 경계를 유지하면서 **Quiet Spatial Editorial** 화면을 관리한다. 최종 방향이 확정되었으므로 현재 작업은 기본적으로 Refinement 또는 Visual QA 모드다. 작업 전 다음 문서를 함께 확인한다.
+기존 지도 기반 기억 기록 기능과 개인정보 경계를 유지하면서 **Memory Atlas — Spatial Paper** 화면을 관리한다. `yeoun_2`는 2026-10-18 사용자 지시로 La Gata Perduda 레퍼런스를 재해석하는 Redesign 작업을 진행했다. 이후 모드는 요청에 맞게 선택하며 원본 저장소를 수정하지 않는다. 작업 전 다음 문서를 함께 확인한다.
 
 - `PROJECT-AUDIT.md`: 현재 기술, 라우트, UI 구조와 위험 영역
 - `FUNCTIONAL-BASELINE.md`: 리디자인 후에도 보존할 동작
@@ -24,7 +24,7 @@
 
 ## 디자인 시스템 적용 위치
 
-- 실제 메인 화면의 공간 배치와 semantic token은 `app/spatial-live.css`, 공유 기반 스타일은 `app/globals.css`가 담당한다. GitHub Pages entry와 App Router layout의 두 CSS import를 함께 확인한다.
+- 실제 메인 화면의 공간 배치와 semantic token은 `app/memory-atlas.css`, 공유 기반 스타일은 `app/globals.css`가 담당한다. 이전 `spatial-live.css`는 호환 기반이며 새 CSS를 두 entry에서 마지막으로 import한다. GitHub Pages entry와 App Router layout의 두 CSS import를 함께 확인한다.
 - `components/memory-app.tsx`는 실제 데이터와 화면 상태를 연결하고 `components/memories/spatial-panels.tsx`는 미리보기·상세 표현을 담당한다. 독립 프로토타입 `docs/design/immersive-spatial/`의 가상 데이터를 서비스에 복사하지 않는다.
 - `components/ui`의 Base UI primitive와 `components/memories`의 공유 컴포넌트를 먼저 재사용한다.
 - 감정 이름과 색의 단일 근원은 `src/features/memories/model.ts`다. 표시 계층에 별도 감정 palette를 복제하지 않는다.
@@ -64,3 +64,7 @@ Playwright 캡처는 `test-results/screenshots/`에서 직접 확인한다. 최�
 ## 보고 방식
 
 결과는 한국어로 보고한다. 변경 파일, 보존한 기능, 데스크톱·모바일 Playwright 결과, `pnpm check` 결과, 캡처 위치와 확인하지 못한 항목을 포함한다.
+
+## 복사본 배포 경계
+
+GitHub Pages 배포는 `redesign/yeoun-2`를 선택해 수동 실행합니다. 원본 사이트의 Site project ID를 이 저장소에 다시 넣거나 원본에 배포하지 않습니다. 새 Sites 호스팅이 필요하면 새로운 Site로 등록해야 합니다.

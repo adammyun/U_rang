@@ -19,6 +19,7 @@ import DeveloperHotspot from './dev/developer-hotspot';
 import MemoryDetail from './memories/memory-detail';
 import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
+import AtlasAtmosphere from './memories/atlas-atmosphere';
 import PanoramaViewer from './memories/panorama-viewer';
 import { logout } from '@/src/features/auth/api';
 import {
@@ -225,8 +226,12 @@ export default function MyMemoryMap({
   }
 
   return (
-    <main className="atlas my-atlas">
-      <a className="skip-link" href="#my-memory-list">
+    <main className="atlas my-atlas memory-atlas atlas-journal">
+      <a className="skip-link" href="#my-memory-list" onClick={(event) => {
+        event.preventDefault();
+        setExpanded(true);
+        requestAnimationFrame(() => document.getElementById('my-memory-list')?.focus());
+      }}>
         내 기억 목록으로 건너뛰기
       </a>
       <Toaster position="top-center" richColors />
@@ -257,6 +262,7 @@ export default function MyMemoryMap({
       <MemoryMap
         memories={memories}
         mode={mapMode}
+        presentation="stamp"
         mapRef={mapRef}
         draftPoint={createPoint}
         highlightedIds={[]}
@@ -265,6 +271,8 @@ export default function MyMemoryMap({
         onSelect={selectMemory}
         onCreate={setCreatePoint}
       />
+
+      <AtlasAtmosphere emotion={selected?.emotion} />
 
       <aside
         id="my-memory-list"

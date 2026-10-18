@@ -28,6 +28,7 @@ import PlaceMemorySheet from './memories/place-memory-sheet';
 import { SpatialMemoryDetail, SpatialPlacePreview } from './memories/spatial-panels';
 import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
+import AtlasAtmosphere from './memories/atlas-atmosphere';
 import {
   emotions,
   formatDate,
@@ -215,6 +216,7 @@ export default function MemoryApp({
 
   const memories = rows;
   const hasActiveFilters = Boolean(filters.year || filters.emotions.length);
+  const selectedPlaceIndex = placeGroup?.memories.findIndex((item) => item.id === selected?.id) ?? -1;
 
   function changeFilters(next: MemoryFilters) {
     nearbyRequest.current?.abort();
@@ -410,9 +412,21 @@ export default function MemoryApp({
     );
   }
 
+  function showExplore() {
+    setExpanded(true);
+    setSelected(null);
+    setSelectedPlace(null);
+    setPlaceAnchor(null);
+    setPlaceListOpen(false);
+  }
+
   return (
-    <main className={`atlas spatial-atlas${selected || placeAnchor || expanded ? ' has-spatial-panel' : ''}`}>
-      <a className="skip-link" href="#public-memory-list">
+    <main className={`atlas spatial-atlas memory-atlas${selected || placeAnchor || expanded ? ' has-spatial-panel' : ''}`}>
+      <a className="skip-link" href="#public-memory-list" onClick={(event) => {
+        event.preventDefault();
+        showExplore();
+        requestAnimationFrame(() => document.getElementById('public-memory-list')?.focus());
+      }}>
         공개 기억 목록으로 건너뛰기
       </a>
       <Toaster position="top-center" richColors />
@@ -447,6 +461,7 @@ export default function MemoryApp({
       <MemoryMap
         memories={memories}
         mode={mapMode}
+        presentation="stamp"
         mapRef={mapRef}
         draftPoint={
           draftLocation?.point ??
@@ -463,7 +478,7 @@ export default function MemoryApp({
         onCreate={selectMapLocation}
       />
 
-      <div className="spatial-map-vignette" aria-hidden="true" />
+      <AtlasAtmosphere emotion={selected?.emotion ?? placeAnchor?.emotion} />
       <PlaceSearch onSelect={selectSearchResult} />
       <MemoryFilterSheet
         filters={filters}
@@ -474,11 +489,23 @@ export default function MemoryApp({
 
       {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
         <div className="spatial-intro">
-          <span className="spatial-eyebrow">ULSAN · MEMORY ATLAS</span>
-          <h1>이 장소에 남은<br /><em>다른 사람의 시간.</em></h1>
-          <p>지도 위 기억의 점을 선택하면 이야기가 열립니다.</p>
+          <span className="spatial-eyebrow">AN ATLAS OF ORDINARY DAYS</span>
+          <h1>기억은,<br /><em>이곳에.</em></h1>
+          <p>어떤 장소는 오래도록 우리를 기억한다.<br />지도 위 작은 조각에서 이야기를 만나보세요.</p>
         </div>
       )}
+
+      {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
+        <section className="atlas-feeling-index" aria-label="감정으로 기억 탐색">
+          <span className="spatial-eyebrow">그날의 마음으로 찾기</span>
+          <div>{(['nostalgic', 'peaceful', 'love', 'happy'] as const).map((emotion) => (
+            <button key={emotion} type="button" aria-pressed={filters.emotions.includes(emotion)} style={{ '--chip-color': emotions[emotion].color } as React.CSSProperties} onClick={() => changeFilters({ ...filters, emotions: filters.emotions.includes(emotion) ? filters.emotions.filter((item) => item !== emotion) : [...filters.emotions, emotion] })}>
+              <span aria-hidden="true">{filters.emotions.includes(emotion) ? '−' : '+'}</span>{emotions[emotion].label}
+            </button>
+          ))}</div>
+        </section>
+      )}
+      <span className="atlas-edge-note" aria-hidden="true">PLACES HOLD OUR STORIES · ULSAN</span>
 
       {selectedPlace && !draftLocation && (
         <section className="selected-place-card" aria-live="polite">
@@ -646,7 +673,7 @@ export default function MemoryApp({
       </div>
       <nav className="spatial-nav" aria-label="지도 메뉴">
         <button type="button" className={!expanded ? 'active' : ''} aria-current={!expanded ? 'page' : undefined} onClick={() => { setExpanded(false); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); setPlaceListOpen(false); }}><MapPin size={18} /> 지도</button>
-        <button type="button" className={expanded ? 'active' : ''} aria-expanded={expanded} onClick={() => { setExpanded(true); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); setPlaceListOpen(false); }}><Compass size={18} /> 탐색</button>
+        <button type="button" className={expanded ? 'active' : ''} aria-expanded={expanded} onClick={showExplore}><Compass size={18} /> 탐색</button>
         <button
           className="primary memory-cta"
           data-tour="create"
@@ -671,7 +698,12 @@ export default function MemoryApp({
 
       {selected && (
         <SpatialMemoryDetail
+          key={selected.id}
           memory={selected}
+          positionLabel={selectedPlaceIndex >= 0 && placeGroup ? `${selectedPlaceIndex + 1} / ${placeGroup.memories.length}` : undefined}
+          onPrevious={selectedPlaceIndex > 0 && placeGroup ? () => void openMemoryFromPlace(placeGroup.memories[selectedPlaceIndex - 1].id) : undefined}
+          onNext={placeGroup && selectedPlaceIndex >= 0 && selectedPlaceIndex < placeGroup.memories.length - 1 ? () => void openMemoryFromPlace(placeGroup.memories[selectedPlaceIndex + 1].id) : undefined}
+          changing={Boolean(openingMemoryId)}
           onOpenPanorama={() =>
             setPanoramaTarget(memoryPanoramaTarget(selected))
           }

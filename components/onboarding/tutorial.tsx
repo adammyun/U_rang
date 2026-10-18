@@ -53,8 +53,9 @@ const steps: TourStep[] = [
     eyebrow: 'MEMORY TRACE',
     title: '작은 흔적 하나가 하나의 기억이에요',
     description:
-      '지도 위의 원을 선택하면 그 장소에 남은 기억과 감정을 읽을 수 있어요.',
+      '지도 위 사진이나 글 조각을 선택하면 그 장소에 남은 기억과 감정을 읽을 수 있어요.',
     selectors: [
+      '.atlas-stamp[data-memory-count="1"]',
       '.raster-memory-marker:empty',
       '.raster-memory-marker',
       '.map-surface',
@@ -64,8 +65,9 @@ const steps: TourStep[] = [
     eyebrow: 'A PLACE, MANY STORIES',
     title: '숫자가 있는 흔적에는 여러 이야기가 겹쳐 있어요',
     description:
-      '같은 장소 가까이에 남겨진 기억을 한데 모아 보여줘요. 선택하면 장소별 기억 목록이 열립니다.',
+      '가까이 놓인 기억을 한데 모아 보여줘요. 서로 떨어진 장소는 확대해서, 같은 장소의 기억은 미리보기에서 만나보세요.',
     selectors: [
+      '.atlas-stamp[data-memory-count]:not([data-memory-count="1"])',
       '.raster-memory-marker:not(:empty)',
       '.memory-list',
       '.map-surface',

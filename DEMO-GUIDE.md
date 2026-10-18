@@ -1,6 +1,6 @@
 # 여운 시연 가이드
 
-현재 작업 브랜치: `redesign/yeoun-2` · 디자인: **Quiet Spatial Editorial**
+현재 작업 브랜치: `redesign/yeoun-2` · 디자인: **Memory Atlas — Spatial Paper**
 
 이 브랜치의 실제 앱 메인 화면은 독립 시안이 아닌, 기존 지도·기억 API와 연결된 화면입니다. 가상 울산 seed는 시연용이며 실제 개인의 이야기가 아닙니다.
 
@@ -34,7 +34,7 @@ pnpm exec vite preview --config vite.pages.config.ts --host 127.0.0.1 --port 417
 
 [http://127.0.0.1:4173/yeoun_2/](http://127.0.0.1:4173/yeoun_2/)을 엽니다. 이 모드는 같은 실제 React UI와 MapLibre 지도를 사용하지만, 울산 공개 seed와 새 기억·사진은 **열려 있는 브라우저의 IndexedDB**에만 있습니다. `로그인`은 로컬 시연 세션이며 방문자 간 데이터 공유나 서버 인증을 시연하지 않습니다. 발표 중 별도의 브라우저 프로필에서 작성하면 기존 사용자 데이터와 섞이지 않습니다.
 
-이 복사본은 아직 공개 사이트로 배포하지 않았습니다. 향후 GitHub Pages를 설정하면 사용할 경로는 `https://adammyun.github.io/yeoun_2/`입니다. 현재 시연에는 위 로컬 주소를 사용합니다. Pages 배포는 수동 실행으로 분리되어 있습니다.
+리디자인 공개 주소는 [https://adammyun.github.io/yeoun_2/](https://adammyun.github.io/yeoun_2/)입니다. Pages 배포는 수동 실행이며 `redesign/yeoun-2` 브랜치를 사용합니다. 공개 버전에서도 기억과 사진은 해당 브라우저에만 저장됩니다. 원본 사이트와 저장 공간을 분리했습니다.
 
 ## 발표 전 3분 점검
 

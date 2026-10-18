@@ -1,8 +1,10 @@
 # 여운 — 기억이 머무는 지도
 
+**리디자인 사이트:** [여운 2 열기](https://adammyun.github.io/yeoun_2/)
+
 **저장소:** [adammyun/yeoun_2](https://github.com/adammyun/yeoun_2)
 
-기존 여운 프로젝트의 최신 로컬 작업을 보존한 독립 복사본입니다. 새로운 UI 작업은 `redesign/yeoun-2` 브랜치에서 진행합니다. 원본 저장소와 공개 사이트는 별도로 유지됩니다. 이 복사본은 아직 웹사이트로 배포하지 않았습니다.
+기존 여운 프로젝트의 최신 로컬 작업을 보존한 독립 복사본입니다. 새로운 UI 작업은 `redesign/yeoun-2` 브랜치에서 진행합니다. 원본 저장소와 공개 사이트는 별도로 유지됩니다. 현재 리디자인은 `redesign/yeoun-2` 브랜치에서 관리합니다. 기준 `main`과 보존 태그는 그대로 유지합니다.
 
 현재 리디자인 브랜치의 로컬 시연 방법은 [DEMO-GUIDE.md](DEMO-GUIDE.md)를 참고하세요. 배포 브랜치에 반영되기 전에는 위 공개 주소가 이전 화면일 수 있습니다.
 
@@ -206,3 +208,7 @@ tests/                    외부 key 없이 실행되는 자동화 테스트
 장소 검색: [Photon](https://photon.komoot.io/) · © OpenStreetMap contributors
 
 OpenStreetMap tile은 화면에 필요한 범위만 요청하며 offline download, bulk prefetch, tile scraping을 구현하지 않습니다.
+
+## yeoun_2 리디자인
+
+Memory Atlas — Spatial Paper: 어두운 전체 지도, 사진/글 스탬프, 맥락 미리보기, 감정 색조와 비대칭 읽기 장면을 사용합니다. 실제 기억 API·검색·사진 작성·내 기억 CRUD를 재사용합니다. [구현 및 검증 기록](docs/design/MEMORY-ATLAS-IMPLEMENTATION.md)을 참고하세요.

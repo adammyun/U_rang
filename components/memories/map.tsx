@@ -14,6 +14,7 @@ import {
   DEFAULT_MAP_ZOOM,
 } from '@/src/features/map/constants';
 import { isPagesRuntime } from '@/src/lib/runtime';
+import MemoryStamp from './memory-stamp';
 
 setWorkerUrl(mapLibreWorkerUrl);
 const MAP_TILE_SOURCE_REVISION = 'osm-standard-v1';
@@ -70,6 +71,7 @@ export default function MemoryMap({
   highlightedIds,
   selectedMemoryId,
   mapRef,
+  presentation = 'trace',
 }: {
   memories: Memory[];
   mode: 'calm' | 'detail';
@@ -81,6 +83,7 @@ export default function MemoryMap({
   highlightedIds: string[];
   selectedMemoryId: string | null;
   mapRef: React.RefObject<MapHandle | null>;
+  presentation?: 'trace' | 'stamp';
 }) {
   const container = useRef<HTMLElement>(null);
   const rasterContainer = useRef<HTMLDivElement>(null);
@@ -320,13 +323,15 @@ export default function MemoryMap({
       const point = project(memory, view.zoom);
       const x = view.width / 2 + point.x - center.x;
       const y = view.height / 2 + point.y - center.y;
-      if (x < -40 || y < -40 || x > view.width + 40 || y > view.height + 40) continue;
-      const group = groups.find((item) => Math.hypot(item.x - x, item.y - y) < 34);
+      const markerSize = presentation === 'stamp' ? 72 : 34;
+      const edgePadding = presentation === 'stamp' ? 80 : 40;
+      if (x < -edgePadding || y < -edgePadding || x > view.width + edgePadding || y > view.height + edgePadding) continue;
+      const group = groups.find((item) => Math.hypot(item.x - x, item.y - y) < markerSize);
       if (group) group.memories.push(memory);
       else groups.push({ x, y, memories: [memory] });
     }
     return groups;
-  }, [memories, view]);
+  }, [memories, view, presentation]);
 
   const currentLocationPosition = useMemo(() => {
     if (!currentLocation || !view.width || !view.height) return null;
@@ -384,6 +389,32 @@ export default function MemoryMap({
           const color = emotions[memory.emotion].color;
           const selected = group.memories.some((item) => item.id === selectedMemoryId);
           const grouped = group.memories.some((item) => highlightedIds.includes(item.id));
+          const selectStamp = () => {
+            // A visual cluster can span distinct places at low zoom. Reveal
+            // those anchors before asking the existing 100m place repository.
+            const spread = group.memories.some((item) => Math.hypot(
+              (item.lng - memory.lng) * 111_320 * Math.cos(memory.lat * Math.PI / 180),
+              (item.lat - memory.lat) * 111_320,
+            ) > 100);
+            if (spread && !draftPoint && mapRef.current && view.zoom < 18) {
+              mapRef.current.flyTo({
+                lng: group.memories.reduce((sum, item) => sum + item.lng, 0) / group.memories.length,
+                lat: group.memories.reduce((sum, item) => sum + item.lat, 0) / group.memories.length,
+              }, Math.min(18, view.zoom + 1.8));
+            } else onSelect(memory);
+          };
+          if (presentation === 'stamp') return (
+            <MemoryStamp
+              key={group.memories.map((item) => item.id).join(':')}
+              memory={memory}
+              count={group.memories.length}
+              selected={selected}
+              grouped={grouped}
+              x={group.x}
+              y={group.y}
+              onSelect={selectStamp}
+            />
+          );
           return (
             <button
               key={group.memories.map((item) => item.id).join(':')}
@@ -418,7 +449,8 @@ export default function MemoryMap({
             }}
           />
         )}
-        <span className="raster-attribution">
+      </div>
+      <span className="raster-attribution">
           <a
             href="https://www.openstreetmap.org/copyright"
             target="_blank"
@@ -446,8 +478,7 @@ export default function MemoryMap({
               </a>
             </>
           )}
-        </span>
-      </div>
+      </span>
       {error && (
         <output className="map-error">
           지도를 불러오지 못했어요. 연결을 확인해 주세요.
