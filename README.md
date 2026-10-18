@@ -1,6 +1,10 @@
 # 여운 — 기억이 머무는 지도
 
-**실행 중인 앱:** [GitHub Pages에서 여운 기억 지도 열기](https://adammyun.github.io/yeoun-memory-atlas/)
+**저장소:** [adammyun/yeoun_2](https://github.com/adammyun/yeoun_2)
+
+기존 여운 프로젝트의 최신 로컬 작업을 보존한 독립 복사본입니다. 새로운 UI 작업은 `redesign/yeoun-2` 브랜치에서 진행합니다. 원본 저장소와 공개 사이트는 별도로 유지됩니다. 이 복사본은 아직 웹사이트로 배포하지 않았습니다.
+
+현재 리디자인 브랜치의 로컬 시연 방법은 [DEMO-GUIDE.md](DEMO-GUIDE.md)를 참고하세요. 배포 브랜치에 반영되기 전에는 위 공개 주소가 이전 화면일 수 있습니다.
 
 장소에 얽힌 개인의 기억을 지도에 기록하고, 같은 장소를 다른 사람들이 어떻게 기억하는지 발견하는 모바일 우선 웹 애플리케이션입니다.
 
@@ -44,7 +48,7 @@ GitHub Pages는 서버를 실행할 수 없으므로 Pages 버전은 여러 방�
 ## 지도 구성
 
 - **Main map:** MapLibre GL JS
-- **Base map:** `https://tile.openstreetmap.org/{z}/{x}/{y}.png`를 `/api/map-tiles` 서버 경유로 사용
+- **Base map:** 기본 간결 모드에는 OpenFreeMap Positron vector style, 상세 모드와 WebGL 호환 경로에는 `https://tile.openstreetmap.org/{z}/{x}/{y}.png` raster tiles를 사용합니다. Worker 모드의 raster 요청은 `/api/map-tiles`를 경유합니다.
 - **Place search:** Photon(OpenStreetMap 데이터), 서버 Route Handler 경유
 - **Panorama:** NAVER Maps Panorama, 사용자가 거리뷰를 열 때만 lazy load
 
@@ -133,10 +137,10 @@ seed에는 실제 개인과 무관한 가상 이야기만 들어 있습니다.
 
 ## Demo Scenario
 
-5분 발표에서는 다음 순서가 안정적입니다.
+5분 발표에서는 다음 순서가 안정적입니다. 최신 화면의 자세한 조작 순서는 [DEMO-GUIDE.md](DEMO-GUIDE.md)에 있습니다.
 
 1. 앱을 열어 울산 fallback, OSM 지도, 공개 marker를 확인합니다.
-2. 태화강 국가정원 marker를 선택해 한 장소에 쌓인 여러 날짜·감정의 기억과 감정 요약을 보여 줍니다.
+2. 태화강 국가정원 marker를 선택해 장소 미리보기를 열고, `이 장소의 다른 기억 보기`에서 여러 날짜·감정의 기억을 보여 줍니다.
 3. `울산대공원`을 검색해 지도가 이동하는 것을 보여 줍니다.
 4. 연도 또는 감정 필터를 적용한 뒤 초기화합니다.
 5. 로컬 로그인 후 지도에서 위치를 선택하고 private 기억을 작성합니다.

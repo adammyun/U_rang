@@ -4,12 +4,13 @@
 
 ## 목표와 기준 문서
 
-기존 지도 기반 기억 기록 기능과 개인정보 경계를 유지하면서 UI/UX를 전면 개선한다. 작업 전 다음 문서를 함께 확인한다.
+기존 지도 기반 기억 기록 기능과 개인정보 경계를 유지하면서 **Quiet Spatial Editorial** 화면을 관리한다. 최종 방향이 확정되었으므로 현재 작업은 기본적으로 Refinement 또는 Visual QA 모드다. 작업 전 다음 문서를 함께 확인한다.
 
 - `PROJECT-AUDIT.md`: 현재 기술, 라우트, UI 구조와 위험 영역
 - `FUNCTIONAL-BASELINE.md`: 리디자인 후에도 보존할 동작
 - `REDESIGN-ROADMAP.md`: 구현 순서와 완료 조건
 - 저장소 루트 `AGENTS.md`: 작업 및 검증 규칙
+- `DESIGN-DNA.md`: 확정된 범용 디자인 언어와 여운 전용 규칙
 
 ## 프로젝트 고유 불변 조건
 
@@ -23,7 +24,8 @@
 
 ## 디자인 시스템 적용 위치
 
-- 기존 token과 제품 스타일의 중심은 `app/globals.css`다. 새 raw value를 반복하기 전에 semantic token을 정의한다.
+- 실제 메인 화면의 공간 배치와 semantic token은 `app/spatial-live.css`, 공유 기반 스타일은 `app/globals.css`가 담당한다. GitHub Pages entry와 App Router layout의 두 CSS import를 함께 확인한다.
+- `components/memory-app.tsx`는 실제 데이터와 화면 상태를 연결하고 `components/memories/spatial-panels.tsx`는 미리보기·상세 표현을 담당한다. 독립 프로토타입 `docs/design/immersive-spatial/`의 가상 데이터를 서비스에 복사하지 않는다.
 - `components/ui`의 Base UI primitive와 `components/memories`의 공유 컴포넌트를 먼저 재사용한다.
 - 감정 이름과 색의 단일 근원은 `src/features/memories/model.ts`다. 표시 계층에 별도 감정 palette를 복제하지 않는다.
 - UI 리디자인 중 `src/features`, `src/server`, API DTO와 저장소 구현은 명시적인 기능 변경이 없는 한 그대로 둔다.

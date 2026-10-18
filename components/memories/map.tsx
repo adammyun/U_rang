@@ -91,6 +91,8 @@ export default function MemoryMap({
   }, [onBounds, onCreate]);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
+  const [tilesReady, setTilesReady] = useState(false);
+  const [rasterCompatibilityActive, setRasterCompatibilityActive] = useState(false);
   const [view, setView] = useState<ViewState>({
     center: DEFAULT_MAP_CENTER,
     zoom: DEFAULT_MAP_ZOOM,
@@ -211,13 +213,24 @@ export default function MemoryMap({
       // the shared HTML overlay below. Keeping them out of the base style
       // guarantees identical markers in calm and detailed map modes.
       setReady(true);
+      setTilesReady(instance.areTilesLoaded());
       syncView();
       report();
     });
     instance.on('move', scheduleViewSync);
+    instance.on('movestart', () => {
+      setTilesReady(false);
+      // Some embedded/automated WebGL contexts stop painting base tiles after
+      // a camera change while markers keep moving. The viewport raster layer
+      // is the existing compatibility path; keep it active after navigation.
+      setRasterCompatibilityActive(true);
+    });
     instance.on('moveend', report);
     instance.on('error', () => setError(true));
-    instance.on('idle', () => setError(false));
+    instance.on('idle', () => {
+      setTilesReady(instance.areTilesLoaded());
+      setError(false);
+    });
     let suppressUntil = 0;
     let press: ReturnType<typeof setTimeout> | undefined;
     let start: { x: number; y: number } | null = null;
@@ -298,7 +311,7 @@ export default function MemoryMap({
     }
     return tiles;
   }, [view]);
-  const showRasterTiles = mode === 'detail' || error || !ready;
+  const showRasterTiles = mode === 'detail' || error || !ready || !tilesReady || rasterCompatibilityActive;
 
   const markerGroups = useMemo(() => {
     const center = project(view.center, view.zoom);

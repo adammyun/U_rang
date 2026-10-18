@@ -16,6 +16,7 @@ import {
 } from '@/src/lib/runtime';
 import '@/app/globals.css';
 import '@/app/main-screen-v2.css';
+import '@/app/spatial-live.css';
 
 document.documentElement.dataset.yeounRuntime = 'pages';
 

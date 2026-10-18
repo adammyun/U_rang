@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './main-screen-v2.css';
+import './spatial-live.css';
 export const metadata: Metadata = {
   icons: { icon: '/favicon.svg' },
   title: '여운 — 기억이 머무는 지도',

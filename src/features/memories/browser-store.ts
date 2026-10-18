@@ -13,7 +13,7 @@ import type {
   UserMemoryFilters,
 } from './schemas';
 
-const DATABASE_NAME = 'yeoun-memory-atlas';
+const DATABASE_NAME = 'yeoun_2';
 const DATABASE_VERSION = 1;
 const STORE_NAME = 'memories';
 const LOCAL_USER_ID = 'github-pages-user';

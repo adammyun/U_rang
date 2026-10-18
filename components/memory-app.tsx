@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight,
   Check,
+  Compass,
   Leaf,
   LoaderCircle,
   LogOut,
@@ -15,15 +16,16 @@ import {
   Minus,
   Plus,
   UserRound,
+  X,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import DeveloperHotspot from './dev/developer-hotspot';
-import MemoryDetail from './memories/memory-detail';
 import MemoryFilterSheet from './memories/memory-filter-sheet';
 import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
 import PanoramaViewer from './memories/panorama-viewer';
 import PlaceMemorySheet from './memories/place-memory-sheet';
+import { SpatialMemoryDetail, SpatialPlacePreview } from './memories/spatial-panels';
 import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
 import {
@@ -154,6 +156,7 @@ export default function MemoryApp({
   const [area, setArea] = useState('울산광역시');
   const [currentLocation, setCurrentLocation] = useState<Point | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [placeListOpen, setPlaceListOpen] = useState(false);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
   const [mapMode, setMapMode] = useState<'calm' | 'detail'>('calm');
@@ -218,6 +221,7 @@ export default function MemoryApp({
     setSelected(null);
     setPlaceAnchor(null);
     setPlaceGroup(null);
+    setPlaceListOpen(false);
     setFilters(next);
     replaceFilterUrl(next);
   }
@@ -230,6 +234,8 @@ export default function MemoryApp({
     setDraftLocation(null);
     setPendingLocation(null);
     setPlaceAnchor(memory);
+    setPlaceListOpen(false);
+    setExpanded(false);
     setPlaceGroup(null);
     setPlaceError(false);
     setPlaceLoading(true);
@@ -278,6 +284,7 @@ export default function MemoryApp({
       setSelectedPlace(null);
       setPlaceAnchor(null);
       setPlaceGroup(null);
+      setPlaceListOpen(false);
       setPendingLocation(null);
       setDraftLocation({ point, locationName });
     },
@@ -295,6 +302,7 @@ export default function MemoryApp({
     setSelectedPlace(null);
     setPlaceAnchor(null);
     setPlaceGroup(null);
+    setPlaceListOpen(false);
     setDraftLocation(null);
     setExpanded(false);
     setPendingLocation(mapRef.current?.center() ?? DEFAULT_MAP_CENTER);
@@ -390,6 +398,7 @@ export default function MemoryApp({
     setSelected(null);
     setPlaceAnchor(null);
     setPlaceGroup(null);
+    setPlaceListOpen(false);
     setDraftLocation(null);
     setPendingLocation(null);
     setSelectedPlace(place);
@@ -402,12 +411,12 @@ export default function MemoryApp({
   }
 
   return (
-    <main className="atlas">
+    <main className={`atlas spatial-atlas${selected || placeAnchor || expanded ? ' has-spatial-panel' : ''}`}>
       <a className="skip-link" href="#public-memory-list">
         공개 기억 목록으로 건너뛰기
       </a>
       <Toaster position="top-center" richColors />
-      <header className="topbar">
+      <header className="topbar spatial-header">
         <button
           type="button"
           className="brand"
@@ -417,16 +426,12 @@ export default function MemoryApp({
         >
           <span className="brand-mark">◌</span>
           <b>여운</b>
-          <span className="brand-caption">기억이 머무는 지도</span>
         </button>
         <DeveloperHotspot />
         <nav className="app-nav" aria-label="주요 메뉴" data-tour="account-navigation">
-          <Link className="active" href="/" aria-current="page">
-            지도
-          </Link>
           {isAuthenticated ? (
             <>
-              <Link href="/my-map" data-tour="my-memories">
+              <Link href="/my-map">
                 <UserRound size={15} /> 내 기억
               </Link>
               <button onClick={() => void signOut()}>
@@ -458,6 +463,7 @@ export default function MemoryApp({
         onCreate={selectMapLocation}
       />
 
+      <div className="spatial-map-vignette" aria-hidden="true" />
       <PlaceSearch onSelect={selectSearchResult} />
       <MemoryFilterSheet
         filters={filters}
@@ -465,6 +471,14 @@ export default function MemoryApp({
         mapMode={mapMode}
         onMapModeChange={setMapMode}
       />
+
+      {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
+        <div className="spatial-intro">
+          <span className="spatial-eyebrow">ULSAN · MEMORY ATLAS</span>
+          <h1>이 장소에 남은<br /><em>다른 사람의 시간.</em></h1>
+          <p>지도 위 기억의 점을 선택하면 이야기가 열립니다.</p>
+        </div>
+      )}
 
       {selectedPlace && !draftLocation && (
         <section className="selected-place-card" aria-live="polite">
@@ -519,14 +533,10 @@ export default function MemoryApp({
         aria-label="주변의 공개 기억"
         tabIndex={-1}
       >
-        <button
-          className="mobile-sheet-toggle"
-          onClick={() => setExpanded((value) => !value)}
-          aria-label={expanded ? '기억 목록 접기' : '기억 목록 펼치기'}
-          aria-expanded={expanded}
-        >
-          <span />
-        </button>
+        <div className="spatial-explore-heading">
+          <div><span className="spatial-eyebrow">EXPLORE ULSAN</span><h2>지도 위의 이야기</h2><p>원할 때만 열어 보는 기억의 목록</p></div>
+          <button type="button" onClick={() => setExpanded(false)} aria-label="탐색 닫기"><X size={18} /></button>
+        </div>
         <div className="editorial">
           <span className="eyebrow">A PLACE, MANY STORIES</span>
           <h1>
@@ -615,8 +625,7 @@ export default function MemoryApp({
       </aside>
 
       <div className={`map-caption ${selectedPlace ? 'is-hidden' : ''}`}>
-        <span className="live-dot" /> {area}
-        <span>현재 지도 주변의 공개 기억을 불러옵니다</span>
+        <span className="live-dot" /> {area} · 공개된 기억 <strong>{loading ? '…' : memories.length}</strong>
       </div>
       {!pendingLocation && (
         <div className="map-guide">
@@ -631,8 +640,13 @@ export default function MemoryApp({
         <button aria-label="지도 축소" onClick={() => mapRef.current?.zoom(-1)}>
           <Minus size={18} />
         </button>
+        <button data-tour="locate" aria-label="현재 위치로 이동" onClick={() => void locate()}>
+          <LocateFixed size={18} />
+        </button>
       </div>
-      <div className="map-actions public-map-actions">
+      <nav className="spatial-nav" aria-label="지도 메뉴">
+        <button type="button" className={!expanded ? 'active' : ''} aria-current={!expanded ? 'page' : undefined} onClick={() => { setExpanded(false); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); setPlaceListOpen(false); }}><MapPin size={18} /> 지도</button>
+        <button type="button" className={expanded ? 'active' : ''} aria-expanded={expanded} onClick={() => { setExpanded(true); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); setPlaceListOpen(false); }}><Compass size={18} /> 탐색</button>
         <button
           className="primary memory-cta"
           data-tour="create"
@@ -642,15 +656,8 @@ export default function MemoryApp({
         >
           <Plus size={19} /> {pendingLocation ? '장소 선택 중' : '기억 남기기'}
         </button>
-        <button
-          className="icon-button"
-          data-tour="locate"
-          aria-label="현재 위치로 이동"
-          onClick={() => void locate()}
-        >
-          <LocateFixed size={20} />
-        </button>
-      </div>
+        <Link href={isAuthenticated ? '/my-map' : '/login?next=/my-map'} data-tour="my-memories"><UserRound size={18} /> {isAuthenticated ? '내 기억' : '로그인'}</Link>
+      </nav>
 
       {draftLocation && (
         <MemoryForm
@@ -663,28 +670,48 @@ export default function MemoryApp({
       )}
 
       {selected && (
-        <MemoryDetail
+        <SpatialMemoryDetail
           memory={selected}
-          preview={false}
           onOpenPanorama={() =>
             setPanoramaTarget(memoryPanoramaTarget(selected))
           }
-          onBack={placeAnchor ? () => setSelected(null) : undefined}
+          onBack={() => { setSelected(null); setPlaceListOpen(false); }}
+          onOtherMemories={placeAnchor ? () => { setSelected(null); setPlaceListOpen(true); } : undefined}
           onClose={() => {
             setSelected(null);
             setPlaceAnchor(null);
             setPlaceGroup(null);
+            setPlaceListOpen(false);
           }}
           onLocate={() => {
             mapRef.current?.flyTo(selected);
             setSelected(null);
             setPlaceAnchor(null);
             setPlaceGroup(null);
+            setPlaceListOpen(false);
           }}
         />
       )}
 
-      {placeAnchor && !selected && (
+      {placeAnchor && !selected && !placeListOpen && (
+        <SpatialPlacePreview
+          anchor={placeAnchor}
+          group={placeGroup}
+          loading={placeLoading}
+          error={placeError}
+          openingMemoryId={openingMemoryId}
+          onRetry={() => openPlace(placeAnchor)}
+          onOpenMemory={(id) => void openMemoryFromPlace(id)}
+          onOpenPlace={() => setPlaceListOpen(true)}
+          onClose={() => {
+            nearbyRequest.current?.abort();
+            setPlaceAnchor(null);
+            setPlaceGroup(null);
+          }}
+        />
+      )}
+
+      {placeAnchor && !selected && placeListOpen && (
         <PlaceMemorySheet
           anchor={placeAnchor}
           group={placeGroup}
@@ -702,9 +729,7 @@ export default function MemoryApp({
           }
           onOpenMemory={(id) => void openMemoryFromPlace(id)}
           onClose={() => {
-            nearbyRequest.current?.abort();
-            setPlaceAnchor(null);
-            setPlaceGroup(null);
+            setPlaceListOpen(false);
           }}
           onLocate={() => {
             const center = placeGroup
@@ -716,6 +741,7 @@ export default function MemoryApp({
             mapRef.current?.flyTo(center);
             setPlaceAnchor(null);
             setPlaceGroup(null);
+            setPlaceListOpen(false);
           }}
         />
       )}

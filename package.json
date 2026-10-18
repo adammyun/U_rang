@@ -18,6 +18,8 @@
     "test:ui:report": "playwright show-report",
     "preview:design": "vite docs/design/prototypes --host 127.0.0.1 --port 4310",
     "preview:spatial": "vite docs/design/apple-spatial-memory --host 127.0.0.1 --port 4320",
+    "preview:immersive": "vite docs/design/immersive-spatial --host 127.0.0.1 --port 4330 --strictPort",
+    "test:immersive": "playwright test --config playwright.immersive.config.ts",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern dist-pages --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build:pages",

@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, root, '');
   return {
     root: resolve(root, 'github-pages'),
-    base: '/yeoun-memory-atlas/',
+    base: '/yeoun_2/',
     publicDir: resolve(root, 'public'),
     resolve: {
       alias: {

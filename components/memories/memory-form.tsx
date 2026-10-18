@@ -194,7 +194,8 @@ export default function MemoryForm({
       visibility,
       is_anonymous: visibility === 'public' && anonymous,
       location_precision: approximate ? 'approximate' : 'exact',
-      ...point,
+      lng: point.lng,
+      lat: point.lat,
     };
     setBusy(true);
     setError('');

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#e9ede8" />
+    <meta name="description" content="여운의 몰입형 지도 경험을 위한 독립 디자인 미리보기" />
+    <title>여운 · Apple Spatial Memory 미리보기</title>
+  </head>
+  <body>
+    <main class="experience" id="experience">
+      <div class="map-stage" id="map" aria-label="울산의 기억 지도"></div>
+      <div class="map-vignette" aria-hidden="true"></div>
+      <div class="map-fallback" id="mapFallback" aria-hidden="true">
+        <span class="fallback-river"></span><span class="fallback-park"></span>
+        <span class="fallback-road fallback-road-one"></span><span class="fallback-road fallback-road-two"></span>
+        <span class="fallback-label fallback-label-one">태화강 국가정원</span>
+        <span class="fallback-label fallback-label-two">중구</span>
+        <span class="fallback-label fallback-label-three">남구</span>
+      </div>
+
+      <header class="floating-header">
+        <button class="identity glass" id="homeButton" type="button" aria-label="여운 기본 지도 보기">
+          <span class="identity-mark" aria-hidden="true"><span></span></span>
+          <span class="identity-word">여운</span>
+        </button>
+        <div class="search-wrap">
+          <label class="search glass" for="placeSearch">
+            <span class="icon" data-icon="search" aria-hidden="true"></span>
+            <input id="placeSearch" type="search" autocomplete="off" placeholder="어떤 장소가 떠오르나요?" aria-label="장소 검색" aria-controls="searchSuggestions" aria-expanded="false" aria-autocomplete="list" />
+            <kbd class="search-shortcut">⌘ K</kbd>
+          </label>
+          <div class="search-suggestions surface" id="searchSuggestions" aria-label="장소 검색 결과" hidden>
+            <p class="eyebrow" id="searchResultLabel" aria-live="polite">장소 제안 · 3곳</p>
+            <button type="button" data-search-place="taehwa"><span class="icon" data-icon="pin"></span><span>태화강 국가정원<small>울산 중구</small></span></button>
+            <button type="button" data-search-place="daewangam"><span class="icon" data-icon="pin"></span><span>대왕암공원<small>울산 동구</small></span></button>
+            <button type="button" data-search-place="ulsanpark"><span class="icon" data-icon="pin"></span><span>울산대공원<small>울산 남구</small></span></button>
+            <p class="search-empty" id="searchEmpty" hidden>일치하는 장소가 없어요. 다른 이름으로 찾아보세요.</p>
+          </div>
+        </div>
+        <button class="desktop-profile glass" id="profileButton" type="button" aria-label="내 기억 보기"><span class="icon" data-icon="user"></span><span>내 기억</span></button>
+      </header>
+
+      <div class="place-intro" id="placeIntro">
+        <span class="eyebrow intro-location">ULSAN · MEMORY ATLAS</span>
+        <h1>이 장소에 남은<br /><em>다른 사람의 시간.</em></h1>
+        <p>지도 위 기억의 점을 선택하면 이야기가 열립니다.</p>
+      </div>
+
+      <div class="map-actions glass" aria-label="지도 조작">
+        <button id="zoomIn" type="button" aria-label="지도 확대"><span class="icon" data-icon="plus"></span></button>
+        <span class="action-rule" aria-hidden="true"></span>
+        <button id="zoomOut" type="button" aria-label="지도 축소"><span class="icon" data-icon="minus"></span></button>
+        <span class="action-rule" aria-hidden="true"></span>
+        <button id="locate" type="button" aria-label="현재 위치"><span class="icon" data-icon="locate"></span></button>
+      </div>
+
+      <div class="map-meta glass" id="mapMeta"><span class="signal-dot"></span><span>울산 · 공개된 기억</span><strong>11</strong></div>
+
+      <nav class="floating-nav glass" aria-label="주요 기능">
+        <button type="button" class="nav-item is-active" id="navMap" aria-current="page"><span class="icon" data-icon="map"></span><span>지도</span></button>
+        <button type="button" class="nav-item" id="navExplore"><span class="icon" data-icon="compass"></span><span>탐색</span></button>
+        <button type="button" class="nav-create" id="navCreate"><span class="icon" data-icon="plus"></span><span>기억 남기기</span></button>
+        <button type="button" class="nav-item" id="navMine"><span class="icon" data-icon="book"></span><span>내 기억</span></button>
+      </nav>
+
+      <aside class="context-panel surface" id="contextPanel" aria-label="장소의 기억 미리보기" hidden>
+        <div class="context-handle" aria-hidden="true"></div>
+        <div class="context-topline"><span class="eyebrow">A PLACE, MANY STORIES</span><button class="icon-button" id="closeContext" type="button" aria-label="미리보기 닫기"><span class="icon" data-icon="close"></span></button></div>
+        <div class="context-location"><span class="pin-badge icon" data-icon="pin" aria-hidden="true"></span><span id="contextPlace">태화강 국가정원</span><span id="contextCount">기억 5개</span></div>
+        <button class="context-story" id="openStory" type="button" aria-label="선택한 기억 자세히 읽기">
+          <span class="context-photo" id="contextPhoto" role="img" aria-label="태화강 산책길의 가상 이미지"></span>
+          <span class="context-copy"><small id="contextDate">2025년 9월 13일 · 사랑</small><strong id="contextTitle">오래된 친구와 다시 만난 곳</strong><span id="contextExcerpt">오랫동안 연락하지 못했던 친구와 만나 강을 따라 천천히 걸었다.</span></span>
+          <span class="context-arrow icon" data-icon="arrow-right" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="all-place-link" id="openPlaceStories">이 장소의 다른 기억 보기 <span class="icon" data-icon="arrow-right"></span></button>
+      </aside>
+
+      <section class="editorial-panel surface" id="editorialPanel" role="dialog" aria-modal="false" aria-label="기억 상세" hidden>
+        <div class="editorial-scroll">
+          <div class="editorial-hero" id="editorialHero"><img id="detailPhoto" src="./assets/taehwagang-memory.png" alt="태화강 국가정원 산책길을 상상해 만든 이미지" /><div class="hero-shade"></div><span class="hero-no-photo" id="heroNoPhoto" hidden>사진 없이 남겨진 기억</span><button id="closeDetail" type="button" class="detail-back glass"><span class="icon" data-icon="arrow-left"></span><span>지도로 돌아가기</span></button><span class="photo-caption" id="photoCaption">가상의 기억을 위한 시안 이미지</span></div>
+          <article class="editorial-content">
+            <div class="editorial-meta"><span class="eyebrow">STORY 01 / ULSAN</span><span class="emotion" id="detailEmotion">사랑</span></div>
+            <p class="editorial-place"><span class="icon" data-icon="pin"></span><span id="detailPlace">태화강 국가정원 · 울산 중구</span></p>
+            <h2 id="detailTitle">오래된 친구와<br /><em>다시 만난 곳</em></h2>
+            <div class="story-divider"><span></span><span id="detailDate">2025. 09. 13</span></div>
+            <p class="story-lead" id="detailLead">“다시 만나면 어색할 줄 알았는데, 우리는 예전처럼 강을 따라 걸었다.”</p>
+            <p id="detailBodyFirst">오랫동안 연락하지 못했던 친구와 만나 강을 따라 천천히 걸었다. 별다른 말을 하지 않아도 서로의 속도를 기억하고 있다는 게 신기했다.</p>
+            <p id="detailBodySecond">바람이 불 때마다 나뭇잎이 흔들렸고, 멀리서 사람들이 웃는 소리가 들렸다. 집으로 돌아가는 길에는 오래 묻어 두었던 이야기를 조금씩 꺼냈다.</p>
+            <footer class="story-footer"><span>익명으로 남긴 기억</span><button type="button" id="nextStory">다른 기억 읽기 <span class="icon" data-icon="arrow-right"></span></button></footer>
+          </article>
+        </div>
+      </section>
+
+      <section class="explore-panel surface" id="explorePanel" role="dialog" aria-modal="false" aria-label="기억 탐색" hidden>
+        <div class="explore-heading"><div><span class="eyebrow">EXPLORE ULSAN</span><h2>지도 위의 이야기</h2><p>원할 때만 열어 보는 기억의 목록</p></div><button class="icon-button" id="closeExplore" type="button" aria-label="탐색 닫기"><span class="icon" data-icon="close"></span></button></div>
+        <div class="explore-list" id="exploreList"></div>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+      <p class="map-attribution">MapLibre · <a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a></p>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

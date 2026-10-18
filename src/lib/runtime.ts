@@ -1,5 +1,5 @@
 const PAGES_RUNTIME_ATTRIBUTE = 'pages';
-const AUTH_STORAGE_KEY = 'yeoun.pages.auth.v1';
+const AUTH_STORAGE_KEY = 'yeoun_2.pages.auth.v1';
 
 export const AUTH_CHANGED_EVENT = 'yeoun:auth-changed';
 

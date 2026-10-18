@@ -1,5 +1,5 @@
 export const ONBOARDING_VERSION = 1;
-export const ONBOARDING_STORAGE_KEY = `yeoun:onboarding:v${ONBOARDING_VERSION}`;
+export const ONBOARDING_STORAGE_KEY = `yeoun_2:onboarding:v${ONBOARDING_VERSION}`;
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 

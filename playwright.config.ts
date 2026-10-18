@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 const host = '127.0.0.1';
 const port = 4173;
-const baseURL = `http://${host}:${port}/yeoun-memory-atlas/`;
+const baseURL = `http://${host}:${port}/yeoun_2/`;
 
 export default defineConfig({
   testDir: './tests/e2e',
