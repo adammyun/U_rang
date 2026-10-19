@@ -126,7 +126,7 @@ test('울산 라인 지도와 상세 지도는 같은 기억 앵커를 사용한
   await expect(page.locator('.spatial-intro h1')).toHaveText('기억은이곳에');
   await expect(page.locator('.eyebrow,.spatial-eyebrow')).toHaveCount(0);
   await page.evaluate(() => document.fonts.ready);
-  expect(await page.evaluate(() => document.fonts.check('400 20px "Yurang Myeongjo"', '유랑'))).toBe(true);
+  expect(await page.evaluate(() => document.fonts.check('400 20px "Yurang Sans"', '유랑'))).toBe(true);
   const marker = page.locator('.atlas-stamp').first();
   const position = await marker.boundingBox();
   const label = await marker.getAttribute('aria-label');
@@ -175,11 +175,11 @@ test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한�
 });
 
 test('라인 데이터 실패와 울산 밖 현재 위치에서는 raster 호환 지도를 유지한다', async ({ page, context }) => {
-  await page.route('**/maps/ulsan-lines.geojson', (route) => route.fulfill({ status: 404, body: '' }));
+  await page.route('**/maps/ulsan-lines.geojson*', (route) => route.fulfill({ status: 404, body: '' }));
   await page.goto('./');
   await expect(page.locator('.raster-map > img').first()).toBeVisible();
   await expect(page.locator('.ulsan-line-map')).toHaveCount(0);
-  await page.unroute('**/maps/ulsan-lines.geojson');
+  await page.unroute('**/maps/ulsan-lines.geojson*');
   await context.grantPermissions(['geolocation']);
   await context.setGeolocation({ longitude: 129.0, latitude: 35.7 });
   await page.reload();
@@ -208,4 +208,62 @@ test('높이가 낮은 화면에서도 조정의 마지막 선택과 적용 버�
   await page.screenshot({ path: `test-results/screenshots/yurang-short-adjust-${info.project.name}.png`, animations: 'disabled' });
   await apply.click();
   await expect(sheet).toBeHidden();
+});
+
+function luminance(css: string) {
+  const channels = css.match(/[\d.]+/g)!.slice(0,3).map(Number).map((v) => v / 255).map((v) => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4);
+  return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+}
+
+test('지도 컨트롤 아이콘이 중앙 정렬되고 조정·작성·로그인이 어두운 테마를 공유한다', async ({ page }, info) => {
+  await page.goto('./');
+  const controls = page.locator('.map-zoom button');
+  for (const button of await controls.all()) {
+    const b = await button.boundingBox(); const icon = await button.locator('svg').boundingBox();
+    expect(b!.width).toBe(44); expect(b!.height).toBe(44);
+    expect(Math.abs((b!.x + b!.width / 2) - (icon!.x + icon!.width / 2))).toBeLessThan(1);
+    expect(Math.abs((b!.y + b!.height / 2) - (icon!.y + icon!.height / 2))).toBeLessThan(1);
+  }
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  const sheet = page.getByRole('dialog');
+  const colors = await sheet.evaluate(el => ({ bg: getComputedStyle(el).backgroundColor, fg: getComputedStyle(el).color }));
+  expect(luminance(colors.bg)).toBeLessThan(.2);
+  expect((luminance(colors.fg) + .05) / (luminance(colors.bg) + .05)).toBeGreaterThan(4.5);
+  await sheet.getByRole('button', { name: '지도 조정 닫기' }).click();
+  await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
+  expect(luminance(await page.locator('.auth-card').evaluate(el => getComputedStyle(el).backgroundColor))).toBeLessThan(.2);
+  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
+  await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
+  await page.getByRole('button', { name: '이 위치 선택' }).click();
+  const form = page.locator('.create-sheet');
+  expect(luminance(await form.evaluate(el => getComputedStyle(el).backgroundColor))).toBeLessThan(.2);
+  expect(luminance(await form.locator('textarea').evaluate(el => getComputedStyle(el).backgroundColor))).toBeLessThan(.2);
+  await page.screenshot({path:`test-results/screenshots/graphite-form-${info.project.name}.png`,animations:'disabled'});
+});
+
+test('긴 감정 이름은 한 줄로 읽히며 상세와 제목은 고딕으로 표시된다', async ({ page }, info) => {
+  await page.goto('./');
+  await page.getByRole('button', {name:'골목의 작은 불빛',exact:true}).click();
+  await page.getByRole('button', {name:'선택한 기억 자세히 읽기'}).click();
+  const detail = page.getByRole('dialog',{name:'기억 상세'});
+  const emotion = detail.locator('.atlas-no-photo strong');
+  await expect(emotion).toHaveText('의미 있는 순간');
+  const metrics = await emotion.evaluate(el=>({height:el.getBoundingClientRect().height,line:parseFloat(getComputedStyle(el).lineHeight),width:el.clientWidth,scroll:el.scrollWidth}));
+  expect(metrics.height).toBeLessThanOrEqual(metrics.line + 1);
+  expect(metrics.scroll).toBeLessThanOrEqual(metrics.width + 1);
+  expect(await detail.getByRole('heading').evaluate(el=>getComputedStyle(el).fontFamily)).toContain('Yurang Sans');
+  await page.screenshot({path:`test-results/screenshots/graphite-meaningful-${info.project.name}.png`,animations:'disabled'});
+});
+
+test('울산 5개 구군 경계와 확대 시 동·도로명을 표시한다', async ({ page }, info) => {
+  await page.goto('./');
+  const map = page.locator('.ulsan-line-map');
+  await expect(map.locator('[data-district]')).toHaveCount(5);
+  expect((await map.locator('.ulsan-line-boundary').getAttribute('d'))!.length).toBeGreaterThan(100);
+  expect(await map.locator('.ulsan-label-district').count()).toBeGreaterThan(0);
+  await page.getByRole('combobox',{name:'장소 이름'}).fill('성남동');
+  await page.getByRole('option',{name:/성남동 문화의거리/}).click();
+  await expect(page.getByText('이곳에 기억 남기기')).toBeVisible();
+  await expect.poll(()=>map.locator('.ulsan-label-neighborhood,.ulsan-label-road').count()).toBeGreaterThan(0);
+  await page.screenshot({path:`test-results/screenshots/graphite-neighborhood-${info.project.name}.png`,animations:'disabled'});
 });

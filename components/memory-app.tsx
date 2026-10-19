@@ -462,6 +462,7 @@ export default function MemoryApp({
         memories={memories}
         mode={mapMode}
         presentation="stamp"
+        reserveIntroSpace={!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace}
         mapRef={mapRef}
         draftPoint={
           draftLocation?.point ??

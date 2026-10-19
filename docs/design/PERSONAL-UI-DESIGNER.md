@@ -1,16 +1,16 @@
-# Personal UI Designer — 여운 프로젝트 프로필
+# Personal UI Designer — 유랑 프로젝트 프로필
 
-이 문서는 `personal-ui-designer` Skill의 범용 규칙에 더해 여운 프로젝트에서만 적용할 구체적인 기준을 정의한다. 다른 프로젝트의 디자인 규칙으로 사용하지 않는다.
+이 문서는 `personal-ui-designer` Skill의 범용 규칙에 더해 유랑 프로젝트에서만 적용할 구체적인 기준을 정의한다. 다른 프로젝트의 디자인 규칙으로 사용하지 않는다.
 
 ## 목표와 기준 문서
 
-기존 지도 기반 기억 기록 기능과 개인정보 경계를 유지하면서 **Memory Atlas — Spatial Paper** 화면을 관리한다. `yeoun_2`는 2026-10-18 사용자 지시로 La Gata Perduda 레퍼런스를 재해석하는 Redesign 작업을 진행했다. 이후 모드는 요청에 맞게 선택하며 원본 저장소를 수정하지 않는다. 작업 전 다음 문서를 함께 확인한다.
+기존 지도 기반 기억 기록 기능과 개인정보 경계를 유지하면서 **Memory Atlas — Graphite** 화면을 관리한다. `yeoun_2`는 2026-10-18 사용자 지시로 La Gata Perduda 레퍼런스를 재해석하는 Redesign 작업을 진행했다. 이후 모드는 요청에 맞게 선택하며 원본 저장소를 수정하지 않는다. 작업 전 다음 문서를 함께 확인한다.
 
 - `PROJECT-AUDIT.md`: 현재 기술, 라우트, UI 구조와 위험 영역
 - `FUNCTIONAL-BASELINE.md`: 리디자인 후에도 보존할 동작
 - `REDESIGN-ROADMAP.md`: 구현 순서와 완료 조건
 - 저장소 루트 `AGENTS.md`: 작업 및 검증 규칙
-- `DESIGN-DNA.md`: 확정된 범용 디자인 언어와 여운 전용 규칙
+- `DESIGN-DNA.md`: 확정된 범용 디자인 언어와 유랑 전용 규칙
 
 ## 프로젝트 고유 불변 조건
 
@@ -68,3 +68,5 @@ Playwright 캡처는 `test-results/screenshots/`에서 직접 확인한다. 최�
 ## 복사본 배포 경계
 
 GitHub Pages 배포는 `redesign/yeoun-2`를 선택해 수동 실행합니다. 원본 사이트의 Site project ID를 이 저장소에 다시 넣거나 원본에 배포하지 않습니다. 새 Sites 호스팅이 필요하면 새로운 Site로 등록해야 합니다.
+
+현재 표현은 graphite 바탕·공통 Noto Sans KR 고딕·산호색 행동 강조를 사용합니다. 사진의 비대칭은 유지하지만 텍스트 전용 감정 표지는 수평으로 읽습니다. 세부 토큰은 `DESIGN-DNA.md`와 `app/memory-atlas.css`를 따릅니다.

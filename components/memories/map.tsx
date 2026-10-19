@@ -72,6 +72,7 @@ export default function MemoryMap({
   selectedMemoryId,
   mapRef,
   presentation = 'trace',
+  reserveIntroSpace = false,
 }: {
   memories: Memory[];
   mode: 'calm' | 'detail';
@@ -84,6 +85,7 @@ export default function MemoryMap({
   selectedMemoryId: string | null;
   mapRef: React.RefObject<MapHandle | null>;
   presentation?: 'trace' | 'stamp';
+  reserveIntroSpace?: boolean;
 }) {
   const container = useRef<HTMLElement>(null);
   const rasterContainer = useRef<HTMLDivElement>(null);
@@ -99,7 +101,7 @@ export default function MemoryMap({
   const [lineData, setLineData] = useState<UlsanLineData | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    const url = isPagesRuntime() ? new URL('maps/ulsan-lines.geojson', document.baseURI).href : '/maps/ulsan-lines.geojson';
+    const url = isPagesRuntime() ? new URL('maps/ulsan-lines.geojson?v=admin-v2', document.baseURI).href : '/maps/ulsan-lines.geojson?v=admin-v2';
     fetch(url, { signal: controller.signal }).then((response) => {
       if (!response.ok) throw new Error('Line map unavailable');
       return response.json() as Promise<UlsanLineData>;
@@ -381,7 +383,7 @@ export default function MemoryMap({
         className={`map-surface raster-map ${!showRasterTiles ? 'vector-visible' : ''} ${mode === 'calm' ? 'calm-mode' : 'detail-mode'}`}
         aria-label="지도 위 기억 마커"
       >
-        {showLineArt && <UlsanLineMap data={lineData} view={view} project={project} />}
+        {showLineArt && <UlsanLineMap data={lineData} view={view} project={project} obstacles={memories} reserveIntroSpace={reserveIntroSpace} />}
         {showRasterTiles && rasterTiles.map((tile) => (
           // Raster tiles are decorative; map attribution is provided by MapLibre.
           // eslint-disable-next-line @next/next/no-img-element

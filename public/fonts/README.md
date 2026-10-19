@@ -1,8 +1,8 @@
-# 유랑 제목용 글꼴
+# 유랑 공통 글꼴
 
-나눔명조(Nanum Myeongjo) Regular 400, Korean WOFF2를 로컬에서 제공합니다. 제목은 이 글꼴을 사용하며 별도 유료 글꼴 서비스나 브라우저의 한국어 세리프 설치에 의존하지 않습니다.
+제목·본문·날짜·메타 정보에 Noto Sans KR 400/600 WOFF2를 로컬에서 제공합니다. 한국어 세리프 설치나 외부 글꼴 서비스에 의존하지 않습니다. 기존 나눔명조 파일은 사용하지 않습니다.
 
-- 배포 출처: [Fontsource @fontsource/nanum-myeongjo 5.3.0](https://www.npmjs.com/package/@fontsource/nanum-myeongjo)
-- 원본 파일: `files/nanum-myeongjo-korean-400-normal.woff2`
-- 라이선스: SIL Open Font License 1.1. 원본 고지 전문은 `OFL-NanumMyeongjo.txt`에 보존합니다.
-- 런타임 패키지 의존성은 추가하지 않았습니다. CSS는 public asset의 `/fonts/` 경로를 사용하고 Vite가 Pages의 base 경로를 적용합니다. Worker 개발 환경에서도 `/public/` 경로를 요청하지 않습니다.
+- 배포 출처: [Fontsource @fontsource/noto-sans-kr 5.3.1](https://www.npmjs.com/package/@fontsource/noto-sans-kr)
+- 원본: `files/noto-sans-kr-korean-400-normal.woff2`, `files/noto-sans-kr-korean-600-normal.woff2`
+- 라이선스: SIL Open Font License 1.1. 원문은 `OFL-NotoSansKR.txt`에 보존합니다.
+- 런타임 패키지는 추가하지 않았습니다. CSS의 `/fonts/` asset 경로에는 Pages build가 base 경로를 적용합니다. Worker에서도 같은 public asset을 사용합니다.

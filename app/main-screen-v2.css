@@ -147,7 +147,7 @@
   max-width: 340px;
   margin: 14px 0 12px;
   color: var(--yeoun-forest-deep);
-  font-family: 'Noto Serif KR', 'Batang', Georgia, serif;
+  font-family: var(--atlas-font, system-ui, sans-serif);
   font-size: clamp(29px, 2.25vw, 34px);
   font-weight: 500;
   line-height: 1.42;
@@ -231,7 +231,7 @@
 .atlas:not(.my-atlas) .memory-card h3 {
   margin: 12px 0 7px;
   color: var(--yeoun-forest-deep);
-  font-family: 'Noto Serif KR', 'Batang', Georgia, serif;
+  font-family: var(--atlas-font, system-ui, sans-serif);
   font-size: 18px;
   font-weight: 500;
   line-height: 1.52;

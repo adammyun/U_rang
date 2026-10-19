@@ -24,3 +24,20 @@ out geom;
 ```
 
 지도에 `© OpenStreetMap contributors`와 저작권 링크를 계속 표시합니다. 파생 데이터의 사용·재배포에는 위 ODbL 조건이 적용됩니다.
+
+## 행정구역과 지명 보완 · 2026-10-19
+
+최초 도로 추출물과 별도로 OSM API에서 실제 울산 구/군 관계의 외곽 way를 받아 연결했습니다. 5개 구/군 polygon과 공유 경계를 중복 제거한 48개 way를 포함합니다. 경계는 약 20m 허용 오차로 단순화했습니다.
+
+- [동구 8127813](https://www.openstreetmap.org/relation/8127813)
+- [남구 8127814](https://www.openstreetmap.org/relation/8127814)
+- [울주군 8127815](https://www.openstreetmap.org/relation/8127815)
+- [중구 8127816](https://www.openstreetmap.org/relation/8127816)
+- [북구 8127817](https://www.openstreetmap.org/relation/8127817)
+- 울산 외곽선: [울산광역시 2395867](https://www.openstreetmap.org/relation/2395867). Nominatim에서 이 도시의 OSM polygon을 한 차례 받아 정적 파일에 보존했습니다. 앱의 검색 기능이나 자동완성에 Nominatim을 연결하지 않았습니다.
+
+파일의 `adminSources`에 개별 관계의 원본 timestamp를 보존합니다. 취득일이 경계의 최신성이나 정부 공인 정확성을 보증하지 않습니다. OSM 공동 편집 자료를 일반화한 지도 표현이며 법적·측량용 경계가 아닙니다.
+
+OSM 명칭·위치에 근거한 도시/구군/동/주요 도로 22개 label을 추가했습니다. 축척 10부터 도시·구군, 12부터 동, 12.3부터 도로명을 표시하되 기억 마커·다른 label·초기 소개 글과 겹치면 생략하거나 인접한 여백으로 옮깁니다. 울산광역시와 남구 label의 위치는 가독성을 위한 지도상 배치이며 공식 중심점을 뜻하지 않습니다.
+
+행정 polygon이 울산 전체를 포함해도 기존 도로 추출물의 bbox는 확장하지 않았습니다. 기존 bbox 밖의 지도 중심과 파일 읽기 실패 시에는 OSM raster fallback을 계속 사용합니다. 브라우저에서 경계 API를 호출하지 않으며, tile prefetch·offline·bulk download를 추가하지 않았습니다. 추가 행정 데이터에도 위 ODbL과 OSM attribution을 적용합니다.
