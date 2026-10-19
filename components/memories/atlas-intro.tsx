@@ -27,6 +27,7 @@ export default function AtlasIntro() {
     const root = node?.closest('main');
     if (!node || !root) return;
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const peekReach = parseFloat(getComputedStyle(node).getPropertyValue('--atlas-intro-peek-reach')) || 160;
     let frame = 0;
     let restoreTimer: ReturnType<typeof setTimeout> | undefined;
     let start: { x: number; y: number } | null = null;
@@ -45,7 +46,9 @@ export default function AtlasIntro() {
         const rect = node.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
-        if (x < 0 || y < 0 || x > rect.width || y > rect.height) { resetPeek(); return; }
+        // Track beyond the text box so the circle reaches the glyphs from outside,
+        // rather than switching on fully formed at an invisible rectangle edge.
+        if (x < -peekReach || y < -peekReach || x > rect.width + peekReach || y > rect.height + peekReach) { resetPeek(); return; }
         node.style.setProperty('--intro-peek-x', `${x}px`);
         node.style.setProperty('--intro-peek-y', `${y}px`);
         node.dataset.peeking = 'true';

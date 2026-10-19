@@ -125,9 +125,9 @@
 
 `AtlasIntro`는 메인의 제목·본문 문구만 담당합니다. 본문은 8개 문장 중 mount 시 한 번 고르고 지도 이동으로 재렌더돼도 바꾸지 않습니다. 제목과 본문은 pointer-events를 받지 않아 밑의 지도·마커를 직접 조작할 수 있습니다.
 
-fine pointer의 hover에서는 82px 원형 CSS mask로 문구의 일부만 지워 아래 지도를 드러냅니다. 전체 문구를 숨기거나 지도를 다시 그리지 않습니다. 키보드 사용·영역 이탈 시 mask를 제거합니다. 모바일은 지도에서 6px 이상 이동한 touch gesture 때만 소개의 opacity를 낮추고 마지막 움직임 약 750ms 후 복귀합니다. 탭·폼·패널 스크롤은 이 효과를 시작하지 않습니다. 제스처를 preventDefault/stopPropagation 하지 않으며 MapLibre lifecycle을 바꾸지 않습니다.
+fine pointer의 hover에서는 제목·본문 사각형 바깥 사방 160px까지 커서를 추적합니다. 82px 원형 CSS mask가 바깥에서 글자 쪽으로 자연스럽게 이어지며 안쪽 52px와 바깥쪽 30px의 부드러운 경계를 사용합니다. 마스크 강도는 220ms로 전환합니다. 전체 문구를 숨기거나 지도를 다시 그리지 않습니다. 키보드 사용·영역 이탈 시 강도를 0으로 되돌립니다. 비활성 마스크는 완전 불투명하게 유지해 경계 진입 시 갑자기 생기는 현상을 피합니다. 모바일은 지도에서 6px 이상 이동한 touch gesture 때만 소개의 opacity를 낮추고 마지막 움직임 약 750ms 후 복귀합니다. 탭·폼·패널 스크롤은 이 효과를 시작하지 않습니다. 제스처를 preventDefault/stopPropagation 하지 않으며 MapLibre lifecycle을 바꾸지 않습니다.
 
-텍스트는 DOM에 남아 접근성 구조를 유지하고, reduced-motion에서는 opacity 전환을 끕니다. 구현·검증은 `YURANG-INTRO-REFINEMENT.md`를 확인합니다.
+텍스트는 DOM에 남아 접근성 구조를 유지하고, reduced-motion에서는 opacity 전환을 끕니다. 초기 구현은 `YURANG-INTRO-REFINEMENT.md`, 반응 영역 확장·진입/이탈 보완은 `YURANG-INTRO-REACH.md`를 확인합니다.
 
 
 ## 접이식 감정 태그와 브랜드 아이콘

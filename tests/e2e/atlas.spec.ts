@@ -406,6 +406,19 @@ test('새 소개 문구는 지도 조작을 가리지 않고 데스크톱 원형
     await expect(intro).not.toHaveAttribute('data-gesture-hidden', 'true');
     await touch.detach();
   } else {
+    const box = (await intro.boundingBox())!;
+    // Begin outside the old invisible text rectangle, then cross its edge.
+    const near = { x: box.x + box.width + 24, y: point.y };
+    await page.mouse.move(box.x + box.width + 180, point.y);
+    await expect(intro).not.toHaveAttribute('data-peeking', 'true');
+    await page.mouse.move(near.x, near.y);
+    await expect(intro).toHaveAttribute('data-peeking', 'true');
+    expect(await intro.evaluate(el => parseFloat(el.style.getPropertyValue('--intro-peek-x')))).toBeGreaterThan(box.width);
+    expect(await intro.evaluate(el => getComputedStyle(el).transitionProperty)).toContain('--intro-peek-strength');
+    await expect.poll(() => intro.evaluate(el => getComputedStyle(el).getPropertyValue('--intro-peek-strength').trim())).toBe('1');
+    await page.screenshot({ path: `test-results/screenshots/intro-approach-${info.project.name}.png`, animations: 'disabled' });
+    await page.mouse.move(box.x + box.width - 24, point.y, { steps: 8 });
+    await expect(intro).toHaveAttribute('data-peeking', 'true');
     await page.mouse.move(point.x, point.y);
     await expect(intro).toHaveAttribute('data-peeking', 'true');
     expect(await intro.evaluate(el => getComputedStyle(el).maskImage)).toContain('radial-gradient');
@@ -415,7 +428,15 @@ test('새 소개 문구는 지도 조작을 가리지 않고 데스크톱 원형
     await page.mouse.up();
     await page.mouse.move(10, 10);
     await expect(intro).not.toHaveAttribute('data-peeking', 'true');
-    expect(await intro.evaluate(el => getComputedStyle(el).maskImage)).toBe('none');
+    // The opaque resting mask remains in place so entry/exit can interpolate.
+    await expect.poll(() => intro.evaluate(el => getComputedStyle(el).getPropertyValue('--intro-peek-strength').trim())).toBe('0');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.mouse.move(point.x, point.y);
+    await expect(intro).toHaveAttribute('data-peeking', 'true');
+    expect(await intro.evaluate(el => getComputedStyle(el).transitionProperty)).toBe('none');
+    await page.keyboard.press('Escape');
+    await expect(intro).not.toHaveAttribute('data-peeking', 'true');
+    await expect.poll(() => intro.evaluate(el => getComputedStyle(el).getPropertyValue('--intro-peek-strength').trim())).toBe('0');
   }
   await expect.poll(() => map.getAttribute('viewBox')).not.toBe(before);
   await expect(intro.locator('p')).toHaveText(copy!);

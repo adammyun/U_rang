@@ -6,6 +6,8 @@
   --atlas-tape: #87949680;
   --atlas-paper-gap: 24px;
   --atlas-tag-reveal: 240ms;
+  --atlas-intro-peek-reach: 160px;
+  --atlas-intro-peek-duration: 220ms;
 }
 .brand .brand-mark.yurang-mark,
 .atlas.memory-atlas .brand-mark.yurang-mark { display: block; flex: 0 0 auto; width: 32px; height: 32px; }
@@ -252,16 +254,22 @@ body:has(.memory-atlas) .place-sheet .place-emotions span { background: var(--at
 .atlas.memory-atlas .memory-card h3,body:has(.memory-atlas) .place-memory h3 { color: var(--atlas-text); }
 
 /* The intro is visually erasable but never intercepts a map click or drag. */
-.atlas.memory-atlas .atlas-intro { pointer-events: none; max-width: calc(100vw - 44px); opacity: 1; transition: opacity 170ms ease; }
+@property --intro-peek-strength { syntax: '<number>'; inherits: false; initial-value: 0; }
+.atlas.memory-atlas .atlas-intro {
+  pointer-events: none; max-width: calc(100vw - 44px); opacity: 1;
+  --intro-peek-strength: 0;
+  transition: opacity 170ms ease, --intro-peek-strength var(--atlas-intro-peek-duration) ease;
+}
 .atlas.memory-atlas .atlas-intro h1 { font-size: clamp(38px,4vw,58px); line-height: 1.25; letter-spacing: -.045em; }
 .atlas-intro h1 > span,.atlas-intro h1 > em { display: block; }
 .atlas.memory-atlas .atlas-intro h1 em { margin-top: 12px; color: var(--atlas-coral); font-style: normal; }
 .atlas.memory-atlas .atlas-intro p { max-width: 24em; min-height: 3.6em; line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
 @media (hover: hover) and (pointer: fine) {
-  .atlas-intro[data-peeking='true'] {
-    -webkit-mask-image: radial-gradient(circle 82px at var(--intro-peek-x) var(--intro-peek-y), transparent 0 62px, #000 82px);
-    mask-image: radial-gradient(circle 82px at var(--intro-peek-x) var(--intro-peek-y), transparent 0 62px, #000 82px);
+  .atlas-intro {
+    -webkit-mask-image: radial-gradient(circle 82px at var(--intro-peek-x,-160px) var(--intro-peek-y,-160px), rgb(0 0 0 / calc(1 - var(--intro-peek-strength))) 0 52px, #000 82px);
+    mask-image: radial-gradient(circle 82px at var(--intro-peek-x,-160px) var(--intro-peek-y,-160px), rgb(0 0 0 / calc(1 - var(--intro-peek-strength))) 0 52px, #000 82px);
   }
+  .atlas.memory-atlas .atlas-intro[data-peeking='true'] { --intro-peek-strength: 1; }
 }
 .atlas-intro[data-gesture-hidden='true'] { opacity: 0 !important; }
 @media (max-width: 700px) {
