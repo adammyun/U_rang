@@ -32,6 +32,8 @@ import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
 import AtlasAtmosphere from './memories/atlas-atmosphere';
 import AtlasIntro from './memories/atlas-intro';
+import AtlasEmotionPicker from './memories/atlas-emotion-picker';
+import { YurangMark } from './ui/yurang-mark';
 import {
   emotions,
   formatDate,
@@ -441,7 +443,7 @@ export default function MemoryApp({
           data-tour="brand"
           onClick={() => window.location.reload()}
         >
-          <span className="brand-mark">◌</span>
+          <YurangMark />
           <b>유랑</b>
         </button>
         <DeveloperHotspot />
@@ -496,14 +498,7 @@ export default function MemoryApp({
       )}
 
       {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
-        <section className="atlas-feeling-index" aria-label="감정으로 기억 탐색">
-
-          <div>{(['nostalgic', 'peaceful', 'love', 'happy'] as const).map((emotion) => (
-            <button key={emotion} type="button" aria-pressed={filters.emotions.includes(emotion)} style={{ '--chip-color': emotions[emotion].color } as React.CSSProperties} onClick={() => changeFilters({ ...filters, emotions: filters.emotions.includes(emotion) ? filters.emotions.filter((item) => item !== emotion) : [...filters.emotions, emotion] })}>
-              <span aria-hidden="true">{filters.emotions.includes(emotion) ? '−' : '+'}</span>{emotions[emotion].label}
-            </button>
-          ))}</div>
-        </section>
+        <AtlasEmotionPicker selected={filters.emotions} onChange={(emotions) => changeFilters({ ...filters, emotions })} />
       )}
       <span className="atlas-edge-note" aria-hidden="true">PLACES HOLD OUR STORIES · ULSAN</span>
 

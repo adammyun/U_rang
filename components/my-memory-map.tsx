@@ -1,6 +1,7 @@
 'use client';
 
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+import { YurangMark } from './ui/yurang-mark';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -246,7 +247,7 @@ export default function MyMemoryMap({
           data-tour="brand"
           onClick={() => window.location.reload()}
         >
-          <span className="brand-mark">◌</span>
+          <YurangMark />
           <b>유랑</b>
           <span className="brand-caption">{displayName}의 기억 지도</span>
         </button>

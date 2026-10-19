@@ -169,6 +169,7 @@ test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한�
   await page.getByRole('button', { name: '평온', exact: true }).click();
   await expect(page.getByRole('link', { name: '모두의 기억 보기' })).toHaveAttribute('href', /emotion=peaceful/);
   await page.getByRole('link', { name: '모두의 기억 보기' }).click();
+  await page.getByRole('button', { name: /^감정 태그 펼치기/ }).click();
   await expect(page.getByLabel('감정으로 기억 탐색').getByRole('button', { name: '평온' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.ulsan-line-map')).toBeVisible();
   await expect(page.getByLabel('지도 메뉴')).toBeVisible();
@@ -419,4 +420,94 @@ test('새 소개 문구는 지도 조작을 가리지 않고 데스크톱 원형
   await expect.poll(() => map.getAttribute('viewBox')).not.toBe(before);
   await expect(intro.locator('p')).toHaveText(copy!);
   await expect(page.getByRole('button', { name: '기억을 남길 장소 선택하기' })).toBeVisible();
+});
+
+test('감정 태그는 옆으로 펼쳐지고 지도 제스처에 접혀도 선택을 유지한다', async ({ page, context }, info) => {
+  await page.goto('./');
+  await expect(page.locator('.ulsan-urban-layers')).toBeVisible();
+  const picker = page.getByLabel('감정으로 기억 탐색');
+  const toggle = picker.getByRole('button', { name: /^감정 태그/ });
+  const tags = picker.getByRole('group', { name: '감정 선택' });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(tags).toBeHidden();
+  await page.screenshot({ path: `test-results/screenshots/emotion-collapsed-${info.project.name}.png`, animations: 'disabled' });
+  const closedToggle = (await toggle.boundingBox())!;
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  expect(Math.abs((await toggle.boundingBox())!.y - closedToggle.y)).toBeLessThan(1);
+  await expect(tags.getByRole('button')).toHaveCount(4);
+  await picker.getByRole('button', { name: '평온', exact: true }).click();
+  await expect(picker.getByRole('button', { name: '평온', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page).toHaveURL(/emotion=peaceful/);
+  await expect(toggle).toHaveAccessibleName('감정 태그 접기, 1개 선택됨');
+  const boxes = await tags.getByRole('button').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().y));
+  expect(Math.max(...boxes) - Math.min(...boxes)).toBeLessThan(1);
+  const pickerBounds = (await picker.boundingBox())!;
+  const zoomBounds = (await page.getByRole('button', { name: '지도 확대', exact: true }).boundingBox())!;
+  expect(pickerBounds.x + pickerBounds.width).toBeLessThan(zoomBounds.x);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(page.locator('.memory-list')).toHaveAttribute('aria-busy', 'false');
+  await page.mouse.move(10, 80);
+  await page.screenshot({ path: `test-results/screenshots/emotion-expanded-${info.project.name}.png`, animations: 'disabled' });
+  const map = page.locator('.ulsan-line-map');
+  const before = await map.getAttribute('viewBox');
+  const point = { x: info.project.name.startsWith('mobile') ? 200 : 800, y: 400 };
+  if (info.project.name.startsWith('mobile')) {
+    const touch = await context.newCDPSession(page);
+    // Swiping the tag row scrolls its options without closing it or moving the map.
+    const row = (await tags.boundingBox())!;
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: row.x + row.width - 15, y: row.y + 24 }] });
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: row.x + 20, y: row.y + 24 }] });
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect.poll(() => tags.evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(await map.getAttribute('viewBox')).toBe(before);
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: point.x + 50, y: point.y + 30 }] });
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await touch.detach();
+  } else {
+    await page.mouse.move(point.x, point.y);
+    await page.mouse.wheel(0, 200);
+  }
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(tags).toBeHidden();
+  await expect.poll(() => map.getAttribute('viewBox')).not.toBe(before);
+  await expect(toggle).toHaveAccessibleName('감정 태그 펼치기, 1개 선택됨');
+  await expect(page).toHaveURL(/emotion=peaceful/);
+  await toggle.click();
+  await expect(picker.getByRole('button', { name: '평온', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await picker.getByRole('button', { name: '평온', exact: true }).focus();
+  await page.keyboard.press('Escape');
+  await expect(toggle).toBeFocused();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  if (!info.project.name.startsWith('mobile')) {
+    await toggle.click();
+    const beforeDrag = await map.getAttribute('viewBox');
+    await page.mouse.move(point.x, point.y);
+    await page.mouse.down();
+    await page.mouse.move(point.x + 50, point.y + 30, { steps: 5 });
+    await page.mouse.up();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect.poll(() => map.getAttribute('viewBox')).not.toBe(beforeDrag);
+    await expect(page).toHaveURL(/emotion=peaceful/);
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await toggle.click();
+  expect(await tags.getByRole('button').first().evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+  await expect(page.locator('.brand .yurang-mark')).toBeVisible();
+  const icon = page.locator('link[rel="icon"]');
+  await expect(icon).toHaveAttribute('href', /favicon\.svg\?v=yurang-map-v2/);
+  const response = await page.request.get(await icon.evaluate(el => (el as HTMLLinkElement).href));
+  expect(response.ok()).toBe(true);
+  expect(await response.text()).toContain('#e7a088');
+  if (info.project.name.startsWith('desktop')) {
+    const preview = await context.newPage();
+    await preview.setViewportSize({ width: 440, height: 220 });
+    const iconUrl = await icon.evaluate(el => (el as HTMLLinkElement).href);
+    await preview.setContent(`<html lang="ko"><body style="margin:0;display:flex;align-items:center;justify-content:space-evenly;height:220px;background:#191f21;color:#eef1ed;font:14px sans-serif">${[16,32,64].map(size => `<figure style="margin:0;text-align:center"><img src="${iconUrl}" width="${size}" height="${size}" alt="유랑 지도 조각 아이콘"><figcaption style="margin-top:20px">${size}px</figcaption></figure>`).join('')}</body></html>`);
+    await expect.poll(() => preview.locator('img').evaluateAll(images => images.every(image => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
+    await preview.screenshot({ path: 'test-results/screenshots/yurang-icon-sizes.png' });
+    await preview.close();
+  }
 });

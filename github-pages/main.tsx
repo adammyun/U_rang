@@ -1,4 +1,5 @@
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+import { YurangMark } from '@/components/ui/yurang-mark';
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowLeft, LogIn, MapPinned } from 'lucide-react';
@@ -38,7 +39,7 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
     <main className="auth-page">
       <section className="auth-card">
         <a className="brand auth-brand" href="#/">
-          <span className="brand-mark">◌</span><b>유랑</b>
+          <YurangMark /><b>유랑</b>
         </a>
 
         <h1><AtlasHeadingLabel>이 브라우저에 기억을 이어서 기록하세요</AtlasHeadingLabel></h1>

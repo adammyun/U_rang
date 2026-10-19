@@ -1,4 +1,5 @@
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+import { YurangMark } from '@/components/ui/yurang-mark';
 import Link from 'next/link';
 import { chatGPTSignInPath } from '@/app/chatgpt-auth';
 
@@ -7,7 +8,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <main className="auth-page">
       <section className="auth-card">
-        <Link className="brand auth-brand" href="/"><span className="brand-mark">◌</span><b>유랑</b></Link>
+        <Link className="brand auth-brand" href="/"><YurangMark /><b>유랑</b></Link>
 
         <h1><AtlasHeadingLabel>내 기억을 이어서 기록하세요</AtlasHeadingLabel></h1>
         <p>ChatGPT 계정으로 안전하게 로그인합니다. 비밀번호를 별도로 저장하지 않습니다.</p>

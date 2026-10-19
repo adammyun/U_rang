@@ -5,6 +5,60 @@
   --atlas-paper-shadow: 7px 9px 0 #090e106b;
   --atlas-tape: #87949680;
   --atlas-paper-gap: 24px;
+  --atlas-tag-reveal: 240ms;
+}
+.brand .brand-mark.yurang-mark,
+.atlas.memory-atlas .brand-mark.yurang-mark { display: block; flex: 0 0 auto; width: 32px; height: 32px; }
+/* A small stack opens into a single row. Map gestures fold it without clearing filters. */
+.atlas-emotion-picker {
+  position: absolute; left: 34px; bottom: 172px; z-index: 9;
+  display: flex; align-items: center; gap: 6px; height: 60px; max-width: calc(100vw - 132px);
+}
+.atlas-emotion-picker button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  flex: 0 0 auto; min-height: 44px; padding: 0 12px; white-space: nowrap;
+  border: 1px solid var(--atlas-border); border-radius: 3px 7px 3px 5px;
+  background: var(--atlas-surface); color: var(--atlas-text); font-size: 12px;
+  box-shadow: 3px 3px 0 #090e1044;
+  transition: background 160ms,color 160ms,border-color 160ms,translate 160ms;
+}
+.atlas-emotion-picker button:hover { background: var(--atlas-raised); border-color: var(--atlas-coral); }
+.atlas-emotion-picker button:active { translate: 0 1px; }
+.atlas-emotion-picker button:focus-visible { outline: 2px solid var(--atlas-coral); outline-offset: 2px; }
+.atlas-emotion-toggle { position: relative; isolation: isolate; }
+.atlas-emotion-picker[data-open='false'] .atlas-emotion-toggle::before {
+  content: ''; position: absolute; inset: -5px 3px 4px; z-index: -1;
+  border: 1px solid var(--atlas-border); border-radius: inherit; background: var(--atlas-cutout);
+  rotate: -4deg;
+}
+.atlas-emotion-chevron { transition: rotate var(--atlas-tag-reveal) var(--atlas-ease); }
+.atlas-emotion-picker[data-open='true'] .atlas-emotion-chevron { rotate: 180deg; }
+.atlas-emotion-count { color: var(--atlas-coral); font-weight: 600; font-variant-numeric: tabular-nums; }
+.atlas-emotion-tags {
+  display: flex; gap: 6px; min-width: 0; padding: 6px 4px;
+  overflow-x: auto; overscroll-behavior-x: contain; touch-action: pan-x;
+  scrollbar-width: thin; scrollbar-color: var(--atlas-border) transparent;
+}
+.atlas-emotion-tags[hidden] { display: none; }
+.atlas-emotion-tags button {
+  background: color-mix(in srgb,var(--chip-color) 20%,var(--atlas-surface));
+  border-color: color-mix(in srgb,var(--chip-color) 55%,var(--atlas-border));
+  animation: atlas-tag-reveal var(--atlas-tag-reveal) var(--atlas-ease) both;
+  animation-delay: calc(var(--tag-index) * 35ms);
+}
+.atlas-emotion-tags button[aria-pressed='true'] { color: var(--atlas-coral); border-color: var(--atlas-coral); background: var(--atlas-raised); }
+@keyframes atlas-tag-reveal { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@media (min-width: 768px) and (max-height: 760px) { .atlas-emotion-picker { bottom: 149px; } }
+@media (max-width: 767px) {
+  .brand .brand-mark.yurang-mark,
+  .atlas.memory-atlas .brand-mark.yurang-mark { width: 26px; height: 26px; }
+  .atlas-emotion-picker { left: 20px; bottom: calc(150px + env(safe-area-inset-bottom)); max-width: calc(100vw - 98px); gap: 4px; }
+  .atlas-emotion-picker button { padding: 0 10px; font-size: 12px; }
+  .atlas-emotion-tags { gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-emotion-picker button,.atlas-emotion-chevron { transition: none; }
+  .atlas-emotion-tags button { animation: none; }
 }
 .atlas-heading-label {
   background: var(--atlas-cutout);
