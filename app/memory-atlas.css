@@ -1,4 +1,4 @@
-@font-face { font-family: "Yurang Myeongjo"; src: url("../public/fonts/nanum-myeongjo-korean-400.woff2") format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: "Yurang Myeongjo"; src: url("/fonts/nanum-myeongjo-korean-400.woff2") format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
 /* Yeoun 2 · Memory Atlas. Geographic projection and data are owned by the app. */
 :root {
   --atlas-charcoal: #171c1b;
@@ -421,3 +421,9 @@ body:has(.memory-atlas) .story-sheet.atlas-adjust-sheet { left: 32px !important;
 .atlas.memory-atlas.atlas-journal .my-map-filters > select { border: 0; border-bottom: 1px solid #c6c4ae; border-radius: 0; background: transparent; }
 .atlas.memory-atlas.atlas-journal .my-emotion-filters button { border-radius: 2px 5px; background: transparent; border-color: #c6c4ae; min-height: 44px; }
 .atlas.memory-atlas.atlas-journal .my-emotion-filters button.selected { background: #d9dfcb; border-color: #798568; }
+/* The filter body scrolls between fixed heading and actions at short heights. */
+body:has(.memory-atlas) .story-sheet.atlas-adjust-sheet { overflow: hidden; }
+.atlas-adjust-sheet > .sheet-heading,.atlas-adjust-sheet > .filter-sheet-actions { flex: 0 0 auto; }
+.atlas-adjust-sheet > .filter-sheet-actions { position: static; margin: 0; padding-top: 10px; background: var(--atlas-paper); border-top: 1px solid #c6c4ae; }
+.atlas-adjust-scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 20px; padding: 0 7px 4px 0; margin-right: -7px; scrollbar-color: #a8b294 #e6e4d6; }
+.atlas-adjust-scroll > * { flex: 0 0 auto; }

@@ -5,4 +5,4 @@
 - 배포 출처: [Fontsource @fontsource/nanum-myeongjo 5.3.0](https://www.npmjs.com/package/@fontsource/nanum-myeongjo)
 - 원본 파일: `files/nanum-myeongjo-korean-400-normal.woff2`
 - 라이선스: SIL Open Font License 1.1. 원본 고지 전문은 `OFL-NanumMyeongjo.txt`에 보존합니다.
-- 런타임 패키지 의존성은 추가하지 않았습니다. CSS의 상대 URL을 통해 두 Vite 빌드가 각 base 경로에 맞는 URL을 생성합니다.
+- 런타임 패키지 의존성은 추가하지 않았습니다. CSS는 public asset의 `/fonts/` 경로를 사용하고 Vite가 Pages의 base 경로를 적용합니다. Worker 개발 환경에서도 `/public/` 경로를 요청하지 않습니다.

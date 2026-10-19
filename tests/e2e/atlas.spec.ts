@@ -189,3 +189,23 @@ test('라인 데이터 실패와 울산 밖 현재 위치에서는 raster 호환
   await expect(page.locator('.ulsan-line-map')).toBeHidden();
   await expect(page.locator('.raster-map > img').first()).toBeVisible();
 });
+
+test('높이가 낮은 화면에서도 조정의 마지막 선택과 적용 버튼이 겹치지 않는다', async ({ page }, info) => {
+  await page.setViewportSize(info.project.name.startsWith('mobile') ? { width: 390, height: 667 } : { width: 1280, height: 720 });
+  await page.goto('./');
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  const sheet = page.getByRole('dialog');
+  const last = sheet.getByRole('button', { name: '의미 있는 순간', exact: true });
+  await last.scrollIntoViewIfNeeded();
+  await last.click();
+  await expect(last).toHaveAttribute('aria-pressed', 'true');
+  const lastBounds = await last.boundingBox();
+  const apply = sheet.getByRole('button', { name: '지도에 적용' });
+  const applyBounds = await apply.boundingBox();
+  expect(lastBounds!.y + lastBounds!.height).toBeLessThanOrEqual(applyBounds!.y);
+  await expect(apply).toBeInViewport();
+  await expect(sheet.getByRole('button', { name: '지도 조정 닫기' })).toBeInViewport();
+  await page.screenshot({ path: `test-results/screenshots/yurang-short-adjust-${info.project.name}.png`, animations: 'disabled' });
+  await apply.click();
+  await expect(sheet).toBeHidden();
+});

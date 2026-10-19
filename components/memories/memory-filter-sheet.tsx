@@ -69,6 +69,7 @@ export default function MemoryFilterSheet({
               <X size={20} />
             </SheetClose>
           </div>
+          <div className="atlas-adjust-scroll" aria-label="지도 조정 내용">
           <SheetDescription>
             걷고 싶은 풍경과 만나고 싶은 기억을 골라보세요.
           </SheetDescription>
@@ -149,6 +150,7 @@ export default function MemoryFilterSheet({
             </fieldset>
           </div>
 
+          </div>
           <div className="filter-sheet-actions">
             <button
               type="button"
