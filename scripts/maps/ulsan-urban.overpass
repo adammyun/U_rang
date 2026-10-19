@@ -1,0 +1,1 @@
+[out:json][timeout:90];(way["building"](35.44,129.17,35.66,129.46);way["highway"~"^(secondary|tertiary|residential|living_street|unclassified|service|pedestrian)$"](35.44,129.17,35.66,129.46);way["landuse"~"^(residential|commercial|retail|industrial)$"](35.44,129.17,35.66,129.46););out geom;

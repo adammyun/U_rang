@@ -267,3 +267,53 @@ test('울산 5개 구군 경계와 확대 시 동·도로명을 표시한다', a
   await expect.poll(()=>map.locator('.ulsan-label-neighborhood,.ulsan-label-road').count()).toBeGreaterThan(0);
   await page.screenshot({path:`test-results/screenshots/graphite-neighborhood-${info.project.name}.png`,animations:'disabled'});
 });
+
+test('어두운 간결 지도에서 시가지와 확대된 실제 건물을 구분할 수 있다', async ({ page }, info) => {
+  test.setTimeout(45_000);
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('./');
+  const urban = page.locator('.ulsan-urban-layers');
+  await expect(urban).toHaveAttribute('data-building-level', 'overview');
+  expect(Number(await urban.getAttribute('data-building-count'))).toBeGreaterThan(1000);
+  expect((await urban.locator('.ulsan-urban-blocks').getAttribute('d'))!.length).toBeGreaterThan(1000);
+  await expect(page.locator('.atlas-stamp').first()).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await mkdir('test-results/screenshots', { recursive: true });
+  await page.screenshot({ path: `test-results/screenshots/buildings-main-${info.project.name}.png`, animations: 'disabled' });
+  await page.getByRole('combobox', { name: '장소 이름' }).fill('성남동');
+  await page.getByRole('option', { name: /성남동 문화의거리/ }).click();
+  await expect(urban).toHaveAttribute('data-building-level', 'footprints');
+  expect(Number(await urban.getAttribute('data-building-count'))).toBeGreaterThan(20);
+  expect((await urban.locator('.ulsan-urban-buildings').getAttribute('d'))!.length).toBeGreaterThan(1000);
+  expect(await page.locator('.ulsan-line-map').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(27, 35, 38)');
+  await expect(page.getByRole('button', { name: '이곳에 기억 남기기' })).toBeVisible();
+  await page.screenshot({ path: `test-results/screenshots/buildings-close-${info.project.name}.png`, animations: 'disabled' });
+  await page.getByRole('button', { name: '골목의 작은 불빛', exact: true }).click();
+  await expect(page.getByRole('button', { name: '선택한 기억 자세히 읽기' })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('건물 데이터가 실패해도 기존 지도와 기억 탐색이 유지된다', async ({ page }) => {
+  await page.route('**/maps/ulsan-urban/*.json*', route => route.fulfill({ status: 503, body: '' }));
+  await page.goto('./');
+  await expect(page.locator('.ulsan-line-map')).toBeVisible();
+  await expect(page.locator('[data-district]')).toHaveCount(5);
+  await expect(page.locator('.atlas-stamp').first()).toBeVisible();
+  await page.getByRole('button', { name: '골목의 작은 불빛', exact: true }).click();
+  await page.getByRole('button', { name: '선택한 기억 자세히 읽기' }).click();
+  await expect(page.getByRole('heading', { name: '골목의 작은 불빛', exact: true })).toBeVisible();
+  await page.unroute('**/maps/ulsan-urban/*.json*');
+  let failedCells = 0;
+  await page.route(/\/maps\/ulsan-urban\/\d+-\d+\.json/, route => {
+    failedCells++;
+    return route.fulfill({ status: 503, body: '' });
+  });
+  await page.reload();
+  await expect(page.locator('.ulsan-urban-layers')).toHaveAttribute('data-building-level', 'overview');
+  await page.getByRole('combobox', { name: '장소 이름' }).fill('성남동');
+  await page.getByRole('option', { name: /성남동 문화의거리/ }).click();
+  await expect.poll(() => failedCells).toBeGreaterThan(0);
+  await expect(page.locator('.ulsan-urban-layers')).toHaveAttribute('data-building-level', 'overview');
+  await expect(page.getByRole('button', { name: '이곳에 기억 남기기' })).toBeVisible();
+});

@@ -14,6 +14,10 @@
   --atlas-rule: rgba(221,231,235,.22);
   --atlas-font: 'Yurang Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --atlas-mono: var(--atlas-font);
+  --atlas-map-block: #344249;
+  --atlas-map-industry: #3b4247;
+  --atlas-map-building: #71838b;
+  --atlas-map-street: #1b2326;
   --atlas-ease: cubic-bezier(.2,.75,.25,1);
 }
 .atlas.memory-atlas {
@@ -548,3 +552,14 @@ body:has(.memory-atlas) .panorama-header { background: var(--atlas-surface); bor
 body:has(.memory-atlas) .panorama-state { background: #252c2fed; color: var(--atlas-text); }
 .dev-page { background: var(--atlas-charcoal); color: var(--atlas-text); }
 .dev-card { background: var(--atlas-surface); color: var(--atlas-text); border-color: var(--atlas-border); }
+
+/* Figure-ground urban fabric: charcoal streets separate slate blocks/buildings. */
+.ulsan-line-map .ulsan-urban-blocks { fill: var(--atlas-map-block); fill-opacity: .72; stroke: none; }
+.ulsan-line-map .ulsan-urban-industry { fill: var(--atlas-map-industry); fill-opacity: .7; stroke: none; }
+.ulsan-line-map .ulsan-urban-buildings { fill: var(--atlas-map-building); fill-opacity: .8; stroke: #91a1a7; stroke-width: .35; stroke-opacity: .4; }
+.ulsan-line-map .ulsan-urban-street-cut { stroke: var(--atlas-map-street); stroke-width: 2.2; }
+.ulsan-line-map .ulsan-urban-artery-cut { stroke: var(--atlas-map-street); stroke-width: 4; }
+.ulsan-line-map .ulsan-urban-streets { stroke: #7e919b; stroke-width: .55; }
+.ulsan-line-map .ulsan-urban-arteries { stroke: #a4b3b8; stroke-width: 1; stroke-opacity: .6; }
+.ulsan-line-map .ulsan-line-roads { stroke: #b7c4c8; stroke-width: 1.35; stroke-opacity: .65; }
+.ulsan-line-map .ulsan-line-boundary { stroke-opacity: .35; }
