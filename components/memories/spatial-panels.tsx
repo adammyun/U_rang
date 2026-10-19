@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, Eye, LoaderCircle, MapPin, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent, type CSSProperties } from 'react';
 import { emotions, formatDate, type Memory, type PlaceMemoryGroup } from '@/lib/types';
 
@@ -30,18 +30,18 @@ export function SpatialPlacePreview({
     <aside className="spatial-context spatial-surface atlas-contact-sheet" aria-label="장소의 기억 미리보기" style={{ '--scene-color': emotions[emotion].color } as CSSProperties}>
       <span className="spatial-context-handle" aria-hidden="true" />
       <div className="spatial-context-topline">
-        <span className="spatial-eyebrow">이곳에 겹쳐진 시간</span>
+
         <button className="spatial-round-close" type="button" onClick={onClose} aria-label="미리보기 닫기"><X size={16} /></button>
       </div>
       <div className="spatial-context-location"><MapPin size={17} /><strong>{group?.placeName || anchor.location_name}</strong><small>기억 {count}개</small></div>
       <button className={`spatial-context-story ${photo ? '' : 'without-photo'}`} type="button" onClick={() => onOpenMemory(first?.id ?? anchor.id)} disabled={Boolean(openingMemoryId)} aria-label="선택한 기억 자세히 읽기">
         {photo && <Image src={photo} alt={`${title}의 기억 사진`} width={120} height={112} unoptimized />}
-        <span className="spatial-context-copy"><small>{formatDate(date)} · {emotions[emotion].label}</small><strong>{title}</strong><span>{preview}</span></span>
+        <span className="spatial-context-copy"><strong>{title}</strong><small>{formatDate(date)} · {emotions[emotion].label}</small><span>{preview}</span></span>
         <ArrowRight size={16} aria-hidden="true" />
       </button>
       {error && <p className="spatial-context-status">주변 기억을 불러오지 못했어요. <button type="button" onClick={onRetry}>다시 시도</button></p>}
       {loading && <p className="spatial-context-status">주변의 기억을 찾고 있어요…</p>}
-      <button className="spatial-context-all" type="button" onClick={onOpenPlace}>이 장소의 다른 기억 보기 <ArrowRight size={14} /></button>
+      <button className="spatial-context-all" type="button" onClick={onOpenPlace} aria-label="이 장소의 다른 기억 보기"><span>{count > 1 ? `이곳의 이야기 ${count}편` : '이곳의 이야기'}</span> <ArrowRight size={14} /></button>
     </aside>
   );
 }
@@ -49,6 +49,7 @@ export function SpatialPlacePreview({
 export function SpatialMemoryDetail({
   memory, onClose, onBack, onOtherMemories, onLocate, onOpenPanorama,
   onPrevious, onNext, positionLabel, changing = false,
+  onEdit, onDelete, deleting = false,
 }: {
   memory: Memory;
   onClose: () => void;
@@ -60,6 +61,9 @@ export function SpatialMemoryDetail({
   onNext?: () => void;
   positionLabel?: string;
   changing?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  deleting?: boolean;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const dialog = useRef<HTMLElement>(null);
@@ -90,20 +94,22 @@ export function SpatialMemoryDetail({
     <section ref={dialog} className={`spatial-detail atlas-reading-scene${onPrevious || onNext ? ' has-pagination' : ''}${leaving ? ' is-leaving' : ''}`} role="dialog" aria-modal="true" aria-label="기억 상세" onKeyDown={handleKeys} style={{ '--scene-color': emotions[memory.emotion].color } as CSSProperties}>
       <header className="atlas-reading-toolbar">
         <button className="spatial-detail-back" type="button" onClick={() => leave(onBack)} disabled={leaving}><ArrowLeft size={17} /> 뒤로가기</button>
-        <span className="spatial-eyebrow">A MEMORY, REVISITED {positionLabel && <b>{positionLabel}</b>}</span>
+
         <button className="spatial-detail-close" type="button" onClick={() => leave(onClose)} disabled={leaving} aria-label="기억 닫기"><X size={21} /><span>닫기</span></button>
       </header>
       <div className="spatial-detail-scroll" tabIndex={0} aria-label="기억 상세 내용">
         <div className="atlas-scene-photo-stack">
         <div className={`spatial-detail-hero ${memory.media.length ? '' : 'without-photo'}`}>
-          {memory.media[0] ? <><Image src={memory.media[0].url} alt={`${memory.title}의 기억 사진 1`} width={900} height={650} unoptimized /><span className="atlas-photo-caption">{memory.location_name} · {formatDate(memory.memory_date)}</span></> : <span className="atlas-no-photo"><small>WORDS IN PLACE OF A PHOTOGRAPH</small><strong>그날의 마음은<br />글로 남아.</strong><span>사진 없이 남겨진 기억</span></span>}
+          {memory.media[0] ? <><Image src={memory.media[0].url} alt={`${memory.title}의 기억 사진 1`} width={900} height={650} unoptimized /><span className="atlas-photo-caption">{memory.location_name} · {formatDate(memory.memory_date)}</span></> : <span className="atlas-no-photo"><strong>{emotions[memory.emotion].label}</strong><span>{memory.location_name}</span></span>}
         </div>
         {memory.media.length > 1 && <div className="atlas-scene-scraps" aria-hidden="true">{memory.media.slice(1,3).map((media) => <Image key={media.id} src={media.url} alt="" width={300} height={250} unoptimized />)}</div>}
         </div>
         <article className="spatial-detail-content">
-          <div className="spatial-detail-meta"><span className="spatial-eyebrow">A STORY ON THE MAP</span><span className="spatial-emotion">{emotions[memory.emotion].label}</span></div>
-          <p className="spatial-detail-place"><MapPin size={14} /> {memory.location_name}</p>
+
+
           <h2 ref={heading} tabIndex={-1}>{memory.title}</h2>
+          <div className="spatial-detail-meta"><span className="spatial-emotion">{emotions[memory.emotion].label}</span></div>
+          <p className="spatial-detail-place"><MapPin size={14} /> {memory.location_name}</p>
           <div className="spatial-detail-date"><span />{formatDate(memory.memory_date)}</div>
           <p className="spatial-detail-body">{memory.content}</p>
           {memory.media.length > 1 && <div className="spatial-detail-gallery" aria-label="기억 사진">{memory.media.slice(1).map((media, index) => <Image key={media.id} src={media.url} alt={`${memory.title}의 기억 사진 ${index + 2}`} width={700} height={500} unoptimized />)}</div>}
@@ -111,6 +117,11 @@ export function SpatialMemoryDetail({
             <button type="button" onClick={() => leave(onLocate)}><MapPin size={16} /> 지도에서 보기</button>
             <button type="button" onClick={onOpenPanorama}><Eye size={16} /> 거리뷰</button>
           </div>
+          {memory.owned && (onEdit || onDelete) && <div className="atlas-owner-actions">
+            {onEdit && <button type="button" onClick={onEdit} disabled={deleting}><Pencil size={16} /> 수정</button>}
+            {onDelete && <button type="button" className="danger-action" onClick={onDelete} disabled={deleting}>{deleting ? <LoaderCircle size={16} className="spin" /> : <Trash2 size={16} />}{deleting ? '삭제 중…' : '삭제'}</button>}
+          </div>}
+          {memory.owned && <p className="atlas-owner-visibility">{memory.visibility === 'private' ? '나만 보기' : memory.visibility === 'unlisted' ? '링크로 공유' : '공개된 기억'}</p>}
           <footer className="spatial-detail-footer"><span>{memory.owned ? '나의 기록' : memory.is_anonymous ? '익명으로 남긴 기억' : '한 사람이 남긴 기억'}</span>{onOtherMemories && <button type="button" onClick={onOtherMemories}>다른 기억 읽기 <ArrowRight size={15} /></button>}</footer>
         </article>
       </div>

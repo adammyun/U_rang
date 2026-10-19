@@ -1,4 +1,4 @@
-# 여운 시연 가이드
+# 유랑 시연 가이드
 
 현재 작업 브랜치: `redesign/yeoun-2` · 디자인: **Memory Atlas — Spatial Paper**
 
@@ -6,7 +6,7 @@
 
 ## 가장 쉬운 로컬 시연: Worker + D1/R2
 
-Node.js 22.13 이상과 pnpm 11.19가 필요합니다. 최초 설치 시 인터넷이 필요합니다. 저장소의 `work/hosted-site` 디렉터리에서 실행합니다.
+Node.js 22.13 이상과 pnpm 11.19가 필요합니다. 최초 설치 시 인터넷이 필요합니다. 복사본 저장소 `work/yeoun_2` 디렉터리에서 실행합니다.
 
 ```bash
 corepack enable

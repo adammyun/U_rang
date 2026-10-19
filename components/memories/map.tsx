@@ -15,10 +15,10 @@ import {
 } from '@/src/features/map/constants';
 import { isPagesRuntime } from '@/src/lib/runtime';
 import MemoryStamp from './memory-stamp';
+import UlsanLineMap, { type UlsanLineData } from './ulsan-line-map';
 
 setWorkerUrl(mapLibreWorkerUrl);
 const MAP_TILE_SOURCE_REVISION = 'osm-standard-v1';
-const CALM_MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
 const MAPLIBRE_WORLD_TILE_SIZE = 512;
 const RASTER_TILE_SIZE = 256;
 
@@ -96,6 +96,18 @@ export default function MemoryMap({
   const [error, setError] = useState(false);
   const [tilesReady, setTilesReady] = useState(false);
   const [rasterCompatibilityActive, setRasterCompatibilityActive] = useState(false);
+  const [lineData, setLineData] = useState<UlsanLineData | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    const url = isPagesRuntime() ? new URL('maps/ulsan-lines.geojson', document.baseURI).href : '/maps/ulsan-lines.geojson';
+    fetch(url, { signal: controller.signal }).then((response) => {
+      if (!response.ok) throw new Error('Line map unavailable');
+      return response.json() as Promise<UlsanLineData>;
+    }).then((data) => { if (!controller.signal.aborted) setLineData(data); }).catch(() => {
+      // The existing OSM raster compatibility path remains the fallback.
+    });
+    return () => controller.abort();
+  }, []);
   const [view, setView] = useState<ViewState>({
     center: DEFAULT_MAP_CENTER,
     zoom: DEFAULT_MAP_ZOOM,
@@ -144,12 +156,9 @@ export default function MemoryMap({
     try {
       instance = new LibreMap({
         container: container.current,
-        // OpenFreeMap Positron is the quiet default style. It is based on
-        // OpenStreetMap, requires no API key, and keeps parks, major roads and
-        // administrative labels legible without the density of the detailed
-        // OSM raster layer. The compatibility layer below remains available
-        // as the detailed option and as the WebGL/network fallback.
-        style: CALM_MAP_STYLE_URL,
+        // The local OSM line drawing below shares this camera/projection and
+        // works without WebGL painting. Detailed OSM raster remains intact.
+        style: { version: 8, sources: {}, layers: [{ id: 'canvas', type: 'background', paint: { 'background-color': '#171c1b' } }] },
         center: [DEFAULT_MAP_CENTER.lng, DEFAULT_MAP_CENTER.lat],
         zoom: DEFAULT_MAP_ZOOM,
         minZoom: 3,
@@ -314,7 +323,10 @@ export default function MemoryMap({
     }
     return tiles;
   }, [view]);
-  const showRasterTiles = mode === 'detail' || error || !ready || !tilesReady || rasterCompatibilityActive;
+  const showLineArt = mode === 'calm' && lineData && view.width > 0 && view.height > 0 &&
+    view.center.lng >= lineData.bbox[0] && view.center.lng <= lineData.bbox[2] &&
+    view.center.lat >= lineData.bbox[1] && view.center.lat <= lineData.bbox[3];
+  const showRasterTiles = !showLineArt && (mode === 'detail' || mode === 'calm' || error || !ready || !tilesReady || rasterCompatibilityActive);
 
   const markerGroups = useMemo(() => {
     const center = project(view.center, view.zoom);
@@ -369,6 +381,7 @@ export default function MemoryMap({
         className={`map-surface raster-map ${!showRasterTiles ? 'vector-visible' : ''} ${mode === 'calm' ? 'calm-mode' : 'detail-mode'}`}
         aria-label="지도 위 기억 마커"
       >
+        {showLineArt && <UlsanLineMap data={lineData} view={view} project={project} />}
         {showRasterTiles && rasterTiles.map((tile) => (
           // Raster tiles are decorative; map attribution is provided by MapLibre.
           // eslint-disable-next-line @next/next/no-img-element
@@ -458,26 +471,6 @@ export default function MemoryMap({
           >
             © OpenStreetMap contributors
           </a>
-          {mode === 'calm' && (
-            <>
-              {' · '}
-              <a
-                href="https://www.openmaptiles.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                © OpenMapTiles
-              </a>
-              {' · '}
-              <a
-                href="https://openfreemap.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                OpenFreeMap
-              </a>
-            </>
-          )}
       </span>
       {error && (
         <output className="map-error">

@@ -118,3 +118,74 @@ test('키보드 건너뛰기가 hash 경로를 깨뜨리지 않고 실제 목록
   await page.getByRole('button', { name: '탐색 닫기' }).click();
   await expect(page.getByLabel('지도 메뉴')).toBeVisible();
 });
+
+test('울산 라인 지도와 상세 지도는 같은 기억 앵커를 사용한다', async ({ page }, info) => {
+  await page.goto('./');
+  await expect(page.getByRole('img', { name: '울산 주요 도로와 하천의 라인 지도' })).toBeVisible();
+  await expect(page).toHaveTitle('유랑 — 기억이 머무는 지도');
+  await expect(page.locator('.spatial-intro h1')).toHaveText('기억은이곳에');
+  await expect(page.locator('.eyebrow,.spatial-eyebrow')).toHaveCount(0);
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => document.fonts.check('400 20px "Yurang Myeongjo"', '유랑'))).toBe(true);
+  const marker = page.locator('.atlas-stamp').first();
+  const position = await marker.boundingBox();
+  const label = await marker.getAttribute('aria-label');
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByRole('navigation', { name: '기억 보기 전환' })).toBeVisible();
+  await expect(sheet.getByRole('link', { name: '모두의 기억 보기' })).toHaveAttribute('aria-current', 'page');
+  await page.screenshot({ path: `test-results/screenshots/yurang-adjust-${info.project.name}.png`, animations: 'disabled' });
+  await sheet.getByRole('button', { name: '의미 있는 순간', exact: true }).scrollIntoViewIfNeeded();
+  await expect(sheet.getByRole('button', { name: '의미 있는 순간', exact: true })).toBeInViewport();
+  await sheet.getByRole('button', { name: '의미 있는 순간', exact: true }).click();
+  await expect(sheet.getByRole('button', { name: '의미 있는 순간', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await sheet.getByRole('button', { name: '초기화' }).click();
+  await sheet.getByRole('button', { name: /^상세/ }).click();
+  await sheet.getByRole('button', { name: '지도 조정 닫기' }).click();
+  await expect(page.locator('.ulsan-line-map')).toBeHidden();
+  await expect(page.locator('.raster-map.detail-mode > img').first()).toBeVisible();
+  const same = page.getByRole('button', { name: label!, exact: true });
+  const next = await same.boundingBox();
+  expect(Math.abs(position!.x - next!.x)).toBeLessThan(1);
+  expect(Math.abs(position!.y - next!.y)).toBeLessThan(1);
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  await page.getByRole('button', { name: /^간결/ }).click();
+  await page.getByRole('button', { name: '지도 조정 닫기' }).click();
+  await expect(page.locator('.ulsan-line-map')).toBeVisible();
+  await expect(page.locator('.raster-map > img')).toHaveCount(0);
+  await page.screenshot({ path: `test-results/screenshots/yurang-main-${info.project.name}.png`, animations: 'disabled' });
+});
+
+test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한다', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  await page.getByRole('link', { name: '내 기억만 보기' }).click();
+  await expect(page.getByRole('button', { name: '로컬 시연 세션 시작' })).toBeVisible();
+  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
+  await expect(page).toHaveURL(/#\/my-map/);
+  await expect(page.getByLabel('내 기억 목록', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  await expect(page.getByRole('link', { name: '내 기억만 보기' })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('button', { name: '평온', exact: true }).click();
+  await expect(page.getByRole('link', { name: '모두의 기억 보기' })).toHaveAttribute('href', /emotion=peaceful/);
+  await page.getByRole('link', { name: '모두의 기억 보기' }).click();
+  await expect(page.getByLabel('감정으로 기억 탐색').getByRole('button', { name: '평온' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.ulsan-line-map')).toBeVisible();
+  await expect(page.getByLabel('지도 메뉴')).toBeVisible();
+});
+
+test('라인 데이터 실패와 울산 밖 현재 위치에서는 raster 호환 지도를 유지한다', async ({ page, context }) => {
+  await page.route('**/maps/ulsan-lines.geojson', (route) => route.fulfill({ status: 404, body: '' }));
+  await page.goto('./');
+  await expect(page.locator('.raster-map > img').first()).toBeVisible();
+  await expect(page.locator('.ulsan-line-map')).toHaveCount(0);
+  await page.unroute('**/maps/ulsan-lines.geojson');
+  await context.grantPermissions(['geolocation']);
+  await context.setGeolocation({ longitude: 129.0, latitude: 35.7 });
+  await page.reload();
+  await expect(page.locator('.ulsan-line-map')).toBeVisible();
+  await page.getByRole('button', { name: '현재 위치로 이동' }).click();
+  await expect(page.getByLabel('현재 위치', { exact: true })).toBeVisible();
+  await expect(page.locator('.ulsan-line-map')).toBeHidden();
+  await expect(page.locator('.raster-map > img').first()).toBeVisible();
+});

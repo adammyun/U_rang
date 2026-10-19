@@ -13,8 +13,8 @@ test.beforeEach(async ({ page }) => {
 test('메인 기억 지도를 표시하고 화면을 캡처한다', async ({ page }, testInfo) => {
   await page.goto('./');
 
-  await expect(page).toHaveTitle('여운 — 기억이 머무는 지도');
-  await expect(page.getByRole('button', { name: '여운 화면 새로고침' })).toBeVisible();
+  await expect(page).toHaveTitle('유랑 — 기억이 머무는 지도');
+  await expect(page.getByRole('button', { name: '유랑 화면 새로고침' })).toBeVisible();
   await expect(page.getByLabel('기억 지도. 지점을 클릭하거나 길게 눌러 기억을 남기세요.')).toBeVisible();
   await expect(page.getByRole('button', { name: '기억을 남길 장소 선택하기' })).toBeVisible();
   await expect(page.locator('.raster-memory-marker').first()).toBeVisible({ timeout: 20_000 });
@@ -35,7 +35,7 @@ test('지도 조정과 장소 기억 열람이 동작한다', async ({ page }) =
 
   await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
   await expect(
-    page.getByRole('heading', { name: '지도를 어떻게 보여드릴까요?' }),
+    page.getByRole('heading', { name: '지도와 기억' }),
   ).toBeVisible();
 
   const detailMode = page.getByRole('button', { name: /^상세/ });

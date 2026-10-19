@@ -434,12 +434,12 @@ export default function MemoryApp({
         <button
           type="button"
           className="brand"
-          aria-label="여운 화면 새로고침"
+          aria-label="유랑 화면 새로고침"
           data-tour="brand"
           onClick={() => window.location.reload()}
         >
           <span className="brand-mark">◌</span>
-          <b>여운</b>
+          <b>유랑</b>
         </button>
         <DeveloperHotspot />
         <nav className="app-nav" aria-label="주요 메뉴" data-tour="account-navigation">
@@ -489,15 +489,15 @@ export default function MemoryApp({
 
       {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
         <div className="spatial-intro">
-          <span className="spatial-eyebrow">AN ATLAS OF ORDINARY DAYS</span>
-          <h1>기억은,<br /><em>이곳에.</em></h1>
+
+          <h1>기억은<br /><em>이곳에</em></h1>
           <p>어떤 장소는 오래도록 우리를 기억한다.<br />지도 위 작은 조각에서 이야기를 만나보세요.</p>
         </div>
       )}
 
       {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
         <section className="atlas-feeling-index" aria-label="감정으로 기억 탐색">
-          <span className="spatial-eyebrow">그날의 마음으로 찾기</span>
+
           <div>{(['nostalgic', 'peaceful', 'love', 'happy'] as const).map((emotion) => (
             <button key={emotion} type="button" aria-pressed={filters.emotions.includes(emotion)} style={{ '--chip-color': emotions[emotion].color } as React.CSSProperties} onClick={() => changeFilters({ ...filters, emotions: filters.emotions.includes(emotion) ? filters.emotions.filter((item) => item !== emotion) : [...filters.emotions, emotion] })}>
               <span aria-hidden="true">{filters.emotions.includes(emotion) ? '−' : '+'}</span>{emotions[emotion].label}
@@ -510,7 +510,7 @@ export default function MemoryApp({
       {selectedPlace && !draftLocation && (
         <section className="selected-place-card" aria-live="polite">
           <div>
-            <span className="eyebrow">SELECTED PLACE</span>
+
             <strong>{selectedPlace.name}</strong>
             <small>{selectedPlace.displayName}</small>
           </div>
@@ -561,15 +561,15 @@ export default function MemoryApp({
         tabIndex={-1}
       >
         <div className="spatial-explore-heading">
-          <div><span className="spatial-eyebrow">EXPLORE ULSAN</span><h2>지도 위의 이야기</h2><p>원할 때만 열어 보는 기억의 목록</p></div>
+          <div><h2>지도 위의 이야기</h2><p>원할 때만 열어 보는 기억의 목록</p></div>
           <button type="button" onClick={() => setExpanded(false)} aria-label="탐색 닫기"><X size={18} /></button>
         </div>
         <div className="editorial">
-          <span className="eyebrow">A PLACE, MANY STORIES</span>
+
           <h1>
-            같은 장소,
+            같은 장소
             <br />
-            서로 다른 이야기.
+            서로 다른 이야기
           </h1>
           <p>익숙한 풍경 속, 누군가의 특별한 순간을 만나보세요.</p>
         </div>

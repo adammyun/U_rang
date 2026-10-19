@@ -12,17 +12,20 @@ import {
 import { emotions, type Emotion } from '@/lib/types';
 import { RECENT_MEMORY_YEARS } from '@/src/features/memories/filters';
 import type { MemoryFilters } from '@/src/features/memories/schemas';
+import MemoryScopeSwitch from './memory-scope-switch';
 
 export default function MemoryFilterSheet({
   filters,
   onChange,
   mapMode,
   onMapModeChange,
+  scope = 'all',
 }: {
   filters: MemoryFilters;
   onChange: (filters: MemoryFilters) => void;
   mapMode: 'calm' | 'detail';
   onMapModeChange: (mode: 'calm' | 'detail') => void;
+  scope?: 'all' | 'mine';
 }) {
   const [open, setOpen] = useState(false);
   const activeCount = Number(Boolean(filters.year)) + filters.emotions.length;
@@ -52,14 +55,14 @@ export default function MemoryFilterSheet({
         <SheetContent
           side="bottom"
           showCloseButton={false}
-          className="story-sheet filter-sheet"
+          className="story-sheet filter-sheet atlas-adjust-sheet"
         >
           <span className="sheet-grip" />
           <div className="sheet-heading">
             <div>
-              <span className="eyebrow">ADJUST THE MAP</span>
+
               <SheetTitle className="modal-heading">
-                지도를 어떻게 보여드릴까요?
+                지도와 기억
               </SheetTitle>
             </div>
             <SheetClose className="close-button" aria-label="지도 조정 닫기">
@@ -67,8 +70,10 @@ export default function MemoryFilterSheet({
             </SheetClose>
           </div>
           <SheetDescription>
-            지도 표현을 고르고, 연도와 감정으로 보고 싶은 기억을 좁혀보세요.
+            걷고 싶은 풍경과 만나고 싶은 기억을 골라보세요.
           </SheetDescription>
+
+          <MemoryScopeSwitch scope={scope} filters={filters} />
 
           <fieldset className="map-appearance-field">
             <legend><Layers3 size={16} /> 지도 표현</legend>
@@ -80,7 +85,7 @@ export default function MemoryFilterSheet({
                 onClick={() => onMapModeChange('calm')}
               >
                 <strong>간결</strong>
-                <span>공원·주요 도로·행정구역 중심</span>
+                <span>울산을 선으로 그리다</span>
               </button>
               <button
                 type="button"

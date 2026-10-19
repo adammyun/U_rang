@@ -31,7 +31,7 @@ const steps: TourStep[] = [
     eyebrow: 'WELCOME TO YEOUN',
     title: '장소에 남은 마음을 발견해요',
     description:
-      '여운은 한 장소에 겹쳐진 서로 다른 사람들의 기억을 천천히 들여다보는 지도예요.',
+      '유랑은 한 장소에 겹쳐진 서로 다른 사람들의 기억을 천천히 들여다보는 지도예요.',
     selectors: ['[data-tour="brand"]'],
   },
   {
@@ -106,7 +106,7 @@ const steps: TourStep[] = [
   },
   {
     eyebrow: 'READY TO EXPLORE',
-    title: '이제 장소에 남은 여운을 만나보세요',
+    title: '이제 기억을 따라 유랑해 보세요',
     description:
       '이 안내는 처음 한 번만 표시됩니다. 숨겨진 개발자 화면에서 언제든 다시 시작할 수 있어요.',
   },
@@ -271,15 +271,15 @@ export default function OnboardingTutorial() {
 
       <div className="tour-panel" ref={panelRef} tabIndex={-1} key={stepIndex}>
         <div className="tour-panel-heading">
-          <span>{step.eyebrow}</span>
+
           <button type="button" onClick={closeTour} aria-label="안내 건너뛰기">
             <X size={18} />
           </button>
         </div>
+        <h2 id="onboarding-title">{step.title}</h2>
         <p className="tour-progress" aria-live="polite">
           {stepIndex + 1} / {steps.length}
         </p>
-        <h2 id="onboarding-title">{step.title}</h2>
         <p id="onboarding-description">{step.description}</p>
         {step.mapInteraction && (
           <small className="tour-interaction-hint">지금 지도를 직접 움직여도 좋아요.</small>

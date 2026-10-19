@@ -64,8 +64,8 @@ export default function DevTools({
       <div className="dev-shell">
         <header className="dev-header">
           <div>
-            <span className="eyebrow">LOCAL EXPERIENCE TOOLS</span>
-            <h1>여운 개발 도구</h1>
+
+            <h1>유랑 개발 도구</h1>
             <p>
               시연 흐름과 브라우저 기능 상태를 확인하는 안전한 보조 화면입니다.
               관리자 권한이나 데이터 접근 권한을 제공하지 않습니다.

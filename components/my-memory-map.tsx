@@ -16,10 +16,11 @@ import {
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import DeveloperHotspot from './dev/developer-hotspot';
-import MemoryDetail from './memories/memory-detail';
+import { SpatialMemoryDetail } from './memories/spatial-panels';
 import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
 import AtlasAtmosphere from './memories/atlas-atmosphere';
+import MemoryFilterSheet from './memories/memory-filter-sheet';
 import PanoramaViewer from './memories/panorama-viewer';
 import { logout } from '@/src/features/auth/api';
 import {
@@ -239,12 +240,12 @@ export default function MyMemoryMap({
         <button
           type="button"
           className="brand"
-          aria-label="여운 화면 새로고침"
+          aria-label="유랑 화면 새로고침"
           data-tour="brand"
           onClick={() => window.location.reload()}
         >
           <span className="brand-mark">◌</span>
-          <b>여운</b>
+          <b>유랑</b>
           <span className="brand-caption">{displayName}의 기억 지도</span>
         </button>
         <DeveloperHotspot />
@@ -273,6 +274,7 @@ export default function MyMemoryMap({
       />
 
       <AtlasAtmosphere emotion={selected?.emotion} />
+      <MemoryFilterSheet scope="mine" filters={filters} onChange={(next) => changeFilters({ ...filters, ...next })} mapMode={mapMode} onMapModeChange={setMapMode} />
 
       <aside
         id="my-memory-list"
@@ -289,7 +291,7 @@ export default function MyMemoryMap({
           <span />
         </button>
         <div className="my-map-heading">
-          <p className="eyebrow">MY MEMORY MAP</p>
+
           <h1>내가 기억하는 장소들</h1>
           <p>공개한 이야기와 나만 간직한 이야기를 한곳에서 봅니다.</p>
         </div>
@@ -487,9 +489,10 @@ export default function MyMemoryMap({
         />
       )}
       {selected && !editing && (
-        <MemoryDetail
+        <SpatialMemoryDetail
+          key={selected.id}
           memory={selected}
-          preview={false}
+          onBack={() => setSelected(null)}
           onOpenPanorama={() =>
             setPanoramaTarget(memoryPanoramaTarget(selected))
           }

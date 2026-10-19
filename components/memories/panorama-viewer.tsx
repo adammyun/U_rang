@@ -138,7 +138,7 @@ export default function PanoramaViewer({
       >
         <DialogHeader className="panorama-header">
           <div>
-            <span className="eyebrow">360° PLACE VIEW</span>
+
             <DialogTitle>{placeName}</DialogTitle>
             <DialogDescription>
               거리뷰 · NAVER의 AroundControl에서 거리뷰와 항공뷰를 전환할 수

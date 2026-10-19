@@ -266,7 +266,7 @@ export default function MemoryForm({
         <span className="sheet-grip" />
         <div className="sheet-heading">
           <div>
-            <span className="eyebrow">LEAVE A LITTLE TRACE</span>
+
             <SheetTitle className="modal-heading">
               {editing ? '기억을 다듬어 볼까요.' : '이곳에, 나의 기억을.'}
             </SheetTitle>

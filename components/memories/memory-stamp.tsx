@@ -30,8 +30,8 @@ export default function MemoryStamp({ memory, count, selected, grouped, x, y, on
       <span className="atlas-stamp-face">
         {photo ? <Image src={photo.url} alt="" width={100} height={100} unoptimized draggable={false} /> : (
           <span className="atlas-stamp-note">
-            <span className="atlas-stamp-date">{memory.memory_date?.slice(5).replace('-', '.') ?? '어느 날'}</span>
             <span className="atlas-stamp-title">{memory.title}</span>
+            <span className="atlas-stamp-date">{memory.memory_date?.slice(5).replace('-', '.') ?? '어느 날'}</span>
             <span className="atlas-stamp-feeling">{emotions[memory.emotion].label}</span>
           </span>
         )}

@@ -36,9 +36,9 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
     <main className="auth-page">
       <section className="auth-card">
         <a className="brand auth-brand" href="#/">
-          <span className="brand-mark">◌</span><b>여운</b>
+          <span className="brand-mark">◌</span><b>유랑</b>
         </a>
-        <p className="eyebrow">BROWSER DEMO SESSION</p>
+
         <h1>이 브라우저에 기억을 이어서 기록하세요</h1>
         <p>
           GitHub Pages 버전은 계정 정보를 전송하지 않습니다. 기억과 사진은 이

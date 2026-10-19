@@ -114,7 +114,7 @@ export default function PlaceMemorySheet({
         <div className="story-scroll-progress" aria-hidden="true"><span /></div>
         <div className="place-heading">
           <div>
-            <span className="eyebrow">SAME PLACE, DIFFERENT MEMORIES</span>
+
             <div className="place-title-row">
               <SheetTitle className="place-title">{placeName}</SheetTitle>
               <span className="place-memory-count" aria-label={`기억 ${memoryCount}개`}>
