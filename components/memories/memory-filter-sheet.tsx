@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import { Layers3, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -55,14 +57,14 @@ export default function MemoryFilterSheet({
         <SheetContent
           side="bottom"
           showCloseButton={false}
-          className="story-sheet filter-sheet atlas-adjust-sheet"
+          className="story-sheet filter-sheet atlas-adjust-sheet atlas-paper-panel"
         >
           <span className="sheet-grip" />
           <div className="sheet-heading">
             <div>
 
               <SheetTitle className="modal-heading">
-                지도와 기억
+                <AtlasHeadingLabel>지도와 기억</AtlasHeadingLabel>
               </SheetTitle>
             </div>
             <SheetClose className="close-button" aria-label="지도 조정 닫기">

@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import Image from 'next/image';
 
 import {
@@ -90,7 +92,7 @@ export default function PlaceMemorySheet({
     >
       <SheetContent
         side="bottom"
-        className="story-sheet place-sheet"
+        className="story-sheet place-sheet atlas-paper-panel"
         showCloseButton={false}
       >
         <span className="sheet-grip" />
@@ -116,7 +118,7 @@ export default function PlaceMemorySheet({
           <div>
 
             <div className="place-title-row">
-              <SheetTitle className="place-title">{placeName}</SheetTitle>
+              <SheetTitle className="place-title"><AtlasHeadingLabel>{placeName}</AtlasHeadingLabel></SheetTitle>
               <span className="place-memory-count" aria-label={`기억 ${memoryCount}개`}>
                 {memoryCount}
               </span>

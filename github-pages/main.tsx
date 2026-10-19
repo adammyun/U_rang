@@ -1,3 +1,4 @@
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowLeft, LogIn, MapPinned } from 'lucide-react';
@@ -18,6 +19,7 @@ import '@/app/globals.css';
 import '@/app/main-screen-v2.css';
 import '@/app/spatial-live.css';
 import '@/app/memory-atlas.css';
+import '@/app/atlas-collage.css';
 
 document.documentElement.dataset.yeounRuntime = 'pages';
 
@@ -39,7 +41,7 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
           <span className="brand-mark">◌</span><b>유랑</b>
         </a>
 
-        <h1>이 브라우저에 기억을 이어서 기록하세요</h1>
+        <h1><AtlasHeadingLabel>이 브라우저에 기억을 이어서 기록하세요</AtlasHeadingLabel></h1>
         <p>
           GitHub Pages 버전은 계정 정보를 전송하지 않습니다. 기억과 사진은 이
           브라우저의 IndexedDB에만 저장됩니다.
@@ -60,7 +62,7 @@ function UnsupportedRoute() {
     <main className="auth-page">
       <section className="auth-card">
         <MapPinned size={30} />
-        <h1>이 화면을 찾지 못했어요</h1>
+        <h1><AtlasHeadingLabel>이 화면을 찾지 못했어요</AtlasHeadingLabel></h1>
         <p>지도에서 울산의 기억을 다시 둘러볼 수 있습니다.</p>
         <a className="auth-submit" href="#/">지도로 돌아가기</a>
       </section>

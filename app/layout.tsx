@@ -3,6 +3,7 @@ import './globals.css';
 import './main-screen-v2.css';
 import './spatial-live.css';
 import './memory-atlas.css';
+import './atlas-collage.css';
 export const metadata: Metadata = {
   icons: { icon: '/favicon.svg' },
   title: '유랑 — 기억이 머무는 지도',

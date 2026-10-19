@@ -16,7 +16,7 @@
 
 브랜드를 유랑으로 변경하고 로컬 Noto Sans KR 고딕 제목, 울산의 주요 도로·강·해안선 라인 지도, 열린 사진·글 상세를 적용했습니다. 조정·기억·작성·인증 표면은 graphite로 통일하고, 지도에 실제 OSM 구/군 경계와 확대 단계별 지명을 표시합니다. 간결 지도에서도 도로로 둘러싸인 도시 블록과 건물 윤곽을 보여 주며 확대 시 작은 건물까지 표시합니다. 조정에서 모두의 기억과 내 기억으로 전환합니다. 내 기억은 기존 인증 경계를 사용하며 public query에 private/unlisted를 섞지 않습니다. 울산 도심 추출 범위 밖 또는 라인 데이터 실패 시 기존 OSM 상세 지도가 표시됩니다.
 
-[지도 데이터 출처·라이선스](public/maps/README.md) · [최초 유랑 변경 기록](docs/design/YURANG-REFINEMENT.md) · [Graphite 보완과 검증](docs/design/YURANG-GRAPHITE-REFINEMENT.md) · [건물·블록 지도 보완](docs/design/YURANG-BUILDING-MAP.md)
+[지도 데이터 출처·라이선스](public/maps/README.md) · [최초 유랑 변경 기록](docs/design/YURANG-REFINEMENT.md) · [Graphite 보완과 검증](docs/design/YURANG-GRAPHITE-REFINEMENT.md) · [건물·블록 지도 보완](docs/design/YURANG-BUILDING-MAP.md) · [팝업·모달 콜라주 통일](docs/design/YURANG-COLLAGE-REFINEMENT.md)
 
 ## 프로젝트 배경
 

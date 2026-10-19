@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import { useEffect, useState } from 'react';
 import { LoaderCircle, RotateCcw, X } from 'lucide-react';
 import {
@@ -131,7 +133,7 @@ export default function PanoramaViewer({
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="panorama-dialog"
+        className="panorama-dialog atlas-paper-panel"
         style={{ translate: 'none' }}
         showCloseButton={false}
         onPointerDownOutside={(event) => event.preventDefault()}
@@ -139,7 +141,7 @@ export default function PanoramaViewer({
         <DialogHeader className="panorama-header">
           <div>
 
-            <DialogTitle>{placeName}</DialogTitle>
+            <DialogTitle><AtlasHeadingLabel>{placeName}</AtlasHeadingLabel></DialogTitle>
             <DialogDescription>
               거리뷰 · NAVER의 AroundControl에서 거리뷰와 항공뷰를 전환할 수
               있습니다.

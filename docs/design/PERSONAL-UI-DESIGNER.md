@@ -24,7 +24,7 @@
 
 ## 디자인 시스템 적용 위치
 
-- 실제 메인 화면의 공간 배치와 semantic token은 `app/memory-atlas.css`, 공유 기반 스타일은 `app/globals.css`가 담당한다. 이전 `spatial-live.css`는 호환 기반이며 새 CSS를 두 entry에서 마지막으로 import한다. GitHub Pages entry와 App Router layout의 두 CSS import를 함께 확인한다.
+- 실제 메인 화면의 공간 배치와 semantic token은 `app/memory-atlas.css`, 공유 기반 스타일은 `app/globals.css`가 담당한다. 이전 `spatial-live.css`는 호환 기반이며 종이·팝업 표현은 `atlas-collage.css`를 두 entry에서 마지막으로 import한다. GitHub Pages entry와 App Router layout의 두 CSS import를 함께 확인한다.
 - `components/memory-app.tsx`는 실제 데이터와 화면 상태를 연결하고 `components/memories/spatial-panels.tsx`는 미리보기·상세 표현을 담당한다. 독립 프로토타입 `docs/design/immersive-spatial/`의 가상 데이터를 서비스에 복사하지 않는다.
 - `components/ui`의 Base UI primitive와 `components/memories`의 공유 컴포넌트를 먼저 재사용한다.
 - 감정 이름과 색의 단일 근원은 `src/features/memories/model.ts`다. 표시 계층에 별도 감정 palette를 복제하지 않는다.
@@ -70,3 +70,5 @@ Playwright 캡처는 `test-results/screenshots/`에서 직접 확인한다. 최�
 GitHub Pages 배포는 `redesign/yeoun-2`를 선택해 수동 실행합니다. 원본 사이트의 Site project ID를 이 저장소에 다시 넣거나 원본에 배포하지 않습니다. 새 Sites 호스팅이 필요하면 새로운 Site로 등록해야 합니다.
 
 현재 표현은 graphite 바탕·공통 Noto Sans KR 고딕·산호색 행동 강조를 사용합니다. 사진의 비대칭은 유지하지만 텍스트 전용 감정 표지는 수평으로 읽습니다. 세부 토큰은 `DESIGN-DNA.md`와 `app/memory-atlas.css`를 따릅니다.
+
+팝업·모달은 `AtlasHeadingLabel`과 `app/atlas-collage.css`의 cut-paper 규칙을 공유합니다. 탐색의 자유로운 사진·메모 배치와 입력의 안정적인 scroll 구조를 구분하되 색·제목·닫기 타일은 일관되게 유지합니다.

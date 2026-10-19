@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
@@ -269,14 +271,14 @@ export default function OnboardingTutorial() {
         <div className="tour-dim tour-dim-full" />
       )}
 
-      <div className="tour-panel" ref={panelRef} tabIndex={-1} key={stepIndex}>
+      <div className="tour-panel atlas-paper-panel" ref={panelRef} tabIndex={-1} key={stepIndex}>
         <div className="tour-panel-heading">
 
           <button type="button" onClick={closeTour} aria-label="안내 건너뛰기">
             <X size={18} />
           </button>
         </div>
-        <h2 id="onboarding-title">{step.title}</h2>
+        <h2 id="onboarding-title"><AtlasHeadingLabel>{step.title}</AtlasHeadingLabel></h2>
         <p className="tour-progress" aria-live="polite">
           {stepIndex + 1} / {steps.length}
         </p>

@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -292,7 +294,7 @@ export default function MyMemoryMap({
         </button>
         <div className="my-map-heading">
 
-          <h1>내가 기억하는 장소들</h1>
+          <h1><AtlasHeadingLabel>내가 기억하는 장소들</AtlasHeadingLabel></h1>
           <p>공개한 이야기와 나만 간직한 이야기를 한곳에서 봅니다.</p>
         </div>
 

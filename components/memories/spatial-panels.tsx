@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent, type CSSProperties } from 'react';
@@ -107,7 +109,8 @@ export function SpatialMemoryDetail({
         <article className="spatial-detail-content">
 
 
-          <h2 ref={heading} tabIndex={-1}>{memory.title}</h2>
+          <h2 ref={heading} tabIndex={-1}><AtlasHeadingLabel>{memory.title}</AtlasHeadingLabel></h2>
+          <div className="atlas-reading-paper">
           <div className="spatial-detail-meta"><span className="spatial-emotion">{emotions[memory.emotion].label}</span></div>
           <p className="spatial-detail-place"><MapPin size={14} /> {memory.location_name}</p>
           <div className="spatial-detail-date"><span />{formatDate(memory.memory_date)}</div>
@@ -123,6 +126,7 @@ export function SpatialMemoryDetail({
           </div>}
           {memory.owned && <p className="atlas-owner-visibility">{memory.visibility === 'private' ? '나만 보기' : memory.visibility === 'unlisted' ? '링크로 공유' : '공개된 기억'}</p>}
           <footer className="spatial-detail-footer"><span>{memory.owned ? '나의 기록' : memory.is_anonymous ? '익명으로 남긴 기억' : '한 사람이 남긴 기억'}</span>{onOtherMemories && <button type="button" onClick={onOtherMemories}>다른 기억 읽기 <ArrowRight size={15} /></button>}</footer>
+          </div>
         </article>
       </div>
       {(onPrevious || onNext) && <nav className="atlas-reading-pagination" aria-label="같은 장소의 기억 이동">

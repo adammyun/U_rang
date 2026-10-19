@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -562,7 +564,7 @@ export default function MemoryApp({
         tabIndex={-1}
       >
         <div className="spatial-explore-heading">
-          <div><h2>지도 위의 이야기</h2><p>원할 때만 열어 보는 기억의 목록</p></div>
+          <div><h2><AtlasHeadingLabel>지도 위의 이야기</AtlasHeadingLabel></h2><p>원할 때만 열어 보는 기억의 목록</p></div>
           <button type="button" onClick={() => setExpanded(false)} aria-label="탐색 닫기"><X size={18} /></button>
         </div>
         <div className="editorial">

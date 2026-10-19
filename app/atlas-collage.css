@@ -1,0 +1,198 @@
+/* Shared cut-paper language. Keep text/inputs level; offsets belong to backing
+   sheets and photographs. The map's geographic anchors never inherit a tilt. */
+:root {
+  --atlas-cutout: #111719;
+  --atlas-paper-shadow: 7px 9px 0 #090e106b;
+  --atlas-tape: #87949680;
+  --atlas-paper-gap: 24px;
+}
+.atlas-heading-label {
+  background: var(--atlas-cutout);
+  color: var(--atlas-text);
+  padding: .06em .22em .14em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+/* Portal backdrops keep the city and its memory scraps in view. */
+body:has(.memory-atlas) :is([data-slot='sheet-overlay'],[data-slot='dialog-overlay']) {
+  backdrop-filter: none; background: #0b11144d;
+}
+body:has(.memory-atlas) .story-sheet.atlas-paper-panel {
+  border: 0 !important; border-left: 2px solid #7a898b80 !important;
+  border-radius: 0 !important; background: var(--atlas-surface) !important;
+  box-shadow: var(--atlas-paper-shadow) !important;
+  padding: 24px 28px !important;
+}
+body:has(.memory-atlas) .atlas-paper-panel .sheet-grip { display: none; }
+body:has(.memory-atlas) :is(.sheet-heading,.place-heading) { gap: 16px; align-items: flex-start; }
+body:has(.memory-atlas) :is(.modal-heading,.place-title) {
+  font-size: clamp(24px,2.4vw,34px) !important; line-height: 1.65 !important;
+  letter-spacing: -.035em; font-weight: 600 !important; margin: 0 !important;
+}
+body:has(.memory-atlas) :is(.close-button,.spatial-round-close),
+.atlas.memory-atlas .spatial-round-close,
+.atlas.memory-atlas :is(.spatial-detail-back,.spatial-detail-close,.spatial-explore-heading > button),
+body:has(.memory-atlas) .tour-panel-heading > button {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  min-width: 44px; min-height: 44px; padding: 10px; border: 0; border-radius: 0;
+  background: var(--atlas-cutout); color: var(--atlas-text); box-shadow: 3px 3px 0 #080d1044;
+  transition: background 160ms,color 160ms,translate 160ms;
+}
+body:has(.memory-atlas) :is(.close-button,.spatial-round-close):hover,
+.atlas.memory-atlas .spatial-round-close:hover,
+.atlas.memory-atlas :is(.spatial-detail-back,.spatial-detail-close,.spatial-explore-heading > button):hover,
+body:has(.memory-atlas) .tour-panel-heading > button:hover {
+  background: var(--atlas-raised); color: var(--atlas-coral); translate: 0 -2px;
+}
+body:has(.memory-atlas) :is(.close-button,.spatial-round-close):active,
+.atlas.memory-atlas :is(.spatial-detail-back,.spatial-detail-close):active { translate: 0 1px; }
+/* The liked contact sheet stays a note, with the same label and close tile. */
+.atlas.memory-atlas .spatial-context { border-radius: 0; box-shadow: var(--atlas-paper-shadow); }
+.atlas.memory-atlas .spatial-context-topline .spatial-round-close { top: 9px; right: 9px; }
+.atlas.memory-atlas .spatial-context-location { padding-right: 48px; }
+.atlas.memory-atlas .spatial-context-copy strong {
+  width: fit-content; background: var(--atlas-cutout); padding: 3px 7px;
+  font-size: 22px; line-height: 1.55; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.atlas.memory-atlas .spatial-context-all { font-size: 15px; min-height: 44px; }
+/* Reading is a collage of a photograph, a title strip and a separate text sheet. */
+.atlas.memory-atlas .atlas-reading-scene {
+  background: linear-gradient(110deg,#151d20b8,#151d20bd); border: 0; border-radius: 0;
+}
+.atlas.memory-atlas .spatial-detail-scroll { gap: 6%; padding-top: 20px; }
+.atlas.memory-atlas .spatial-detail-content { margin-top: 64px; padding: 0 0 30px; }
+.atlas.memory-atlas .spatial-detail-content h2 {
+  position: relative; z-index: 1; margin: 0 0 0 20px;
+  font-size: clamp(30px,3.8vw,54px); line-height: 1.65; letter-spacing: -.04em;
+}
+.atlas-reading-paper {
+  margin-top: -4px; padding: 28px 30px; background: var(--atlas-cutout);
+  box-shadow: var(--atlas-paper-shadow); border-left: 2px solid #6f808255;
+}
+.atlas.memory-atlas .spatial-detail-body { font-size: 16px; line-height: 2; }
+.atlas.memory-atlas .spatial-detail-place { margin-top: 18px; }
+.atlas.memory-atlas .spatial-detail-tools button { background: var(--atlas-surface); border: 0; padding: 8px 12px; }
+.atlas.memory-atlas .spatial-detail-gallery { padding: 12px 4px; }
+.atlas.memory-atlas .spatial-detail-hero.without-photo { min-height: 0; padding: 0; margin: 55px 18px 25px; }
+.atlas-no-photo {
+  min-height: 280px; padding: 36px 18px; gap: 24px;
+  background: color-mix(in srgb,var(--scene-color) 13%,var(--atlas-surface));
+  border: 1px solid #81909270; box-shadow: var(--atlas-paper-shadow);
+}
+.atlas-no-photo::before {
+  inset: -9px auto auto 36%; width: 76px; height: 20px; border: 0; border-radius: 0;
+  transform: rotate(-5deg); background: var(--atlas-tape);
+}
+.atlas-no-photo::after { display: none; }
+.atlas-no-photo strong { font-size: clamp(25px,3.1vw,40px); letter-spacing: -.03em; }
+.atlas-no-photo > span { max-width: 95%; letter-spacing: 0; }
+.atlas-reading-pagination { border: 0; }
+.atlas-reading-pagination button { background: var(--atlas-cutout); padding: 8px 14px; }
+.atlas-reading-pagination > span { background: var(--atlas-cutout); padding: 12px; }
+/* Adjustment and writing share note edges; their real scroll owners stay intact. */
+body:has(.memory-atlas) .atlas-adjust-sheet.atlas-paper-panel { gap: 18px !important; }
+.atlas-adjust-sheet .map-appearance-options { gap: 16px; padding: 4px; }
+.atlas-adjust-sheet .map-appearance-options button {
+  border: 1px solid var(--atlas-border); background: var(--atlas-raised); box-shadow: 3px 4px 0 #0003;
+}
+.atlas-adjust-sheet .map-appearance-options button:first-child { rotate: -.7deg; }
+.atlas-adjust-sheet .map-appearance-options button:last-child { rotate: .7deg; }
+.atlas-adjust-sheet .map-appearance-options button.selected { border-color: var(--atlas-coral); box-shadow: 3px 4px 0 #e7a08830; }
+.atlas-adjust-sheet .filter-emotions button { border-radius: 0; background: var(--atlas-cutout); }
+body:has(.memory-atlas) .story-sheet :is(.primary,.secondary) { border-radius: 0; }
+body:has(.memory-atlas) .create-sheet .sheet-heading {
+  position: sticky; top: -24px; z-index: 5; background: var(--atlas-surface); padding: 14px 0;
+}
+body:has(.memory-atlas) .create-sheet :is(.location-selected,.privacy-settings,.memory-images-empty) { border-radius: 0; border: 0; border-left: 2px solid var(--atlas-border); }
+body:has(.memory-atlas) .create-sheet :is(input:not([type=file]),textarea,.form-select) { border-radius: 0; }
+body:has(.memory-atlas) .create-sheet .visibility-options label { border-radius: 0; }
+/* Place collections use staggered notes instead of an unrelated timeline. */
+body:has(.memory-atlas) .place-sheet.atlas-paper-panel { max-width: 780px; }
+body:has(.memory-atlas) .place-sheet .place-heading {
+  position: sticky; top: 0; z-index: 8; background: var(--atlas-surface); padding-bottom: 12px;
+}
+body:has(.memory-atlas) .place-sheet .place-title-row { gap: 12px; flex-wrap: wrap; }
+body:has(.memory-atlas) .place-memory-count { border-radius: 0; background: var(--atlas-cutout); color: var(--atlas-coral); }
+body:has(.memory-atlas) .place-timeline { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px 20px; padding: 12px 7px 24px; }
+body:has(.memory-atlas) .place-timeline::before,body:has(.memory-atlas) .timeline-dot { display: none; }
+body:has(.memory-atlas) .place-memory { padding: 0; min-width: 0; }
+body:has(.memory-atlas) .place-memory:nth-child(even) { margin-top: 24px; }
+/* A pseudo sheet tilts behind level copy, keeping long titles stable. */
+.atlas.memory-atlas .memory-card,body:has(.memory-atlas) .place-memory > button {
+  --paper-tilt: -.7deg; position: relative; isolation: isolate; border: 0; border-radius: 0;
+  padding: 20px 18px; margin: 0; background: transparent; box-shadow: none; min-width: 0;
+}
+.atlas.memory-atlas .memory-card::before,body:has(.memory-atlas) .place-memory > button::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; background: var(--atlas-raised);
+  border: 1px solid #75838780; box-shadow: 4px 5px 0 #0a11134d; transform: rotate(var(--paper-tilt));
+  transition: transform 180ms,border-color 180ms;
+}
+.atlas.memory-atlas .memory-card:nth-child(even),body:has(.memory-atlas) .place-memory:nth-child(even) > button { --paper-tilt: .7deg; }
+.atlas.memory-atlas .memory-card:hover,body:has(.memory-atlas) .place-memory > button:hover { background: transparent; }
+.atlas.memory-atlas .memory-card:hover::before,body:has(.memory-atlas) .place-memory > button:hover::before { transform: rotate(0deg); border-color: var(--atlas-coral); }
+body:has(.memory-atlas) .place-memory.selected > button { box-shadow: none; }
+body:has(.memory-atlas) .place-memory.selected > button::before { border-color: var(--atlas-coral); }
+.atlas.memory-atlas .memory-card h3,body:has(.memory-atlas) .place-memory h3 { font-size: 18px; line-height: 1.6; margin: 8px 0; word-break: keep-all; overflow-wrap: anywhere; }
+body:has(.memory-atlas) .place-memory-thumbnail { order: 0; height: 145px; border: 5px solid var(--atlas-surface); border-bottom-width: 14px; margin-bottom: 12px; }
+body:has(.memory-atlas) .panorama-entry,body:has(.memory-atlas) .place-locate { border-radius: 0; border: 0; background: var(--atlas-cutout); }
+body:has(.memory-atlas) .place-emotions span { border-radius: 0; background: var(--atlas-cutout); }
+.atlas.memory-atlas .discovery.expanded { border: 0; border-radius: 0; background: #20292ce8; box-shadow: var(--atlas-paper-shadow); }
+.atlas.memory-atlas .spatial-explore-heading { align-items: flex-start; gap: 20px; }
+.atlas.memory-atlas .spatial-explore-heading h2 { font-size: 27px; line-height: 1.65; }
+.atlas.memory-atlas .memory-list { padding: 8px 6px 24px; gap: 22px; }
+.atlas.memory-atlas.atlas-journal .my-memory-panel { border: 0; border-left: 2px solid var(--atlas-border); box-shadow: var(--atlas-paper-shadow); }
+.atlas.memory-atlas.atlas-journal .my-map-heading h1 { font-size: 25px; line-height: 1.65; }
+/* The same title/edge/close language continues through auth, tour and panorama. */
+.auth-page .auth-card { border: 0; border-left: 2px solid var(--atlas-border); border-radius: 0; box-shadow: var(--atlas-paper-shadow); }
+.auth-page .auth-card h1 { line-height: 1.8; }
+body:has(.memory-atlas) .tour-panel { border: 0; border-left: 2px solid var(--atlas-border); border-radius: 0; box-shadow: var(--atlas-paper-shadow); }
+body:has(.memory-atlas) .tour-panel h2 { line-height: 1.7; }
+body:has(.memory-atlas) .tour-next,body:has(.memory-atlas) .tour-back { border-radius: 0; }
+body:has(.memory-atlas) .panorama-dialog { border: 0; border-left: 2px solid var(--atlas-border); border-radius: 0; box-shadow: var(--atlas-paper-shadow); }
+body:has(.memory-atlas) .panorama-header { padding: 22px; gap: 16px; }
+body:has(.memory-atlas) .panorama-header [data-slot='dialog-title'] { font-size: 25px; line-height: 1.7; }
+@media (min-width: 761px) {
+  body:has(.memory-atlas) .place-sheet.atlas-paper-panel { width: min(780px,calc(100vw - 80px)) !important; right: 40px !important; bottom: 40px !important; }
+}
+@media (max-width: 700px) {
+  body:has(.memory-atlas) .story-sheet.atlas-paper-panel { padding: 20px 21px calc(22px + env(safe-area-inset-bottom)) !important; max-height: calc(100dvh - 48px); }
+  body:has(.memory-atlas) .atlas-adjust-sheet.atlas-paper-panel { max-height: 88dvh; }
+  .atlas.memory-atlas .spatial-context-copy strong { font-size: 19px; }
+  .atlas.memory-atlas .spatial-context { padding-top: 16px; }
+  .atlas.memory-atlas .spatial-detail-content { margin-top: 0; }
+  .atlas.memory-atlas .spatial-detail-content h2 { font-size: 30px; margin-left: 9px; }
+  .atlas-reading-paper { padding: 24px 20px; }
+  .atlas.memory-atlas .spatial-detail-scroll { padding: 12px 18px 35px; }
+  .atlas.memory-atlas .spatial-detail-hero.without-photo { margin: 25px 14px 30px; }
+  .atlas-no-photo { min-height: 220px; padding: 30px 15px; }
+  .atlas-no-photo strong { font-size: 27px; }
+  .atlas-reading-pagination button { gap: 6px; padding: 8px; }
+  .atlas.memory-atlas .discovery.expanded { left: 10px; right: 10px; border-radius: 0; padding: 22px; }
+  body:has(.memory-atlas) .place-timeline { grid-template-columns: 1fr; gap: 22px; padding-inline: 6px; }
+  body:has(.memory-atlas) .place-memory:nth-child(even) { margin-top: 0; padding-left: 7px; }
+  body:has(.memory-atlas) .create-sheet .sheet-heading { top: -20px; padding-top: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas.memory-atlas *,body:has(.memory-atlas) .atlas-paper-panel *,
+  .atlas.memory-atlas *::before,body:has(.memory-atlas) .atlas-paper-panel *::before { transition: none !important; animation: none !important; }
+}
+/* Browsing collections float as individual scraps; dense input stays on one
+   steady sheet. Both use the same title strip, paper edge and close tile. */
+body:has(.memory-atlas) .place-sheet.atlas-paper-panel {
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+}
+body:has(.memory-atlas) .place-sheet .place-heading {
+  background: var(--atlas-cutout); padding: 14px 16px;
+}
+body:has(.memory-atlas) .story-scroll-progress { background: transparent; height: 2px; flex-basis: 2px; }
+body:has(.memory-atlas) .story-scroll-progress > span { background: var(--atlas-coral); }
+body:has(.memory-atlas) .place-sheet .panorama-entry { width: fit-content; max-width: 100%; padding: 12px 16px; background: var(--atlas-cutout); }
+body:has(.memory-atlas) .place-sheet .place-emotions span { background: var(--atlas-cutout); border-color: #6b7c8066; }
+.atlas.memory-atlas .discovery.expanded { background: transparent; box-shadow: none; }
+.atlas.memory-atlas .spatial-explore-heading { padding: 15px; background: var(--atlas-cutout); }
+.atlas.memory-atlas .discovery.expanded > .section-title { padding: 10px; background: var(--atlas-cutout); width: fit-content; }
+.atlas.memory-atlas.atlas-journal .my-memory-panel.expanded { background: var(--atlas-surface); }
+.atlas.memory-atlas .memory-card h3,body:has(.memory-atlas) .place-memory h3 { color: var(--atlas-text); }

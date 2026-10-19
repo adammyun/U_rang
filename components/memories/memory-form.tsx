@@ -1,5 +1,7 @@
 'use client';
 
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -261,14 +263,14 @@ export default function MemoryForm({
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="story-sheet create-sheet"
+        className="story-sheet create-sheet atlas-paper-panel"
       >
         <span className="sheet-grip" />
         <div className="sheet-heading">
           <div>
 
             <SheetTitle className="modal-heading">
-              {editing ? '기억을 다듬어 볼까요.' : '이곳에, 나의 기억을.'}
+              <AtlasHeadingLabel>{editing ? '기억을 다듬어 볼까요.' : '이곳에, 나의 기억을.'}</AtlasHeadingLabel>
             </SheetTitle>
           </div>
           <SheetClose
