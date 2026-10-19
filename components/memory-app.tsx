@@ -31,6 +31,7 @@ import { SpatialMemoryDetail, SpatialPlacePreview } from './memories/spatial-pan
 import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
 import AtlasAtmosphere from './memories/atlas-atmosphere';
+import AtlasIntro from './memories/atlas-intro';
 import {
   emotions,
   formatDate,
@@ -491,11 +492,7 @@ export default function MemoryApp({
       />
 
       {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
-        <div className="spatial-intro">
-
-          <h1>기억은<br /><em>이곳에</em></h1>
-          <p>어떤 장소는 오래도록 우리를 기억한다.<br />지도 위 작은 조각에서 이야기를 만나보세요.</p>
-        </div>
+        <AtlasIntro />
       )}
 
       {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (

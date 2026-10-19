@@ -123,7 +123,7 @@ test('울산 라인 지도와 상세 지도는 같은 기억 앵커를 사용한
   await page.goto('./');
   await expect(page.getByRole('img', { name: '울산 주요 도로와 하천의 라인 지도' })).toBeVisible();
   await expect(page).toHaveTitle('유랑 — 기억이 머무는 지도');
-  await expect(page.locator('.spatial-intro h1')).toHaveText('기억은이곳에');
+  await expect(page.locator('.spatial-intro h1')).toHaveText('기억을 거닐다유랑');
   await expect(page.locator('.eyebrow,.spatial-eyebrow')).toHaveCount(0);
   await page.evaluate(() => document.fonts.ready);
   expect(await page.evaluate(() => document.fonts.check('400 20px "Yurang Sans"', '유랑'))).toBe(true);
@@ -248,6 +248,14 @@ test('긴 감정 이름은 한 줄로 읽히며 상세와 제목은 고딕으로
   const detail = page.getByRole('dialog',{name:'기억 상세'});
   const emotion = detail.locator('.atlas-no-photo strong');
   await expect(emotion).toHaveText('의미 있는 순간');
+  const orbit = await detail.locator('.atlas-no-photo').evaluate(el => ({
+    before: getComputedStyle(el, '::before').borderRadius,
+    after: getComputedStyle(el, '::after').display,
+    background: getComputedStyle(el).backgroundColor,
+  }));
+  expect(orbit.before).toContain('%');
+  expect(orbit.after).toBe('block');
+  expect(orbit.background).toBe('rgba(0, 0, 0, 0)');
   const metrics = await emotion.evaluate(el=>({height:el.getBoundingClientRect().height,line:parseFloat(getComputedStyle(el).lineHeight),width:el.clientWidth,scroll:el.scrollWidth}));
   expect(metrics.height).toBeLessThanOrEqual(metrics.line + 1);
   expect(metrics.scroll).toBeLessThanOrEqual(metrics.width + 1);
@@ -365,4 +373,50 @@ test('포스트잇 미리보기에서 같은 톤의 장소 목록·상세·조�
   await expect(form.getByRole('button', { name: '기록 닫기' })).toBeInViewport();
   await page.screenshot({ path: `test-results/screenshots/collage-form-${info.project.name}.png`, animations: 'disabled' });
   await form.getByRole('button', { name: '기록 닫기' }).click();
+});
+
+test('새 소개 문구는 지도 조작을 가리지 않고 데스크톱 원형 창과 모바일 일시 숨김을 제공한다', async ({ page, context }, info) => {
+  await page.goto('./');
+  const intro = page.locator('.atlas-intro');
+  await expect(intro.getByRole('heading')).toHaveText('기억을 거닐다유랑');
+  await expect(intro.locator('em')).toHaveText('유랑');
+  await expect(intro.locator('p')).not.toBeEmpty();
+  expect(await intro.locator('em').evaluate(el => getComputedStyle(el).color)).toBe('rgb(231, 160, 136)');
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator('.ulsan-urban-layers')).toBeVisible();
+  await mkdir('test-results/screenshots', { recursive: true });
+  await page.screenshot({ path: `test-results/screenshots/intro-main-${info.project.name}.png`, animations: 'disabled' });
+  const copy = await intro.locator('p').textContent();
+  const rect = (await intro.locator('h1 > span').boundingBox())!;
+  const point = { x: rect.x + rect.width * .4, y: rect.y + rect.height / 2 };
+  const map = page.locator('.ulsan-line-map');
+  const before = await map.getAttribute('viewBox');
+  expect(await page.evaluate(({ x, y }) => !document.elementFromPoint(x, y)?.closest('.atlas-intro'), point)).toBe(true);
+
+  if (info.project.name.startsWith('mobile')) {
+    const touch = await context.newCDPSession(page);
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: point.x + 40, y: point.y + 35 }] });
+    await expect(intro).toHaveAttribute('data-gesture-hidden', 'true');
+    await expect(intro).toHaveCSS('opacity', '0');
+    await page.screenshot({ path: `test-results/screenshots/intro-gesture-${info.project.name}.png`, animations: 'disabled' });
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(intro).toHaveCSS('opacity', '1');
+    await expect(intro).not.toHaveAttribute('data-gesture-hidden', 'true');
+    await touch.detach();
+  } else {
+    await page.mouse.move(point.x, point.y);
+    await expect(intro).toHaveAttribute('data-peeking', 'true');
+    expect(await intro.evaluate(el => getComputedStyle(el).maskImage)).toContain('radial-gradient');
+    await page.screenshot({ path: `test-results/screenshots/intro-peek-${info.project.name}.png`, animations: 'disabled' });
+    await page.mouse.down();
+    await page.mouse.move(point.x + 60, point.y + 30, { steps: 5 });
+    await page.mouse.up();
+    await page.mouse.move(10, 10);
+    await expect(intro).not.toHaveAttribute('data-peeking', 'true');
+    expect(await intro.evaluate(el => getComputedStyle(el).maskImage)).toBe('none');
+  }
+  await expect.poll(() => map.getAttribute('viewBox')).not.toBe(before);
+  await expect(intro.locator('p')).toHaveText(copy!);
+  await expect(page.getByRole('button', { name: '기억을 남길 장소 선택하기' })).toBeVisible();
 });
