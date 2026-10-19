@@ -174,7 +174,7 @@ pnpm check
 
 ### GitHub Pages 배포
 
-`main`에 push하면 `.github/workflows/pages.yml`이 정적 앱을 빌드하고 GitHub Pages에 배포합니다.
+GitHub Actions의 **Deploy GitHub Pages → Run workflow**에서 `redesign/yeoun-2` 브랜치를 선택해 수동 실행합니다. `.github/workflows/pages.yml`은 한 작업에서 정적 앱 빌드 → Pages artifact 업로드 → 공개 게시를 순서대로 수행합니다. 기존 `github-pages` 환경의 브랜치 제한과 권한을 유지하며 `main`은 보존합니다.
 
 ```bash
 pnpm build:pages
