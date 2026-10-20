@@ -38,7 +38,7 @@ test('지도 조정과 장소 기억 열람이 동작한다', async ({ page }) =
     page.getByRole('heading', { name: '지도와 기억' }),
   ).toBeVisible();
 
-  const detailMode = page.getByRole('button', { name: /^상세/ });
+  const detailMode = page.getByRole('button', { name: /^자세히/ });
   await detailMode.click();
   await expect(detailMode).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: '지도 조정 닫기' }).click();

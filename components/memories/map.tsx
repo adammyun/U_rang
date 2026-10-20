@@ -15,6 +15,7 @@ import {
 } from '@/src/features/map/constants';
 import { isPagesRuntime } from '@/src/lib/runtime';
 import MemoryStamp from './memory-stamp';
+import type { MapMode } from '@/src/features/map/appearance';
 import UlsanLineMap, { type UlsanLineData } from './ulsan-line-map';
 
 setWorkerUrl(mapLibreWorkerUrl);
@@ -75,7 +76,7 @@ export default function MemoryMap({
   reserveIntroSpace = false,
 }: {
   memories: Memory[];
-  mode: 'calm' | 'detail';
+  mode: MapMode;
   onBounds: (bounds: Bounds) => void;
   onSelect: (memory: Memory) => void;
   onCreate: (point: Point) => void;
@@ -325,10 +326,10 @@ export default function MemoryMap({
     }
     return tiles;
   }, [view]);
-  const showLineArt = mode === 'calm' && lineData && view.width > 0 && view.height > 0 &&
+  const showLineArt = mode !== 'detail' && lineData && view.width > 0 && view.height > 0 &&
     view.center.lng >= lineData.bbox[0] && view.center.lng <= lineData.bbox[2] &&
     view.center.lat >= lineData.bbox[1] && view.center.lat <= lineData.bbox[3];
-  const showRasterTiles = !showLineArt && (mode === 'detail' || mode === 'calm' || error || !ready || !tilesReady || rasterCompatibilityActive);
+  const showRasterTiles = !showLineArt && (mode === 'detail' || mode === 'calm' || mode === 'dark' || error || !ready || !tilesReady || rasterCompatibilityActive);
 
   const markerGroups = useMemo(() => {
     const center = project(view.center, view.zoom);
@@ -380,7 +381,7 @@ export default function MemoryMap({
       />
       <div
         ref={rasterContainer}
-        className={`map-surface raster-map ${!showRasterTiles ? 'vector-visible' : ''} ${mode === 'calm' ? 'calm-mode' : 'detail-mode'}`}
+        className={`map-surface raster-map ${!showRasterTiles ? 'vector-visible' : ''} ${mode}-mode`}
         aria-label="지도 위 기억 마커"
       >
         {showLineArt && <UlsanLineMap data={lineData} view={view} project={project} obstacles={memories} reserveIntroSpace={reserveIntroSpace} />}
@@ -451,7 +452,12 @@ export default function MemoryMap({
               left: draftLocationPosition.x,
               top: draftLocationPosition.y,
             }}
-          />
+          >
+            <svg viewBox="0 0 32 40" aria-hidden="true" focusable="false">
+              <path d="M16 38S2 24 2 16a14 14 0 1 1 28 0c0 8-14 22-14 22Z" />
+              <circle cx="16" cy="16" r="5" />
+            </svg>
+          </span>
         )}
         {currentLocationPosition && (
           <span

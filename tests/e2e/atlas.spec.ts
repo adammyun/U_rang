@@ -140,7 +140,7 @@ test('울산 라인 지도와 상세 지도는 같은 기억 앵커를 사용한
   await sheet.getByRole('button', { name: '의미 있는 순간', exact: true }).click();
   await expect(sheet.getByRole('button', { name: '의미 있는 순간', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await sheet.getByRole('button', { name: '초기화' }).click();
-  await sheet.getByRole('button', { name: /^상세/ }).click();
+  await sheet.getByRole('button', { name: /^자세히/ }).click();
   await sheet.getByRole('button', { name: '지도 조정 닫기' }).click();
   await expect(page.locator('.ulsan-line-map')).toBeHidden();
   await expect(page.locator('.raster-map.detail-mode > img').first()).toBeVisible();
@@ -149,7 +149,7 @@ test('울산 라인 지도와 상세 지도는 같은 기억 앵커를 사용한
   expect(Math.abs(position!.x - next!.x)).toBeLessThan(1);
   expect(Math.abs(position!.y - next!.y)).toBeLessThan(1);
   await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
-  await page.getByRole('button', { name: /^간결/ }).click();
+  await page.getByRole('button', { name: /^기본/ }).click();
   await page.getByRole('button', { name: '지도 조정 닫기' }).click();
   await expect(page.locator('.ulsan-line-map')).toBeVisible();
   await expect(page.locator('.raster-map > img')).toHaveCount(0);
@@ -277,7 +277,7 @@ test('울산 5개 구군 경계와 확대 시 동·도로명을 표시한다', a
   await page.screenshot({path:`test-results/screenshots/graphite-neighborhood-${info.project.name}.png`,animations:'disabled'});
 });
 
-test('어두운 간결 지도에서 시가지와 확대된 실제 건물을 구분할 수 있다', async ({ page }, info) => {
+test('기본 지도에서 시가지와 확대된 실제 건물을 구분할 수 있다', async ({ page }, info) => {
   test.setTimeout(45_000);
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -295,7 +295,7 @@ test('어두운 간결 지도에서 시가지와 확대된 실제 건물을 구�
   await expect(urban).toHaveAttribute('data-building-level', 'footprints');
   expect(Number(await urban.getAttribute('data-building-count'))).toBeGreaterThan(20);
   expect((await urban.locator('.ulsan-urban-buildings').getAttribute('d'))!.length).toBeGreaterThan(1000);
-  expect(await page.locator('.ulsan-line-map').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(27, 35, 38)');
+  expect(await page.locator('.ulsan-line-map').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(96, 118, 120)');
   await expect(page.getByRole('button', { name: '이곳에 기억 남기기' })).toBeVisible();
   await page.screenshot({ path: `test-results/screenshots/buildings-close-${info.project.name}.png`, animations: 'disabled' });
   await page.getByRole('button', { name: '골목의 작은 불빛', exact: true }).click();

@@ -111,10 +111,10 @@ export default function UlsanUrbanLayers({ view, project }: { view: View; projec
   return <g className="ulsan-urban-layers" data-building-level={hasDetails ? 'footprints' : 'overview'} data-building-count={hasDetails ? details!.features.length : overview.buildingCount}>
     <path className="ulsan-urban-blocks" d={overview.block} />
     <path className="ulsan-urban-industry" d={overview.industrial} />
-    <path className="ulsan-urban-buildings" d={hasDetails ? detailPaths : overview.building} vectorEffect="non-scaling-stroke" />
-    <path className="ulsan-urban-street-cut" d={overview.street} vectorEffect="non-scaling-stroke" />
-    <path className="ulsan-urban-artery-cut" d={overview.artery} vectorEffect="non-scaling-stroke" />
-    <path className="ulsan-urban-streets" d={overview.street} vectorEffect="non-scaling-stroke" style={{ opacity: Math.min(.6, Math.max(.16, (view.zoom - 10) * .12)) }} />
-    <path className="ulsan-urban-arteries" d={overview.artery} vectorEffect="non-scaling-stroke" />
+    <path className="ulsan-urban-buildings" d={hasDetails ? detailPaths : overview.building} />
+    <path className="ulsan-urban-street-cut" d={overview.street} />
+    <path className="ulsan-urban-artery-cut" d={overview.artery} />
+    <path className="ulsan-urban-streets" d={overview.street} style={{ opacity: Math.min(.6, Math.max(.16, (view.zoom - 10) * .12)) }} />
+    <path className="ulsan-urban-arteries" d={overview.artery} />
   </g>;
 }

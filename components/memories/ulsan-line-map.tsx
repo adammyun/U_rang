@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import type { Point } from '@/lib/types';
 import UlsanUrbanLayers from './ulsan-urban-layers';
 
@@ -43,6 +43,8 @@ export default function UlsanLineMap({ data, view, project, obstacles = [], rese
       return `${i ? 'L' : 'M'}${p.x.toFixed(8)},${p.y.toFixed(8)}`;
     }).join('') + 'Z').join(''),
   })), [data, project]);
+  // Convert screen-pixel stroke widths into world units. Safari can overpaint
+  // non-scaling strokes when this geographic viewBox is much smaller than 1.
   const scale = 2 ** view.zoom;
   const center = project(view.center, 0);
   const left = center.x - view.width / (2 * scale);
@@ -75,15 +77,15 @@ export default function UlsanLineMap({ data, view, project, obstacles = [], rese
     occupied.push({ x, y: y + dy, width });
     return [{ ...label, x: point.x, y: point.y + dy / scale, fontSize }];
   });
-  return <svg className="ulsan-line-map" viewBox={`${left} ${top} ${view.width / scale} ${view.height / scale}`} preserveAspectRatio="none" role="img" aria-label="울산 주요 도로와 하천의 라인 지도">
+  return <svg className="ulsan-line-map" style={{ '--ulsan-stroke-unit': 1 / scale } as CSSProperties} viewBox={`${left} ${top} ${view.width / scale} ${view.height / scale}`} preserveAspectRatio="none" role="img" aria-label="울산 주요 도로와 하천의 라인 지도">
     {areas.map((area, index) => <path key={area.name} className={`ulsan-district-area district-tone-${index % 3}`} d={area.path} data-district={area.name} fillRule="evenodd" />)}
     <UlsanUrbanLayers view={view} project={project} />
-    <path className="ulsan-line-parks" d={paths.park} vectorEffect="non-scaling-stroke" />
-    <path className="ulsan-line-roads" d={paths.road} vectorEffect="non-scaling-stroke" />
-    <path className="ulsan-line-rivers" d={paths.river} vectorEffect="non-scaling-stroke" style={{ strokeWidth: Math.min(12, Math.max(2, 2 ** (view.zoom - 10))) }} />
-    <path className="ulsan-line-coast" d={paths.coast} vectorEffect="non-scaling-stroke" />
-    <path className="ulsan-line-boundary" d={paths.boundary} vectorEffect="non-scaling-stroke" />
-    <path className="ulsan-line-city-boundary" d={paths.cityBoundary} vectorEffect="non-scaling-stroke" />
+    <path className="ulsan-line-parks" d={paths.park} />
+    <path className="ulsan-line-roads" d={paths.road} />
+    <path className="ulsan-line-rivers" d={paths.river} style={{ strokeWidth: Math.min(12, Math.max(2, 2 ** (view.zoom - 10))) / scale }} />
+    <path className="ulsan-line-coast" d={paths.coast} />
+    <path className="ulsan-line-boundary" d={paths.boundary} />
+    <path className="ulsan-line-city-boundary" d={paths.cityBoundary} />
     {placed.map((label) => <text key={`${label.kind}:${label.name}`} x={label.x} y={label.y} className={`ulsan-label-${label.kind}`} textAnchor="middle" style={{ fontSize: label.fontSize / scale, letterSpacing: .5 / scale }}>{label.name}</text>)}
   </svg>;
 }

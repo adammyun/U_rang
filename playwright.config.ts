@@ -38,6 +38,16 @@ export default defineConfig({
         isMobile: true,
       },
     },
+    {
+      name: 'desktop-webkit',
+      testMatch: '**/browser-compat.spec.ts',
+      use: { browserName: 'webkit', viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'mobile-webkit',
+      testMatch: '**/browser-compat.spec.ts',
+      use: { browserName: 'webkit', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true },
+    },
   ],
   webServer: {
     command:

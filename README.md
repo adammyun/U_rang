@@ -56,7 +56,7 @@ GitHub Pages는 서버를 실행할 수 없으므로 Pages 버전은 여러 방�
 ## 지도 구성
 
 - **Main map:** MapLibre GL JS
-- **Base map:** 기본 간결 모드에는 OpenFreeMap Positron vector style, 상세 모드와 WebGL 호환 경로에는 `https://tile.openstreetmap.org/{z}/{x}/{y}.png` raster tiles를 사용합니다. Worker 모드의 raster 요청은 `/api/map-tiles`를 경유합니다.
+- **Base map:** 조정의 `기본 / 다크 / 자세히`에서 선택합니다. 기본은 부드러운 회청색, 다크는 차콜 톤의 같은 울산 SVG 도로·건물 지도입니다. 자세히와 범위 밖·데이터 실패 fallback에는 `https://tile.openstreetmap.org/{z}/{x}/{y}.png` raster tiles를 사용합니다. 세 모드는 같은 카메라와 기억 마커를 공유합니다. Worker 모드의 raster 요청은 `/api/map-tiles`를 경유합니다.
 - **Place search:** Photon(OpenStreetMap 데이터), 서버 Route Handler 경유
 - **Panorama:** NAVER Maps Panorama, 사용자가 거리뷰를 열 때만 lazy load
 
@@ -171,6 +171,18 @@ pnpm check
 ```
 
 `.github/workflows/ci.yml`도 Node 22.13과 pnpm lockfile을 사용해 push와 pull request마다 같은 네 단계를 실행합니다. 현재 자동화 테스트는 NAVER SDK의 미설정·실패·재시도·중복 로드와 Panorama 좌표 DTO 경계를 검증하며 실제 외부 API key를 요구하지 않습니다.
+
+### 브라우저 UI 검증
+
+```bash
+# 최초 1회: 테스트용 브라우저 설치
+pnpm exec playwright install chromium webkit
+pnpm test:ui --workers=1
+```
+
+테스트가 Pages 빌드와 `http://127.0.0.1:4173/yeoun_2/` 미리보기를 실행합니다. Chromium은 기존 기능 전체를, WebKit은 지도 선 두께·위치 핀·작성 화면의 호환성을 각각 데스크톱/모바일에서 검사합니다. 캡처는 `test-results/screenshots/`, HTML 결과는 `pnpm test:ui:report`에서 확인합니다. WebKit 모바일 검증은 실제 iPhone 테스트를 대체하지 않습니다.
+
+[Safari 지도·작성 화면 수정 및 검증 기록](docs/design/YURANG-SAFARI-FORM-FIX.md)
 
 ### GitHub Pages 배포
 

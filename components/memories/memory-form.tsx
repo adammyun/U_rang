@@ -310,7 +310,7 @@ export default function MemoryForm({
           </div>
 
           <label>
-            장소 이름 <small className="optional-label">선택</small>
+            <span className="field-label">장소 이름 <small className="optional-label">선택</small></span>
             <input
               id="memory-location-name"
               maxLength={160}
@@ -398,8 +398,9 @@ export default function MemoryForm({
 
           <div className="form-row">
             <label>
-              기억이 있었던 날짜 <small className="optional-label">선택</small>
+              <span className="field-label">기억이 있었던 날짜 <small className="optional-label">선택</small></span>
               <input
+                id="memory-date"
                 type="date"
                 value={memoryDate}
                 onChange={(event) => {
@@ -433,7 +434,7 @@ export default function MemoryForm({
                   aria-labelledby="emotion-label"
                   className="form-select"
                 >
-                  <SelectValue />
+                  <SelectValue>{emotions[emotion].label}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(emotions).map(([key, item]) => (

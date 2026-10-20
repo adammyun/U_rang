@@ -24,6 +24,8 @@ import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
 import AtlasAtmosphere from './memories/atlas-atmosphere';
 import MemoryFilterSheet from './memories/memory-filter-sheet';
+import MapAppearanceOptions from './memories/map-appearance-options';
+import type { MapMode } from '@/src/features/map/appearance';
 import PanoramaViewer from './memories/panorama-viewer';
 import { logout } from '@/src/features/auth/api';
 import {
@@ -122,7 +124,7 @@ export default function MyMemoryMap({
   const [expanded, setExpanded] = useState(false);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
-  const [mapMode, setMapMode] = useState<'calm' | 'detail'>('calm');
+  const [mapMode, setMapMode] = useState<MapMode>('calm');
 
   // oxlint-disable react/react-compiler -- Loading state is reset for each server-filtered request.
   useEffect(() => {
@@ -302,26 +304,7 @@ export default function MyMemoryMap({
         <div className="my-map-filters" aria-label="내 기억 필터">
           <fieldset className="map-appearance-field my-map-appearance">
             <legend>지도 표현</legend>
-            <div className="map-appearance-options">
-              <button
-                type="button"
-                className={mapMode === 'calm' ? 'selected' : ''}
-                aria-pressed={mapMode === 'calm'}
-                onClick={() => setMapMode('calm')}
-              >
-                <strong>간결</strong>
-                <span>주요 지형 중심</span>
-              </button>
-              <button
-                type="button"
-                className={mapMode === 'detail' ? 'selected' : ''}
-                aria-pressed={mapMode === 'detail'}
-                onClick={() => setMapMode('detail')}
-              >
-                <strong>상세</strong>
-                <span>주변 정보 포함</span>
-              </button>
-            </div>
+            <MapAppearanceOptions mode={mapMode} onChange={setMapMode} />
           </fieldset>
           <select
             aria-label="공개 범위"

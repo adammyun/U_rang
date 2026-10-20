@@ -23,6 +23,7 @@ import {
 import { Toaster, toast } from 'sonner';
 import DeveloperHotspot from './dev/developer-hotspot';
 import MemoryFilterSheet from './memories/memory-filter-sheet';
+import type { MapMode } from '@/src/features/map/appearance';
 import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
 import PanoramaViewer from './memories/panorama-viewer';
@@ -165,7 +166,7 @@ export default function MemoryApp({
   const [placeListOpen, setPlaceListOpen] = useState(false);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
-  const [mapMode, setMapMode] = useState<'calm' | 'detail'>('calm');
+  const [mapMode, setMapMode] = useState<MapMode>('calm');
 
   // oxlint-disable react/react-compiler -- Loading state is reset when a new viewport request begins.
   useEffect(() => {

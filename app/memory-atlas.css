@@ -37,7 +37,7 @@
 .atlas.memory-atlas .map-surface { inset: 0; }
 .atlas.memory-atlas .raster-map { background: #202823; }
 .atlas.memory-atlas .maplibregl-canvas-container { filter: invert(1) hue-rotate(180deg) saturate(.12) brightness(.68); }
-.atlas.memory-atlas .raster-map.calm-mode > img { opacity: .8; filter: invert(1) hue-rotate(180deg) saturate(.12) brightness(.68); }
+.atlas.memory-atlas .raster-map:is(.calm-mode,.dark-mode) > img { opacity: .8; filter: invert(1) hue-rotate(180deg) saturate(.12) brightness(.68); }
 .atlas.memory-atlas .raster-map.detail-mode > img { opacity: .92; filter: saturate(.3) brightness(.8); }
 .atlas-map-treatment, .atlas-scene-wash { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 .atlas-map-treatment { background: none; }
@@ -294,12 +294,12 @@ body :is(h1,h2,h3,.modal-heading,.place-title,.brand b,.spatial-context-location
 .atlas.memory-atlas .brand b { font-family: var(--atlas-font); font-weight: 400; }
 .atlas.memory-atlas .maplibregl-canvas-container { filter: none; }
 .ulsan-line-map { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; background: #1a211f; }
-.ulsan-line-map path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.ulsan-line-map .ulsan-line-parks { fill: #2d3b30; fill-opacity: .6; stroke: #788569; stroke-width: .7; stroke-opacity: .35; }
-.ulsan-line-map .ulsan-line-roads { stroke: #a6ab94; stroke-width: .85; stroke-opacity: .4; }
+.ulsan-line-map path { vector-effect: none; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ulsan-line-map .ulsan-line-parks { fill: #2d3b30; fill-opacity: .6; stroke: #788569; stroke-width: calc(var(--ulsan-stroke-unit, 1) * .7px); stroke-opacity: .35; }
+.ulsan-line-map .ulsan-line-roads { stroke: #a6ab94; stroke-width: calc(var(--ulsan-stroke-unit, 1) * .85px); stroke-opacity: .4; }
 .ulsan-line-map .ulsan-line-rivers { stroke: #809b9c; stroke-opacity: .55; }
-.ulsan-line-map .ulsan-line-coast { stroke: #8dacad; stroke-width: 1.4; stroke-opacity: .7; }
-.ulsan-line-map text { fill: #c1c5ac; font-family: var(--atlas-font); paint-order: stroke; stroke: #1a211f; stroke-width: 3px; vector-effect: non-scaling-stroke; }
+.ulsan-line-map .ulsan-line-coast { stroke: #8dacad; stroke-width: calc(var(--ulsan-stroke-unit, 1) * 1.4px); stroke-opacity: .7; }
+.ulsan-line-map text { fill: #c1c5ac; font-family: var(--atlas-font); paint-order: stroke; stroke: #1a211f; stroke-width: calc(var(--ulsan-stroke-unit, 1) * 3px); vector-effect: none; }
 .ulsan-line-map .ulsan-label-district { fill: #c3c6b0; opacity: .65; }
 .ulsan-line-map .ulsan-label-water { fill: #91aaab; opacity: .8; }
 .ulsan-line-map .ulsan-label-park { fill: #b7c9a3; }
@@ -518,8 +518,8 @@ body:has(.memory-atlas) .tour-panel > p,body:has(.memory-atlas) .tour-progress {
 .ulsan-line-map .ulsan-district-area { fill: #8e9ca0; fill-opacity: .045; stroke: none; }
 .ulsan-line-map .ulsan-district-area.district-tone-1 { fill: #536f7b; fill-opacity: .1; }
 .ulsan-line-map .ulsan-district-area.district-tone-2 { fill: #b7b3a7; fill-opacity: .055; }
-.ulsan-line-map .ulsan-line-boundary { stroke: #a9b7b7; stroke-width: 1.15; stroke-dasharray: 6 5; stroke-opacity: .65; }
-.ulsan-line-map .ulsan-line-city-boundary { stroke: #e0ae95; stroke-width: 1.6; stroke-dasharray: 10 6; stroke-opacity: .65; }
+.ulsan-line-map .ulsan-line-boundary { stroke: #a9b7b7; stroke-width: calc(var(--ulsan-stroke-unit, 1) * 1.15px); stroke-dasharray: calc(var(--ulsan-stroke-unit, 1) * 6px) calc(var(--ulsan-stroke-unit, 1) * 5px); stroke-opacity: .65; }
+.ulsan-line-map .ulsan-line-city-boundary { stroke: #e0ae95; stroke-width: calc(var(--ulsan-stroke-unit, 1) * 1.6px); stroke-dasharray: calc(var(--ulsan-stroke-unit, 1) * 10px) calc(var(--ulsan-stroke-unit, 1) * 6px); stroke-opacity: .65; }
 .ulsan-line-map text { font-family: var(--atlas-font); font-weight: 400; fill: #cad4d7; stroke: #1b2326; }
 .ulsan-line-map .ulsan-label-district { opacity: 1; fill: #e3e7e5; font-weight: 600; }
 .ulsan-line-map .ulsan-label-city { fill: #e8b199; font-weight: 600; }
@@ -542,10 +542,28 @@ body:has(.memory-atlas) .panorama-state { background: #252c2fed; color: var(--at
 /* Figure-ground urban fabric: charcoal streets separate slate blocks/buildings. */
 .ulsan-line-map .ulsan-urban-blocks { fill: var(--atlas-map-block); fill-opacity: .72; stroke: none; }
 .ulsan-line-map .ulsan-urban-industry { fill: var(--atlas-map-industry); fill-opacity: .7; stroke: none; }
-.ulsan-line-map .ulsan-urban-buildings { fill: var(--atlas-map-building); fill-opacity: .8; stroke: #91a1a7; stroke-width: .35; stroke-opacity: .4; }
-.ulsan-line-map .ulsan-urban-street-cut { stroke: var(--atlas-map-street); stroke-width: 2.2; }
-.ulsan-line-map .ulsan-urban-artery-cut { stroke: var(--atlas-map-street); stroke-width: 4; }
-.ulsan-line-map .ulsan-urban-streets { stroke: #7e919b; stroke-width: .55; }
-.ulsan-line-map .ulsan-urban-arteries { stroke: #a4b3b8; stroke-width: 1; stroke-opacity: .6; }
-.ulsan-line-map .ulsan-line-roads { stroke: #b7c4c8; stroke-width: 1.35; stroke-opacity: .65; }
+.ulsan-line-map .ulsan-urban-buildings { fill: var(--atlas-map-building); fill-opacity: .8; stroke: #91a1a7; stroke-width: calc(var(--ulsan-stroke-unit, 1) * .35px); stroke-opacity: .4; }
+.ulsan-line-map .ulsan-urban-street-cut { stroke: var(--atlas-map-street); stroke-width: calc(var(--ulsan-stroke-unit, 1) * 2.2px); }
+.ulsan-line-map .ulsan-urban-artery-cut { stroke: var(--atlas-map-street); stroke-width: calc(var(--ulsan-stroke-unit, 1) * 4px); }
+.ulsan-line-map .ulsan-urban-streets { stroke: #7e919b; stroke-width: calc(var(--ulsan-stroke-unit, 1) * .55px); }
+.ulsan-line-map .ulsan-urban-arteries { stroke: #a4b3b8; stroke-width: calc(var(--ulsan-stroke-unit, 1) * 1px); stroke-opacity: .6; }
+.ulsan-line-map .ulsan-line-roads { stroke: #b7c4c8; stroke-width: calc(var(--ulsan-stroke-unit, 1) * 1.35px); stroke-opacity: .65; }
 .ulsan-line-map .ulsan-line-boundary { stroke-opacity: .35; }
+
+/* Explicit slate palette preserves the softer public appearance in every
+   browser; dark uses the charcoal tokens above, with identical map geometry. */
+.raster-map.calm-mode {
+  --atlas-map-block: #758b8e;
+  --atlas-map-industry: #708487;
+  --atlas-map-building: #a2b5b8;
+  --atlas-map-street: #607678;
+}
+.raster-map.calm-mode .ulsan-line-map { background: #607678; }
+.raster-map.calm-mode .ulsan-line-parks { fill: #72877b; stroke: #b3bda9; }
+.raster-map.calm-mode .ulsan-line-roads { stroke: #b8cbcd; stroke-opacity: .65; }
+.raster-map.calm-mode .ulsan-line-rivers { stroke: #a4c0c2; }
+.raster-map.calm-mode .ulsan-line-coast { stroke: #bfd2d2; }
+.raster-map.calm-mode .ulsan-urban-streets { stroke: #b3c5c8; }
+.raster-map.calm-mode .ulsan-urban-arteries { stroke: #c3d2d4; }
+.raster-map.calm-mode .ulsan-line-map text { stroke: #455a5d; }
+.atlas.memory-atlas:has(.raster-map.calm-mode) .atlas-intro p { color: var(--atlas-text); text-shadow: 0 1px 5px #172123; }

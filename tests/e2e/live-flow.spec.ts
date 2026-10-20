@@ -23,12 +23,20 @@ test('실제 공개 기억을 미리보고 검색·상세·탐색으로 이동�
   const map = page.getByLabel('기억 지도. 지점을 클릭하거나 길게 눌러 기억을 남기세요.');
   await expect(map).toBeVisible();
   await expect(page.locator('.raster-memory-marker').first()).toBeVisible();
+  const lineMap = page.locator('.ulsan-line-map');
+  await expect(lineMap).toBeVisible();
+  const viewWidth = async () => Number((await lineMap.getAttribute('viewBox'))!.split(' ')[2]);
+  const initialWidth = await viewWidth();
   await page.getByRole('button', { name: '지도 확대' }).click();
+  await expect.poll(async () => initialWidth / await viewWidth()).toBeCloseTo(2, 2);
   await page.getByRole('button', { name: '지도 축소' }).click();
+  await expect.poll(async () => initialWidth / await viewWidth()).toBeCloseTo(1, 2);
   await map.dragTo(map, { sourcePosition: { x: 250, y: 400 }, targetPosition: { x: 280, y: 420 }, force: true });
   await page.waitForTimeout(4000);
 
-  await page.locator('.raster-memory-marker').first().click();
+  // Marker order changes with viewport grouping. A cross-place cluster opens
+  // a closer map, while this known 100m place group opens the reading preview.
+  await page.getByRole('button', { name: /태화강 국가정원.*기억/ }).click();
   await expect(page.getByLabel('장소의 기억 미리보기')).toBeVisible();
   await capture(page, 'live-preview', testInfo.project.name);
   await page.getByRole('button', { name: '선택한 기억 자세히 읽기' }).click();

@@ -150,7 +150,9 @@ body:has(.memory-atlas) :is(.close-button,.spatial-round-close):active,
 .atlas-reading-pagination > span { background: var(--atlas-cutout); padding: 12px; }
 /* Adjustment and writing share note edges; their real scroll owners stay intact. */
 body:has(.memory-atlas) .atlas-adjust-sheet.atlas-paper-panel { gap: 18px !important; }
-.atlas-adjust-sheet .map-appearance-options { gap: 16px; padding: 4px; }
+.map-appearance-options { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.atlas-adjust-sheet .map-appearance-options { gap: 10px; padding: 4px; }
+.atlas-adjust-sheet .map-appearance-options button { padding-inline: 10px; }
 .atlas-adjust-sheet .map-appearance-options button {
   border: 1px solid var(--atlas-border); background: var(--atlas-raised); box-shadow: 3px 4px 0 #0003;
 }
@@ -165,6 +167,42 @@ body:has(.memory-atlas) .create-sheet .sheet-heading {
 body:has(.memory-atlas) .create-sheet :is(.location-selected,.privacy-settings,.memory-images-empty) { border-radius: 0; border: 0; border-left: 2px solid var(--atlas-border); }
 body:has(.memory-atlas) .create-sheet :is(input:not([type=file]),textarea,.form-select) { border-radius: 0; }
 body:has(.memory-atlas) .create-sheet .visibility-options label { border-radius: 0; }
+/* Native date controls and custom selects share a label row and input baseline. */
+body:has(.memory-atlas) .create-sheet .form-row { grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; }
+body:has(.memory-atlas) .create-sheet .form-row > * { min-width: 0; }
+.memory-form .field-label { display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 6px; }
+.memory-form .field-label .optional-label { margin-left: 0; }
+body:has(.memory-atlas) .create-sheet input[type='date'] {
+  height: 50px; min-height: 50px; max-width: 100%; color-scheme: dark;
+  -webkit-appearance: none; appearance: none; text-align: left;
+}
+body:has(.memory-atlas) .create-sheet input[type='date']::-webkit-date-and-time-value { text-align: left; min-height: 1.5em; }
+body:has(.memory-atlas) .create-sheet :is(.privacy-settings,.memory-images-empty) { padding: 16px; }
+body:has(.memory-atlas) .create-sheet .privacy-settings > label {
+  display: grid; grid-template-columns: minmax(0,1fr) 44px; gap: 16px; align-items: center;
+}
+body:has(.memory-atlas) .create-sheet .privacy-settings > label > span:not([data-slot]) { min-width: 0; overflow-wrap: anywhere; }
+body:has(.memory-atlas) .create-sheet .privacy-settings [data-slot='switch'] { width: 44px; height: 26px; }
+body:has(.memory-atlas) .create-sheet .privacy-settings [data-slot='switch']::after { inset: -9px 0; }
+body:has(.memory-atlas) .create-sheet .privacy-settings [data-slot='switch-thumb'] { width: 20px; height: 20px; translate: 2px 0; }
+body:has(.memory-atlas) .create-sheet .privacy-settings [data-slot='switch-thumb'][data-checked] { translate: 20px 0; }
+body:has(.memory-atlas) .create-sheet .visibility-options > label { min-width: 0; padding: 14px; gap: 10px; }
+body:has(.memory-atlas) .create-sheet .visibility-options > label > :is(svg,[data-slot='radio-group-item']) { flex-shrink: 0; }
+body:has(.memory-atlas) .create-sheet .visibility-options > label > span { min-width: 0; }
+@media (max-width: 650px) { body:has(.memory-atlas) .create-sheet .form-row { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 480px) {
+  body:has(.memory-atlas) .create-sheet .visibility-options { grid-template-columns: minmax(0,1fr); }
+  body:has(.memory-atlas) .create-sheet .visibility-options > label > svg { display: block; }
+}
+/* The outer element owns only the geographic anchor; the SVG tip points down. */
+.atlas .raster-draft-location {
+  width: 32px; height: 40px; transform: translate(-50%,-100%); transform-origin: center bottom;
+  border: 0; border-radius: 0; background: none; box-shadow: none;
+}
+.atlas .raster-draft-location::after { content: none; }
+.raster-draft-location > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.raster-draft-location path { fill: var(--atlas-coral); stroke: var(--atlas-text); stroke-width: 2px; stroke-linejoin: round; }
+.raster-draft-location circle { fill: var(--atlas-text); }
 /* Place collections use staggered notes instead of an unrelated timeline. */
 body:has(.memory-atlas) .place-sheet.atlas-paper-panel { max-width: 780px; }
 body:has(.memory-atlas) .place-sheet .place-heading {

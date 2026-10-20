@@ -15,6 +15,8 @@ import { emotions, type Emotion } from '@/lib/types';
 import { RECENT_MEMORY_YEARS } from '@/src/features/memories/filters';
 import type { MemoryFilters } from '@/src/features/memories/schemas';
 import MemoryScopeSwitch from './memory-scope-switch';
+import MapAppearanceOptions from './map-appearance-options';
+import type { MapMode } from '@/src/features/map/appearance';
 
 export default function MemoryFilterSheet({
   filters,
@@ -25,8 +27,8 @@ export default function MemoryFilterSheet({
 }: {
   filters: MemoryFilters;
   onChange: (filters: MemoryFilters) => void;
-  mapMode: 'calm' | 'detail';
-  onMapModeChange: (mode: 'calm' | 'detail') => void;
+  mapMode: MapMode;
+  onMapModeChange: (mode: MapMode) => void;
   scope?: 'all' | 'mine';
 }) {
   const [open, setOpen] = useState(false);
@@ -80,26 +82,7 @@ export default function MemoryFilterSheet({
 
           <fieldset className="map-appearance-field">
             <legend><Layers3 size={16} /> 지도 표현</legend>
-            <div className="map-appearance-options">
-              <button
-                type="button"
-                className={mapMode === 'calm' ? 'selected' : ''}
-                aria-pressed={mapMode === 'calm'}
-                onClick={() => onMapModeChange('calm')}
-              >
-                <strong>간결</strong>
-                <span>울산을 선으로 그리다</span>
-              </button>
-              <button
-                type="button"
-                className={mapMode === 'detail' ? 'selected' : ''}
-                aria-pressed={mapMode === 'detail'}
-                onClick={() => onMapModeChange('detail')}
-              >
-                <strong>상세</strong>
-                <span>골목과 주변 시설까지 자세히</span>
-              </button>
-            </div>
+            <MapAppearanceOptions mode={mapMode} onChange={onMapModeChange} />
           </fieldset>
 
           <div className="filter-fields">
