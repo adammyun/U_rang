@@ -3,7 +3,7 @@
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import {
   ArrowRight,
   Globe2,
@@ -119,6 +119,9 @@ export default function MemoryForm({
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [imageError, setImageError] = useState('');
+  const imageErrorId = useId();
+  const imageErrorMessage = useRef<HTMLParagraphElement>(null);
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<FormField, string>>
   >({});
@@ -126,6 +129,10 @@ export default function MemoryForm({
   const [removedMediaIds, setRemovedMediaIds] = useState<string[]>([]);
   const previewUrls = useRef(new Set<string>());
   const fileInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (imageError) imageErrorMessage.current?.scrollIntoView({ block: 'nearest' });
+  }, [imageError]);
 
   useEffect(
     () => () => {
@@ -143,21 +150,22 @@ export default function MemoryForm({
     const files = Array.from(event.target.files ?? []);
     event.target.value = '';
     if (!files.length) return;
+    setImageError('');
     if (
       keptMedia.length + newImages.length + files.length >
       MAX_MEMORY_IMAGES
     ) {
-      setError('사진은 한 기억에 최대 5장까지 첨부할 수 있습니다.');
+      setImageError('사진은 한 기억에 최대 5장까지 첨부할 수 있습니다.');
       return;
     }
     if (
       files.some((file) => !ALLOWED_IMAGE_TYPES.includes(file.type as never))
     ) {
-      setError('JPG, PNG, WEBP 이미지만 업로드할 수 있습니다.');
+      setImageError('JPG, PNG, WEBP 이미지만 업로드할 수 있습니다.');
       return;
     }
     if (files.some((file) => file.size > MAX_IMAGE_FILE_SIZE)) {
-      setError('사진 한 장은 5MB 이하여야 합니다.');
+      setImageError('사진 한 장은 5MB 이하여야 합니다.');
       return;
     }
     setBusy(true);
@@ -168,10 +176,10 @@ export default function MemoryForm({
         previewUrls.current.add(previewUrl);
         return { id: crypto.randomUUID(), file, previewUrl };
       });
-      setError('');
+      setImageError('');
       setNewImages((current) => [...current, ...pending]);
     } catch {
-      setError('사진을 안전하게 처리하지 못했습니다. 다른 사진을 선택해 주세요.');
+      setImageError('사진을 안전하게 처리하지 못했습니다. 다른 사진을 선택해 주세요.');
     } finally {
       setBusy(false);
     }
@@ -459,6 +467,7 @@ export default function MemoryForm({
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
+                aria-describedby={imageError ? imageErrorId : undefined}
                 disabled={
                   busy ||
                   keptMedia.length + newImages.length >= MAX_MEMORY_IMAGES
@@ -474,8 +483,12 @@ export default function MemoryForm({
                 multiple
                 onChange={selectImages}
                 disabled={busy}
+                aria-invalid={Boolean(imageError)}
+                aria-describedby={imageError ? imageErrorId : undefined}
               />
             </div>
+
+            {imageError && <p ref={imageErrorMessage} id={imageErrorId} className="form-error memory-images-error" role="alert">{imageError}</p>}
 
             {keptMedia.length + newImages.length > 0 ? (
               <div className="memory-image-previews">

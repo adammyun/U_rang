@@ -64,7 +64,7 @@ test('비공개 글 기록은 공개 스탬프에 나타나지 않고 내 기억
   await expect(page.getByLabel('주변의 공개 기억').getByText(title)).toHaveCount(0);
   await page.getByRole('button', { name: '탐색 닫기' }).click();
   await page.getByLabel('지도 메뉴').getByRole('link', { name: '내 기억' }).click();
-  if (info.project.name.startsWith('mobile')) await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
+  await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
   await expect(page.getByLabel('내 기억 목록').getByText(title)).toBeVisible();
 });
 
@@ -163,7 +163,8 @@ test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한�
   await expect(page.getByRole('button', { name: '로컬 시연 세션 시작' })).toBeVisible();
   await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
   await expect(page).toHaveURL(/#\/my-map/);
-  await expect(page.getByLabel('내 기억 목록', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('내 기억 목록', { exact: true })).toBeHidden();
+  await expect(page.getByRole('link', { name: '모두의 지도로 돌아가기' })).toBeVisible();
   await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
   await expect(page.getByRole('link', { name: '내 기억만 보기' })).toHaveAttribute('aria-current', 'page');
   await page.getByRole('button', { name: '평온', exact: true }).click();

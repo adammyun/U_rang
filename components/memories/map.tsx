@@ -74,6 +74,7 @@ export default function MemoryMap({
   mapRef,
   presentation = 'trace',
   reserveIntroSpace = false,
+  hideMemories = false,
 }: {
   memories: Memory[];
   mode: MapMode;
@@ -87,6 +88,7 @@ export default function MemoryMap({
   mapRef: React.RefObject<MapHandle | null>;
   presentation?: 'trace' | 'stamp';
   reserveIntroSpace?: boolean;
+  hideMemories?: boolean;
 }) {
   const container = useRef<HTMLElement>(null);
   const rasterContainer = useRef<HTMLDivElement>(null);
@@ -372,6 +374,8 @@ export default function MemoryMap({
     return { x, y };
   }, [draftPoint, view]);
 
+  const visibleMarkerGroups = hideMemories ? [] : markerGroups;
+
   return (
     <>
       <section
@@ -400,7 +404,7 @@ export default function MemoryMap({
             }}
           />
         ))}
-        {markerGroups.map((group) => {
+        {visibleMarkerGroups.map((group) => {
           const memory = group.memories[0];
           const color = emotions[memory.emotion].color;
           const selected = group.memories.some((item) => item.id === selectedMemoryId);

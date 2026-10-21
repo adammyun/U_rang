@@ -110,7 +110,7 @@ test('날짜·한글 감정·사진·공개 설정이 정렬되고 선택한 값
   await expect(detail.locator('.spatial-emotion')).toHaveText('사랑');
   await detail.getByRole('button', { name: '기억 닫기' }).click();
   await page.getByLabel('지도 메뉴').getByRole('link', { name: '내 기억' }).click();
-  if (info.project.name.startsWith('mobile')) await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
+  await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
   const myModes = page.locator('.my-map-appearance');
   for (const label of ['다크', '자세히', '기본']) {
     const option = myModes.getByRole('button', { name: new RegExp(`^${label}`) });

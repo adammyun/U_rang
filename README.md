@@ -184,6 +184,8 @@ pnpm test:ui --workers=1
 
 [Safari 지도·작성 화면 수정 및 검증 기록](docs/design/YURANG-SAFARI-FORM-FIX.md)
 
+[작성 CTA·조각 숨김·내 기억·감정 접힘·사진 경고 보완](docs/design/YURANG-USABILITY-REFINEMENT.md): 내 기억은 전체 지도로 시작하고 하단 기억 목록에서 필터와 기록을 펼칩니다. 상단 지도로 돌아가기 버튼으로 공개 지도에 복귀합니다. WebKit 검사에는 이 사용성 흐름도 포함됩니다.
+
 ### GitHub Pages 배포
 
 GitHub Actions의 **Deploy GitHub Pages → Run workflow**에서 `redesign/yeoun-2` 브랜치를 선택해 수동 실행합니다. `.github/workflows/pages.yml`은 한 작업에서 정적 앱 빌드 → Pages artifact 업로드 → 공개 게시를 순서대로 수행합니다. 기존 `github-pages` 환경의 브랜치 제한과 권한을 유지하며 `main`은 보존합니다.

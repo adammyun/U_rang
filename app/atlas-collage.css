@@ -6,6 +6,10 @@
   --atlas-tape: #87949680;
   --atlas-paper-gap: 24px;
   --atlas-tag-reveal: 240ms;
+  --atlas-tag-fold: 180ms;
+  --atlas-action: #ffb08d;
+  --atlas-action-hover: #ffc5a9;
+  --atlas-action-ink: #111719;
   --atlas-intro-peek-reach: 160px;
   --atlas-intro-peek-duration: 220ms;
 }
@@ -49,6 +53,12 @@
   animation-delay: calc(var(--tag-index) * 35ms);
 }
 .atlas-emotion-tags button[aria-pressed='true'] { color: var(--atlas-coral); border-color: var(--atlas-coral); background: var(--atlas-raised); }
+.atlas-emotion-picker[data-state='closing'] .atlas-emotion-tags { pointer-events: none; }
+.atlas-emotion-picker[data-state='closing'] .atlas-emotion-tags button {
+  animation: atlas-tag-fold var(--atlas-tag-fold) var(--atlas-ease) both;
+  animation-delay: calc((3 - var(--tag-index)) * 20ms);
+}
+@keyframes atlas-tag-fold { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(-18px) scale(.94); } }
 @keyframes atlas-tag-reveal { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 @media (min-width: 768px) and (max-height: 760px) { .atlas-emotion-picker { bottom: 149px; } }
 @media (max-width: 767px) {
@@ -316,3 +326,51 @@ body:has(.memory-atlas) .place-sheet .place-emotions span { background: var(--at
   .atlas.memory-atlas .atlas-intro p { max-width: 22em; font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .atlas.memory-atlas .atlas-intro { transition: none; } }
+
+/* The core action remains distinct on slate, charcoal and raster maps. */
+.atlas.memory-atlas .spatial-nav .memory-cta {
+  background: var(--atlas-action); color: var(--atlas-action-ink); border: 2px solid #ffe6d8;
+  box-shadow: 0 0 0 3px var(--atlas-cutout),4px 6px 0 #090e1073;
+  font-weight: 700; opacity: 1;
+}
+.atlas.memory-atlas .spatial-nav .memory-cta:hover { background: var(--atlas-action-hover); box-shadow: 0 0 0 3px var(--atlas-cutout),5px 8px 0 #090e1073; }
+.atlas.memory-atlas .spatial-nav .memory-cta:active { background: var(--atlas-action); box-shadow: 0 0 0 3px var(--atlas-cutout); }
+.atlas.memory-atlas .spatial-nav .memory-cta:focus-visible { outline: 3px solid var(--atlas-text); outline-offset: 6px; }
+body:has(.memory-atlas) .create-sheet .memory-images-error {
+  margin: 10px 0 12px; padding: 12px 14px; border-left: 3px solid var(--atlas-action);
+  color: #ffcfbc; background: #3a2927; line-height: 1.6;
+}
+/* My memories shares the full map and opens its archive only on demand. */
+.atlas.memory-atlas.atlas-journal .my-map-back { display: inline-flex; gap: 7px; min-height: 44px; padding: 0 12px; background: var(--atlas-cutout); border: 1px solid var(--atlas-border); color: var(--atlas-text); }
+.atlas.memory-atlas.atlas-journal .my-memory-panel[hidden] { display: none; }
+.atlas.memory-atlas.atlas-journal .my-memory-panel.expanded {
+  inset: 100px 32px 118px auto; width: min(640px,calc(100vw - 64px)); height: auto;
+  padding: 24px; overflow: auto; overscroll-behavior: contain; background: var(--atlas-surface);
+  border: 0; border-radius: 0; box-shadow: var(--atlas-paper-shadow); z-index: 15;
+}
+.atlas.memory-atlas.atlas-journal .my-map-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; position: sticky; top: -24px; z-index: 2; background: var(--atlas-surface); padding: 14px 0; margin: -14px 0 14px; }
+.atlas.memory-atlas.atlas-journal .my-map-heading h2 { font-size: 25px; line-height: 1.65; }
+.atlas.memory-atlas.atlas-journal .my-map-heading .close-button { flex-shrink: 0; }
+.atlas.memory-atlas.atlas-journal .my-memory-panel .memory-list { overflow: visible; flex: initial; padding: 8px 0 18px; }
+.atlas.memory-atlas.atlas-journal .memory-archive-group { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; padding: 3px; }
+.atlas.memory-atlas.atlas-journal .memory-archive-group > h3 { grid-column: 1 / -1; color: var(--atlas-text); margin-bottom: 0; }
+.atlas.memory-atlas.atlas-journal .my-memory-card { min-width: 0; margin: 0; padding: 16px; border: 0; border-radius: 0; background: var(--atlas-cutout); box-shadow: 3px 4px 0 #0004; }
+.atlas.memory-atlas.atlas-journal .my-memory-card h3 { word-break: keep-all; overflow-wrap: anywhere; }
+.atlas.memory-atlas.atlas-journal .my-memory-card:hover { outline: 1px solid var(--atlas-coral); transform: translateY(-2px); }
+.atlas.memory-atlas.atlas-journal .my-memory-card:focus-visible { outline: 2px solid var(--atlas-coral); outline-offset: 3px; }
+.atlas.memory-atlas.atlas-journal .map-caption { top: auto; right: 32px; bottom: 36px; max-width: 340px; }
+.atlas.memory-atlas.atlas-journal .map-filter-button,.atlas.memory-atlas.atlas-journal:has(.my-memory-panel.expanded) .map-filter-button { top: auto; right: auto; left: 34px; bottom: 113px; }
+.atlas.memory-atlas.atlas-journal .map-zoom { top: auto; bottom: 132px; }
+.atlas.memory-atlas.atlas-journal .raster-attribution { top: auto; left: auto; right: 5px; bottom: 3px; }
+.atlas.memory-atlas.atlas-journal:has(.my-memory-panel.expanded) .map-zoom { visibility: hidden; }
+@media (max-width: 767px) {
+  .atlas.memory-atlas.atlas-journal .app-nav { gap: 5px; }
+  .atlas.memory-atlas.atlas-journal .app-nav .my-map-back { font-size: 11px; padding-inline: 9px; }
+  .atlas.memory-atlas.atlas-journal .my-memory-panel.expanded { inset: calc(94px + env(safe-area-inset-top)) 10px calc(110px + env(safe-area-inset-bottom)); width: auto; height: auto; padding: 20px; }
+  .atlas.memory-atlas.atlas-journal .my-map-heading { top: -20px; }
+  .atlas.memory-atlas.atlas-journal .my-map-heading h2 { font-size: 23px; }
+  .atlas.memory-atlas.atlas-journal .memory-archive-group { grid-template-columns: minmax(0,1fr); }
+  .atlas.memory-atlas.atlas-journal .map-caption { top: calc(74px + env(safe-area-inset-top)); bottom: auto; left: 20px; right: 20px; max-width: none; font-size: 9px; }
+  .atlas.memory-atlas.atlas-journal .map-filter-button,.atlas.memory-atlas.atlas-journal:has(.my-memory-panel.expanded) .map-filter-button { left: 20px; bottom: calc(113px + env(safe-area-inset-bottom)); }
+  .atlas.memory-atlas.atlas-journal .map-zoom { bottom: calc(131px + env(safe-area-inset-bottom)); }
+}

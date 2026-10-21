@@ -89,9 +89,7 @@ test('격리된 브라우저에서 사진 첨부·공개 기록 작성·수정·
   await page.getByRole('button', { name: '기억 닫기' }).click();
   await expect(page.getByLabel('지도 메뉴').getByRole('link', { name: '내 기억' })).toBeVisible();
   await page.getByLabel('지도 메뉴').getByRole('link', { name: '내 기억' }).click();
-  if (testInfo.project.name.startsWith('mobile')) {
-    await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
-  }
+  await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
   await expect(page.getByLabel('내 기억 목록').getByText(title)).toBeVisible();
   await page.getByLabel('내 기억 목록').getByText(title).click();
   await page.getByRole('button', { name: '수정' }).click();

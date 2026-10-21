@@ -468,6 +468,7 @@ export default function MemoryApp({
         memories={memories}
         mode={mapMode}
         presentation="stamp"
+        hideMemories={Boolean(pendingLocation || draftLocation)}
         reserveIntroSpace={!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace}
         mapRef={mapRef}
         draftPoint={
@@ -532,7 +533,7 @@ export default function MemoryApp({
             <span className="location-picker-icon"><MapPin size={19} /></span>
             <span>
               <strong>기억이 머문 장소를 골라주세요</strong>
-              <small>지도 지점이나 기억 마커를 누르면 선택 마커가 이동해요.</small>
+              <small>지도를 눌러 선택 마커를 옮겨보세요. 장소를 고르는 동안 기억 조각은 잠시 숨겨요.</small>
             </span>
           </div>
           <div className="location-picker-actions">

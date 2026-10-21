@@ -14,7 +14,11 @@ const prompts = [
 ] as const;
 
 /** Presentation-only: never captures a gesture or changes the map camera. */
-export default function AtlasIntro() {
+export default function AtlasIntro({ heading = '기억을 거닐다', accent = '유랑', description }: {
+  heading?: string;
+  accent?: string;
+  description?: string;
+} = {}) {
   const intro = useRef<HTMLDivElement>(null);
   const [prompt, setPrompt] = useState<string>(prompts[0]);
   useEffect(() => {
@@ -90,7 +94,7 @@ export default function AtlasIntro() {
   }, []);
 
   return <div ref={intro} className="spatial-intro atlas-intro">
-    <h1><span>기억을 거닐다</span><em>유랑</em></h1>
-    <p>{prompt}</p>
+    <h1><span>{heading}</span><em>{accent}</em></h1>
+    <p>{description ?? prompt}</p>
   </div>;
 }

@@ -6,9 +6,13 @@ import { YurangMark } from './ui/yurang-mark';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ArrowLeft,
   ArrowUpRight,
+  BookOpen,
+  Minus,
+  X,
   Globe2,
   Leaf,
   LoaderCircle,
@@ -23,6 +27,7 @@ import { SpatialMemoryDetail } from './memories/spatial-panels';
 import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
 import AtlasAtmosphere from './memories/atlas-atmosphere';
+import AtlasIntro from './memories/atlas-intro';
 import MemoryFilterSheet from './memories/memory-filter-sheet';
 import MapAppearanceOptions from './memories/map-appearance-options';
 import type { MapMode } from '@/src/features/map/appearance';
@@ -51,13 +56,16 @@ type MyFilters = Omit<UserMemoryFilters, 'limit'>;
 function MyMemoryCard({
   memory,
   onSelect,
+  busy,
 }: {
   memory: Memory;
   onSelect: (memory: Memory) => void;
+  busy: boolean;
 }) {
   return (
     <button
       className="memory-card my-memory-card"
+      disabled={busy}
       onClick={() => onSelect(memory)}
     >
       {memory.media[0] && (
@@ -122,9 +130,14 @@ export default function MyMemoryMap({
   const [createPoint, setCreatePoint] = useState<Point | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const archiveToggle = useRef<HTMLButtonElement>(null);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
   const [mapMode, setMapMode] = useState<MapMode>('calm');
+  const closeArchive = useCallback(() => {
+    setExpanded(false);
+    requestAnimationFrame(() => archiveToggle.current?.focus({ preventScroll: true }));
+  }, []);
 
   // oxlint-disable react/react-compiler -- Loading state is reset for each server-filtered request.
   useEffect(() => {
@@ -146,6 +159,17 @@ export default function MyMemoryMap({
     return () => controller.abort();
   }, [filters, revision]);
   // oxlint-enable react/react-compiler
+
+  useEffect(() => {
+    if (!expanded || selected || editing || createPoint) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) {
+        closeArchive();
+      }
+    };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [expanded, selected, editing, createPoint, closeArchive]);
 
   const years = useMemo(
     () =>
@@ -232,7 +256,7 @@ export default function MyMemoryMap({
   }
 
   return (
-    <main className="atlas my-atlas memory-atlas atlas-journal">
+    <main className="atlas my-atlas memory-atlas atlas-journal" aria-label={`${displayName}의 기억 지도`}>
       <a className="skip-link" href="#my-memory-list" onClick={(event) => {
         event.preventDefault();
         setExpanded(true);
@@ -241,7 +265,7 @@ export default function MyMemoryMap({
         내 기억 목록으로 건너뛰기
       </a>
       <Toaster position="top-center" richColors />
-      <header className="topbar">
+      <header className="topbar spatial-header">
         <button
           type="button"
           className="brand"
@@ -251,14 +275,10 @@ export default function MyMemoryMap({
         >
           <YurangMark />
           <b>유랑</b>
-          <span className="brand-caption">{displayName}의 기억 지도</span>
         </button>
         <DeveloperHotspot />
         <nav className="app-nav" aria-label="주요 메뉴">
-          <Link href="/">지도</Link>
-          <Link className="active" href="/my-map" aria-current="page">
-            내 기억
-          </Link>
+          <Link href="/" className="my-map-back" aria-label="모두의 지도로 돌아가기"><ArrowLeft size={18} /> 지도로 돌아가기</Link>
           <button onClick={() => void signOut()}>
             <LogOut size={15} /> 로그아웃
           </button>
@@ -269,6 +289,8 @@ export default function MyMemoryMap({
         memories={memories}
         mode={mapMode}
         presentation="stamp"
+        hideMemories={Boolean(createPoint || editing)}
+        reserveIntroSpace={!expanded && !selected && !createPoint}
         mapRef={mapRef}
         draftPoint={createPoint}
         highlightedIds={[]}
@@ -279,6 +301,7 @@ export default function MyMemoryMap({
       />
 
       <AtlasAtmosphere emotion={selected?.emotion} />
+      {!expanded && !selected && !createPoint && !editing && <AtlasIntro heading="내가 남긴" accent="기억들" description="공개한 이야기와 나만 간직한 순간을 다시 거닐어보세요" />}
       <MemoryFilterSheet scope="mine" filters={filters} onChange={(next) => changeFilters({ ...filters, ...next })} mapMode={mapMode} onMapModeChange={setMapMode} />
 
       <aside
@@ -286,19 +309,11 @@ export default function MyMemoryMap({
         className={`discovery my-memory-panel ${expanded ? 'expanded' : ''}`}
         aria-label="내 기억 목록"
         tabIndex={-1}
+        hidden={!expanded}
       >
-        <button
-          className="mobile-sheet-toggle"
-          onClick={() => setExpanded((value) => !value)}
-          aria-label={expanded ? '내 기억 목록 접기' : '내 기억 목록 펼치기'}
-          aria-expanded={expanded}
-        >
-          <span />
-        </button>
         <div className="my-map-heading">
-
-          <h1><AtlasHeadingLabel>내가 기억하는 장소들</AtlasHeadingLabel></h1>
-          <p>공개한 이야기와 나만 간직한 이야기를 한곳에서 봅니다.</p>
+          <h2><AtlasHeadingLabel>나의 기억 조각</AtlasHeadingLabel></h2>
+          <button type="button" className="close-button" aria-label="내 기억 목록 닫기" onClick={closeArchive}><X size={20} /></button>
         </div>
 
         <div className="my-map-filters" aria-label="내 기억 필터">
@@ -392,7 +407,8 @@ export default function MyMemoryMap({
           </output>
         )}
         <div className="memory-list" aria-busy={loading} aria-live="polite">
-          {loading ? (
+          {loading && memories.length > 0 && <p className="my-memory-loading" role="status">조건에 맞는 기억을 펼치는 중…</p>}
+          {loading && !memories.length ? (
             <div className="empty-state">
               <LoaderCircle className="spin" size={24} /> 기억을 펼치는 중…
             </div>
@@ -410,6 +426,7 @@ export default function MyMemoryMap({
                     key={memory.id}
                     memory={memory}
                     onSelect={selectMemory}
+                    busy={loading}
                   />
                 ))}
               </section>
@@ -445,18 +462,18 @@ export default function MyMemoryMap({
         <span className="live-dot" /> 나의 기억 지도
         <span>정확한 위치는 로그인한 나에게만 표시됩니다</span>
       </div>
-      <div className={`map-actions ${expanded ? 'panel-expanded' : ''}`}>
-        <button
-          className="primary"
-          aria-label="현재 지도 중심에 새 기억 추가"
-          onClick={() => {
-            const center = mapRef.current?.center();
-            if (center) setCreatePoint(center);
-          }}
-        >
-          <Plus size={19} /> 기억 추가
-        </button>
+      <div className="map-zoom">
+        <button aria-label="지도 확대" onClick={() => mapRef.current?.zoom(1)}><Plus size={18} /></button>
+        <button aria-label="지도 축소" onClick={() => mapRef.current?.zoom(-1)}><Minus size={18} /></button>
       </div>
+      <nav className="spatial-nav" aria-label="내 기억 지도 메뉴">
+        <button className="primary memory-cta" aria-label="현재 지도 중심에 새 기억 추가" onClick={() => {
+          const center = mapRef.current?.center();
+          if (center) { setExpanded(false); setCreatePoint(center); }
+        }}><Plus size={19} /> 기억 남기기</button>
+        <Link href="/"><ArrowLeft size={18} /> 모두의 지도</Link>
+        <button ref={archiveToggle} type="button" className={expanded ? 'active' : ''} aria-label={expanded ? '내 기억 목록 접기' : '내 기억 목록 펼치기'} aria-controls="my-memory-list" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}><BookOpen size={18} /> 기억 목록</button>
+      </nav>
 
       {createPoint && (
         <MemoryForm

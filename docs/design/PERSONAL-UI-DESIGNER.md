@@ -17,7 +17,7 @@
 - Worker/App Router와 GitHub Pages 정적 SPA가 같은 React UI를 사용하므로 두 실행 환경을 함께 고려한다.
 - 공개 지도에는 public 기억만 표시한다. private/unlisted 기억과 approximate 위치의 실제 좌표가 공개 응답이나 집계로 유출되지 않게 한다.
 - `components/memories/map.tsx`의 MapLibre lifecycle, container size 보정, ResizeObserver, raster compatibility/fallback layer, attribution과 단일 marker overlay를 유지한다.
-- 울산 fallback 중심, 브라우저 현재 위치 우선 정책, calm/detail 지도 모드의 marker 일치를 유지한다.
+- 울산 fallback 중심, 브라우저 현재 위치 우선 정책, 기본/다크/자세히 지도 모드의 marker 일치를 유지한다.
 - 핵심 CTA는 위치 선택을 거쳐 기억 작성으로 이동한다. 지도 직접 선택, 장소 검색, 장소 그룹, 상세, 뒤로가기, 내 기억 CRUD 흐름을 보존한다.
 - 긴 본문과 사진이 있는 detail/form/place sheet는 내부 스크롤이 가능하고 모든 action에 도달해야 한다.
 - 튜토리얼의 `data-tour`, GitHub Pages hash route, App Router 경로와 filter query 동기화를 함께 확인한다.
@@ -55,11 +55,13 @@ Playwright 캡처는 `test-results/screenshots/`에서 직접 확인한다. 최�
 
 - 공개 지도 초기 화면과 울산 marker
 - 지도 control, 검색, 조정, 현재 위치, 핵심 CTA의 겹침 여부
-- calm/detail 전환 후 marker 위치
+- 기본/다크/자세히 전환 후 marker 위치
 - 장소 그룹에서 상세로 이동하고 뒤로 돌아오는 흐름
 - 긴 본문과 사진이 있는 sheet의 스크롤
 - private/public 작성과 내 기억 수정·삭제
 - 모바일 safe area와 데스크톱 지도·콘텐츠 배치
+
+내 기억은 고정 사이드바 대신 전체 지도에서 시작하며 하단 기억 목록 토글로 아카이브를 엽니다. 목록 닫기·Escape의 초점 복귀, 지도로 돌아가기 링크, owner 필터·수정·삭제를 함께 검사합니다. 작성 장소를 고르는 동안에는 조각만 숨기고 지도·선택 핀을 유지하며 취소 후 복원합니다. 감정 접힘은 퇴장 애니메이션 동안 inert, 이후 hidden으로 전환합니다. 사진 선택 오류는 버튼 곁의 alert로 안내합니다.
 
 ## 보고 방식
 
