@@ -144,6 +144,7 @@ function PagesApp() {
 
   return (
     <MemoryApp
+      initialExplore={route.search.get('explore') === '1'}
       isAuthenticated={authenticated}
       initialFilters={
         route.search.size

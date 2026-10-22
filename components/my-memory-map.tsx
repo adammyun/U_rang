@@ -10,7 +10,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowUpRight,
-  BookOpen,
   Minus,
   X,
   Globe2,
@@ -28,6 +27,9 @@ import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
 import AtlasAtmosphere from './memories/atlas-atmosphere';
 import AtlasIntro from './memories/atlas-intro';
+import AtlasNavigation from './memories/atlas-navigation';
+import AtlasLocationPicker from './memories/atlas-location-picker';
+import { DEFAULT_MAP_CENTER } from '@/src/features/map/constants';
 import MemoryFilterSheet from './memories/memory-filter-sheet';
 import MapAppearanceOptions from './memories/map-appearance-options';
 import type { MapMode } from '@/src/features/map/appearance';
@@ -127,6 +129,7 @@ export default function MyMemoryMap({
   const [revision, setRevision] = useState(0);
   const [selected, setSelected] = useState<Memory | null>(null);
   const [editing, setEditing] = useState<Memory | null>(null);
+  const [pendingLocation, setPendingLocation] = useState<Point | null>(null);
   const [createPoint, setCreatePoint] = useState<Point | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -289,19 +292,19 @@ export default function MyMemoryMap({
         memories={memories}
         mode={mapMode}
         presentation="stamp"
-        hideMemories={Boolean(createPoint || editing)}
-        reserveIntroSpace={!expanded && !selected && !createPoint}
+        hideMemories={Boolean(pendingLocation || createPoint || editing)}
+        reserveIntroSpace={!expanded && !selected && !createPoint && !pendingLocation}
         mapRef={mapRef}
-        draftPoint={createPoint}
+        draftPoint={pendingLocation ?? createPoint}
         highlightedIds={[]}
         selectedMemoryId={selected?.id ?? null}
         onBounds={() => undefined}
         onSelect={selectMemory}
-        onCreate={setCreatePoint}
+        onCreate={(point) => { if (pendingLocation) setPendingLocation(point); }}
       />
 
       <AtlasAtmosphere emotion={selected?.emotion} />
-      {!expanded && !selected && !createPoint && !editing && <AtlasIntro heading="내가 남긴" accent="기억들" description="공개한 이야기와 나만 간직한 순간을 다시 거닐어보세요" />}
+      {!expanded && !selected && !createPoint && !editing && !pendingLocation && <AtlasIntro heading="내가 남긴" accent="기억들" description="공개한 이야기와 나만 간직한 순간을 다시 거닐어보세요" />}
       <MemoryFilterSheet scope="mine" filters={filters} onChange={(next) => changeFilters({ ...filters, ...next })} mapMode={mapMode} onMapModeChange={setMapMode} />
 
       <aside
@@ -466,14 +469,11 @@ export default function MyMemoryMap({
         <button aria-label="지도 확대" onClick={() => mapRef.current?.zoom(1)}><Plus size={18} /></button>
         <button aria-label="지도 축소" onClick={() => mapRef.current?.zoom(-1)}><Minus size={18} /></button>
       </div>
-      <nav className="spatial-nav" aria-label="내 기억 지도 메뉴">
-        <button className="primary memory-cta" aria-label="현재 지도 중심에 새 기억 추가" onClick={() => {
-          const center = mapRef.current?.center();
-          if (center) { setExpanded(false); setCreatePoint(center); }
-        }}><Plus size={19} /> 기억 남기기</button>
-        <Link href="/"><ArrowLeft size={18} /> 모두의 지도</Link>
-        <button ref={archiveToggle} type="button" className={expanded ? 'active' : ''} aria-label={expanded ? '내 기억 목록 접기' : '내 기억 목록 펼치기'} aria-controls="my-memory-list" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}><BookOpen size={18} /> 기억 목록</button>
-      </nav>
+      <AtlasNavigation mine authenticated expanded={expanded} selecting={Boolean(pendingLocation)} archiveRef={archiveToggle}
+        onCreate={() => { setExpanded(false); setSelected(null); setPendingLocation(mapRef.current?.center() ?? DEFAULT_MAP_CENTER); }}
+        onArchive={() => { setPendingLocation(null); setExpanded(value => !value); }}
+      />
+      {pendingLocation && <AtlasLocationPicker onCancel={() => setPendingLocation(null)} onConfirm={() => { setCreatePoint(pendingLocation); setPendingLocation(null); }} />}
 
       {createPoint && (
         <MemoryForm

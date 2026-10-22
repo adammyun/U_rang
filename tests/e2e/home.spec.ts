@@ -15,7 +15,7 @@ test('메인 기억 지도를 표시하고 화면을 캡처한다', async ({ pag
 
   await expect(page).toHaveTitle('유랑 — 기억이 머무는 지도');
   await expect(page.getByRole('button', { name: '유랑 화면 새로고침' })).toBeVisible();
-  await expect(page.getByLabel('기억 지도. 지점을 클릭하거나 길게 눌러 기억을 남기세요.')).toBeVisible();
+  await expect(page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.')).toBeVisible();
   await expect(page.getByRole('button', { name: '기억을 남길 장소 선택하기' })).toBeVisible();
   await expect(page.locator('.raster-memory-marker').first()).toBeVisible({ timeout: 20_000 });
 

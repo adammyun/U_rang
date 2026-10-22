@@ -12,6 +12,9 @@ import { emotions } from '@/lib/types';
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
+  ULSAN_MAP_BOUNDS,
+  MIN_MAP_ZOOM,
+  MAX_MAP_ZOOM,
 } from '@/src/features/map/constants';
 import { isPagesRuntime } from '@/src/lib/runtime';
 import MemoryStamp from './memory-stamp';
@@ -166,8 +169,9 @@ export default function MemoryMap({
         style: { version: 8, sources: {}, layers: [{ id: 'canvas', type: 'background', paint: { 'background-color': '#171c1b' } }] },
         center: [DEFAULT_MAP_CENTER.lng, DEFAULT_MAP_CENTER.lat],
         zoom: DEFAULT_MAP_ZOOM,
-        minZoom: 3,
-        maxZoom: 19,
+        minZoom: MIN_MAP_ZOOM,
+        maxZoom: MAX_MAP_ZOOM,
+        maxBounds: ULSAN_MAP_BOUNDS,
         renderWorldCopies: false,
         // The compatibility layer owns the single visible attribution link so
         // it stays readable above the mobile memory panel.
@@ -180,12 +184,12 @@ export default function MemoryMap({
     map.current = instance;
     mapRef.current = {
       flyTo: (p, zoom = 15) =>
-        instance.flyTo({ center: [p.lng, p.lat], zoom, duration: 1000 }),
+        instance.flyTo({ center: [p.lng, p.lat], zoom: Math.max(instance.getMinZoom(), Math.min(MAX_MAP_ZOOM, zoom)), duration: 1000 }),
       center: () => ({
         lng: instance.getCenter().lng,
         lat: instance.getCenter().lat,
       }),
-      zoom: (d) => instance.zoomTo(instance.getZoom() + d),
+      zoom: (d) => instance.zoomTo(Math.max(instance.getMinZoom(), Math.min(MAX_MAP_ZOOM, instance.getZoom() + d))),
     };
     const report = () => {
       const b = instance.getBounds();
@@ -381,7 +385,7 @@ export default function MemoryMap({
       <section
         ref={container}
         className="map-surface"
-        aria-label="기억 지도. 지점을 클릭하거나 길게 눌러 기억을 남기세요."
+        aria-label="울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요."
       />
       <div
         ref={rasterContainer}
@@ -416,11 +420,11 @@ export default function MemoryMap({
               (item.lng - memory.lng) * 111_320 * Math.cos(memory.lat * Math.PI / 180),
               (item.lat - memory.lat) * 111_320,
             ) > 100);
-            if (spread && !draftPoint && mapRef.current && view.zoom < 18) {
+            if (spread && !draftPoint && mapRef.current && view.zoom < MAX_MAP_ZOOM) {
               mapRef.current.flyTo({
                 lng: group.memories.reduce((sum, item) => sum + item.lng, 0) / group.memories.length,
                 lat: group.memories.reduce((sum, item) => sum + item.lat, 0) / group.memories.length,
-              }, Math.min(18, view.zoom + 1.8));
+              }, Math.min(MAX_MAP_ZOOM, view.zoom + 1.8));
             } else onSelect(memory);
           };
           if (presentation === 'stamp') return (

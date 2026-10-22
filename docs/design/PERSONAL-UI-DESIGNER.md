@@ -17,8 +17,8 @@
 - Worker/App Router와 GitHub Pages 정적 SPA가 같은 React UI를 사용하므로 두 실행 환경을 함께 고려한다.
 - 공개 지도에는 public 기억만 표시한다. private/unlisted 기억과 approximate 위치의 실제 좌표가 공개 응답이나 집계로 유출되지 않게 한다.
 - `components/memories/map.tsx`의 MapLibre lifecycle, container size 보정, ResizeObserver, raster compatibility/fallback layer, attribution과 단일 marker overlay를 유지한다.
-- 울산 fallback 중심, 브라우저 현재 위치 우선 정책, 기본/다크/자세히 지도 모드의 marker 일치를 유지한다.
-- 핵심 CTA는 위치 선택을 거쳐 기억 작성으로 이동한다. 지도 직접 선택, 장소 검색, 장소 그룹, 상세, 뒤로가기, 내 기억 CRUD 흐름을 보존한다.
+- 울산 fallback 중심, 범위 안 브라우저 현재 위치 우선 정책, 기본/다크/자세히 지도 모드의 marker 일치를 유지한다.
+- 핵심 CTA는 위치 선택을 거쳐 기억 작성으로 이동한다. 일반 지도 클릭으로 작성을 시작하지 않으며 CTA의 위치 선택 중에만 지도를 눌러 핀을 옮긴다. 장소 검색, 장소 그룹, 상세, 뒤로가기, 내 기억 CRUD 흐름을 보존한다.
 - 긴 본문과 사진이 있는 detail/form/place sheet는 내부 스크롤이 가능하고 모든 action에 도달해야 한다.
 - 튜토리얼의 `data-tour`, GitHub Pages hash route, App Router 경로와 filter query 동기화를 함께 확인한다.
 
@@ -61,7 +61,7 @@ Playwright 캡처는 `test-results/screenshots/`에서 직접 확인한다. 최�
 - private/public 작성과 내 기억 수정·삭제
 - 모바일 safe area와 데스크톱 지도·콘텐츠 배치
 
-내 기억은 고정 사이드바 대신 전체 지도에서 시작하며 하단 기억 목록 토글로 아카이브를 엽니다. 목록 닫기·Escape의 초점 복귀, 지도로 돌아가기 링크, owner 필터·수정·삭제를 함께 검사합니다. 작성 장소를 고르는 동안에는 조각만 숨기고 지도·선택 핀을 유지하며 취소 후 복원합니다. 감정 접힘은 퇴장 애니메이션 동안 inert, 이후 hidden으로 전환합니다. 사진 선택 오류는 버튼 곁의 alert로 안내합니다.
+내 기억은 고정 사이드바 대신 전체 지도에서 시작하며 동일한 지도·탐색·내 기억 하단 메뉴를 유지하고 내 기억 탭을 다시 누르면 아카이브를 엽니다. 목록 닫기·Escape의 초점 복귀, 지도로 돌아가기 링크, owner 필터·수정·삭제를 함께 검사합니다. 작성 장소를 고르는 동안에는 조각만 숨기고 지도·선택 핀을 유지하며 취소 후 복원합니다. 감정 접힘은 퇴장 애니메이션 동안 inert, 이후 hidden으로 전환합니다. 사진 선택 오류는 버튼 곁의 alert로 안내합니다.
 
 ## 보고 방식
 
@@ -74,3 +74,5 @@ GitHub Pages 배포는 `redesign/yeoun-2`를 선택해 수동 실행합니다. �
 현재 표현은 graphite 바탕·공통 Noto Sans KR 고딕·산호색 행동 강조를 사용합니다. 사진의 비대칭은 유지하지만 텍스트 전용 감정 표지는 수평으로 읽습니다. 세부 토큰은 `DESIGN-DNA.md`와 `app/memory-atlas.css`를 따릅니다.
 
 팝업·모달은 `AtlasHeadingLabel`과 `app/atlas-collage.css`의 cut-paper 규칙을 공유합니다. 탐색의 자유로운 사진·메모 배치와 입력의 안정적인 scroll 구조를 구분하되 색·제목·닫기 타일은 일관되게 유지합니다.
+
+2026-10-22 사용자 변경: 지도 제공 범위(경도 129.17–129.46, 위도 35.44–35.66) 안에서만 카메라가 이동하며 확대 상한은 17입니다. 범위 밖 현재 위치는 실제 좌표를 유지하되 지도를 그 위치로 벗어나게 하지 않고 안내합니다. 기본/다크/자세히에 같은 제약을 적용하며 라인 데이터 로딩 실패 때의 raster fallback은 유지합니다.

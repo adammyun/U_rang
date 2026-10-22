@@ -40,7 +40,7 @@ function paths(features: Feature[], project: Project) {
 }
 
 /** Same-origin geographic data only. Never requests tiles or external APIs. */
-export default function UlsanUrbanLayers({ view, project }: { view: View; project: Project }) {
+export default function UlsanUrbanLayers({ view, project, unitsPerPixel }: { view: View; project: Project; unitsPerPixel: number }) {
   const [data, setData] = useState<UrbanData | null>(null);
   const [details, setDetails] = useState<{ key: string; features: Feature[] } | null>(null);
   const cache = useRef(new Map<string, Feature[]>());
@@ -55,10 +55,9 @@ export default function UlsanUrbanLayers({ view, project }: { view: View; projec
     return () => controller.abort();
   }, []);
 
-  const scale = 2 ** view.zoom;
   const center = project(view.center, 0);
-  const halfWidth = view.width / (2 * scale);
-  const halfHeight = view.height / (2 * scale);
+  const halfWidth = view.width * unitsPerPixel / 2;
+  const halfHeight = view.height * unitsPerPixel / 2;
   const files = (view.zoom >= 13 ? data?.tiles ?? [] : []).filter(tile => {
     const nw = project({ lng: tile.bounds[0], lat: tile.bounds[3] }, 0);
     const se = project({ lng: tile.bounds[2], lat: tile.bounds[1] }, 0);

@@ -491,7 +491,7 @@ export default function MemoryForm({
             {imageError && <p ref={imageErrorMessage} id={imageErrorId} className="form-error memory-images-error" role="alert">{imageError}</p>}
 
             {keptMedia.length + newImages.length > 0 ? (
-              <div className="memory-image-previews">
+              <div className="memory-image-previews" tabIndex={0} role="region" aria-label="첨부 사진 미리보기">
                 {keptMedia.map((media, index) => (
                   <figure key={media.id}>
                     <Image

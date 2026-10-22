@@ -46,11 +46,20 @@ test('감정 태그는 접히는 동안 애니메이션을 보이고 즉시 키�
   const tags = picker.locator('.atlas-emotion-tags');
   await toggle.click();
   await picker.getByRole('button', { name: '평온', exact: true }).click();
+  // Observe the 260ms exit in the browser itself. Separate automation round
+  // trips can outlive the animation under load even when the UI is correct.
+  const fold = picker.evaluate(el => new Promise(resolve => {
+    const observer = new MutationObserver(() => {
+      if (el.getAttribute('data-state') !== 'closing') return;
+      const group = el.querySelector('.atlas-emotion-tags')!;
+      const button = group.querySelector('button')!;
+      observer.disconnect();
+      resolve({ state: el.getAttribute('data-state'), inert: group.hasAttribute('inert'), hidden: group.getAttribute('aria-hidden'), animation: getComputedStyle(button).animationName });
+    });
+    observer.observe(el, { attributes: true, attributeFilter: ['data-state'] });
+  }));
   await toggle.click();
-  await expect(picker).toHaveAttribute('data-state', 'closing');
-  await expect(tags).toHaveAttribute('inert', '');
-  await expect(tags).toHaveAttribute('aria-hidden', 'true');
-  expect(await tags.locator('button').first().evaluate(el => getComputedStyle(el).animationName)).toBe('atlas-tag-fold');
+  expect(await fold).toEqual({ state: 'closing', inert: true, hidden: 'true', animation: 'atlas-tag-fold' });
   await expect(picker).toHaveAttribute('data-state', 'closed');
   await expect(tags).toBeHidden();
   await expect(page).toHaveURL(/emotion=peaceful/);

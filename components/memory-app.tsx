@@ -8,8 +8,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight,
-  Check,
-  Compass,
   Leaf,
   LoaderCircle,
   LogOut,
@@ -33,6 +31,8 @@ import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
 import AtlasAtmosphere from './memories/atlas-atmosphere';
 import AtlasIntro from './memories/atlas-intro';
+import AtlasNavigation from './memories/atlas-navigation';
+import AtlasLocationPicker from './memories/atlas-location-picker';
 import AtlasEmotionPicker from './memories/atlas-emotion-picker';
 import { YurangMark } from './ui/yurang-mark';
 import {
@@ -52,6 +52,7 @@ import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
   SEARCH_RESULT_ZOOM,
+  isInUlsanMap,
 } from '@/src/features/map/constants';
 import { logout } from '@/src/features/auth/api';
 import type {
@@ -131,10 +132,12 @@ export default function MemoryApp({
   isAuthenticated,
   initialFilters,
   naverMapsClientId,
+  initialExplore = false,
 }: {
   isAuthenticated: boolean;
   initialFilters: MemoryFilters;
   naverMapsClientId: string;
+  initialExplore?: boolean;
 }) {
   const router = useRouter();
   const mapRef = useRef<MapHandle | null>(null);
@@ -162,7 +165,7 @@ export default function MemoryApp({
   );
   const [area, setArea] = useState('울산광역시');
   const [currentLocation, setCurrentLocation] = useState<Point | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(initialExplore);
   const [placeListOpen, setPlaceListOpen] = useState(false);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
@@ -323,9 +326,8 @@ export default function MemoryApp({
         setPendingLocation(point);
         return;
       }
-      startCreate(point);
     },
-    [pendingLocation, startCreate],
+    [pendingLocation],
   );
 
   const selectMapMemory = useCallback(
@@ -388,7 +390,11 @@ export default function MemoryApp({
           };
           setCurrentLocation(point);
           mapRef.current?.flyTo(point);
-          setArea('내 주변');
+          if (isInUlsanMap(point)) setArea('내 주변');
+          else {
+            setArea('울산광역시');
+            toast.info('현재 위치는 울산 지도 범위 밖이에요. 지도 탐색은 울산 안에서 할 수 있어요.');
+          }
           resolve();
         },
         () => {
@@ -419,6 +425,7 @@ export default function MemoryApp({
   }
 
   function showExplore() {
+    setPendingLocation(null);
     setExpanded(true);
     setSelected(null);
     setSelectedPlace(null);
@@ -523,33 +530,7 @@ export default function MemoryApp({
         </section>
       )}
 
-      {pendingLocation && !draftLocation && (
-        <section
-          className="location-picker-card"
-          aria-label="기억을 남길 장소 선택"
-          aria-live="polite"
-        >
-          <div className="location-picker-copy">
-            <span className="location-picker-icon"><MapPin size={19} /></span>
-            <span>
-              <strong>기억이 머문 장소를 골라주세요</strong>
-              <small>지도를 눌러 선택 마커를 옮겨보세요. 장소를 고르는 동안 기억 조각은 잠시 숨겨요.</small>
-            </span>
-          </div>
-          <div className="location-picker-actions">
-            <button type="button" onClick={() => setPendingLocation(null)}>
-              취소
-            </button>
-            <button
-              type="button"
-              className="confirm"
-              onClick={() => startCreate(pendingLocation)}
-            >
-              <Check size={16} /> 이 위치 선택
-            </button>
-          </div>
-        </section>
-      )}
+      {pendingLocation && !draftLocation && <AtlasLocationPicker onCancel={() => setPendingLocation(null)} onConfirm={() => startCreate(pendingLocation)} />}
 
       <aside
         id="public-memory-list"
@@ -654,7 +635,7 @@ export default function MemoryApp({
       {!pendingLocation && (
         <div className="map-guide">
           <span className="guide-trace" />
-          지도를 클릭하거나 길게 눌러 위치를 선택하세요
+          기억 남기기로 장소를 골라 이야기를 남겨보세요
         </div>
       )}
       <div className="map-zoom">
@@ -668,20 +649,12 @@ export default function MemoryApp({
           <LocateFixed size={18} />
         </button>
       </div>
-      <nav className="spatial-nav" aria-label="지도 메뉴">
-        <button type="button" className={!expanded ? 'active' : ''} aria-current={!expanded ? 'page' : undefined} onClick={() => { setExpanded(false); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); setPlaceListOpen(false); }}><MapPin size={18} /> 지도</button>
-        <button type="button" className={expanded ? 'active' : ''} aria-expanded={expanded} onClick={showExplore}><Compass size={18} /> 탐색</button>
-        <button
-          className="primary memory-cta"
-          data-tour="create"
-          aria-label="기억을 남길 장소 선택하기"
-          aria-pressed={Boolean(pendingLocation)}
-          onClick={beginLocationSelection}
-        >
-          <Plus size={19} /> {pendingLocation ? '장소 선택 중' : '기억 남기기'}
-        </button>
-        <Link href={isAuthenticated ? '/my-map' : '/login?next=/my-map'} data-tour="my-memories"><UserRound size={18} /> {isAuthenticated ? '내 기억' : '로그인'}</Link>
-      </nav>
+      <AtlasNavigation
+        authenticated={isAuthenticated} expanded={expanded} selecting={Boolean(pendingLocation)}
+        onCreate={beginLocationSelection}
+        onMap={() => { setPendingLocation(null); setExpanded(false); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); setPlaceListOpen(false); }}
+        onExplore={showExplore}
+      />
 
       {draftLocation && (
         <MemoryForm

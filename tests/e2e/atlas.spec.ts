@@ -176,7 +176,7 @@ test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한�
   await expect(page.getByLabel('지도 메뉴')).toBeVisible();
 });
 
-test('라인 데이터 실패와 울산 밖 현재 위치에서는 raster 호환 지도를 유지한다', async ({ page, context }) => {
+test('라인 데이터 실패 시 raster를 유지하고 울산 밖 현재 위치는 지도 범위를 벗어나지 않는다', async ({ page, context }) => {
   await page.route('**/maps/ulsan-lines.geojson*', (route) => route.fulfill({ status: 404, body: '' }));
   await page.goto('./');
   await expect(page.locator('.raster-map > img').first()).toBeVisible();
@@ -187,9 +187,9 @@ test('라인 데이터 실패와 울산 밖 현재 위치에서는 raster 호환
   await page.reload();
   await expect(page.locator('.ulsan-line-map')).toBeVisible();
   await page.getByRole('button', { name: '현재 위치로 이동' }).click();
-  await expect(page.getByLabel('현재 위치', { exact: true })).toBeVisible();
-  await expect(page.locator('.ulsan-line-map')).toBeHidden();
-  await expect(page.locator('.raster-map > img').first()).toBeVisible();
+  await expect(page.getByText('현재 위치는 울산 지도 범위 밖이에요. 지도 탐색은 울산 안에서 할 수 있어요.')).toBeVisible();
+  await expect(page.locator('.ulsan-line-map')).toBeVisible();
+  await expect(page.locator('.raster-map > img')).toHaveCount(0);
 });
 
 test('높이가 낮은 화면에서도 조정의 마지막 선택과 적용 버튼이 겹치지 않는다', async ({ page }, info) => {

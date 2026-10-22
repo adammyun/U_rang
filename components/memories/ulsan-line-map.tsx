@@ -1,8 +1,11 @@
 'use client';
 
-import { useMemo, type CSSProperties } from 'react';
+import { useCallback, useMemo, type CSSProperties } from 'react';
 import type { Point } from '@/lib/types';
 import UlsanUrbanLayers from './ulsan-urban-layers';
+import { DEFAULT_MAP_CENTER } from '@/src/features/map/constants';
+
+const DRAWING_SCALE = 2 ** 12;
 
 export type UlsanLineData = {
   bbox: [number, number, number, number];
@@ -25,28 +28,35 @@ export default function UlsanLineMap({ data, view, project, obstacles = [], rese
   obstacles?: Point[];
   reserveIntroSpace?: boolean;
 }) {
+  // Use city-local coordinates with a sensible viewBox size. WebKit stops
+  // painting paths when a global zoom-0 viewBox becomes a tiny fraction of 1.
+  // Only drawing units change: MapLibre and memory geographic anchors do not.
+  const drawingProject = useCallback((point: Point, zoom: number) => {
+    const absolute = project(point, zoom);
+    const origin = project(DEFAULT_MAP_CENTER, zoom);
+    return { x: (absolute.x - origin.x) * DRAWING_SCALE, y: (absolute.y - origin.y) * DRAWING_SCALE };
+  }, [project]);
   const paths = useMemo(() => {
     const result = { road: '', river: '', coast: '', park: '', boundary: '', cityBoundary: '' };
     for (const feature of data.features) {
       const path = feature.geometry.coordinates.map(([lng, lat], index) => {
-        const p = project({ lng, lat }, 0);
+        const p = drawingProject({ lng, lat }, 0);
         return `${index ? 'L' : 'M'}${p.x.toFixed(8)},${p.y.toFixed(8)}`;
       }).join('');
       result[feature.properties.kind] += path + (feature.properties.kind === 'park' ? 'Z' : '');
     }
     return result;
-  }, [data, project]);
+  }, [data, drawingProject]);
   const areas = useMemo(() => (data.areas ?? []).map((area) => ({
     name: area.name,
     path: area.coordinates.map((ring) => ring.map(([lng, lat], i) => {
-      const p = project({ lng, lat }, 0);
+      const p = drawingProject({ lng, lat }, 0);
       return `${i ? 'L' : 'M'}${p.x.toFixed(8)},${p.y.toFixed(8)}`;
     }).join('') + 'Z').join(''),
-  })), [data, project]);
-  // Convert screen-pixel stroke widths into world units. Safari can overpaint
-  // non-scaling strokes when this geographic viewBox is much smaller than 1.
-  const scale = 2 ** view.zoom;
-  const center = project(view.center, 0);
+  })), [data, drawingProject]);
+  // Keep the existing Safari-safe screen-pixel stroke correction in local units.
+  const scale = 2 ** view.zoom / DRAWING_SCALE;
+  const center = drawingProject(view.center, 0);
   const left = center.x - view.width / (2 * scale);
   const top = center.y - view.height / (2 * scale);
   const labels = [
@@ -56,10 +66,10 @@ export default function UlsanLineMap({ data, view, project, obstacles = [], rese
     { name: '울산대공원', lng: 129.294, lat: 35.526, kind: 'park', minZoom: 11.5 },
   ];
   const occupied: Array<{ x: number; y: number; width: number }> = [];
-  const memoryPoints = obstacles.map((p) => project(p, 0));
+  const memoryPoints = obstacles.map((p) => drawingProject(p, 0));
   const placed = labels.flatMap((label) => {
     if (view.zoom < label.minZoom) return [];
-    const point = project(label, 0);
+    const point = drawingProject(label, 0);
     const fontSize = label.kind === 'district' ? 16 : label.kind === 'city' ? 14 : 11;
     const width = label.name.length * fontSize + 12;
     const x = (point.x - left) * scale;
@@ -79,7 +89,7 @@ export default function UlsanLineMap({ data, view, project, obstacles = [], rese
   });
   return <svg className="ulsan-line-map" style={{ '--ulsan-stroke-unit': 1 / scale } as CSSProperties} viewBox={`${left} ${top} ${view.width / scale} ${view.height / scale}`} preserveAspectRatio="none" role="img" aria-label="울산 주요 도로와 하천의 라인 지도">
     {areas.map((area, index) => <path key={area.name} className={`ulsan-district-area district-tone-${index % 3}`} d={area.path} data-district={area.name} fillRule="evenodd" />)}
-    <UlsanUrbanLayers view={view} project={project} />
+    <UlsanUrbanLayers view={view} project={drawingProject} unitsPerPixel={1 / scale} />
     <path className="ulsan-line-parks" d={paths.park} />
     <path className="ulsan-line-roads" d={paths.road} />
     <path className="ulsan-line-rivers" d={paths.river} style={{ strokeWidth: Math.min(12, Math.max(2, 2 ** (view.zoom - 10))) / scale }} />

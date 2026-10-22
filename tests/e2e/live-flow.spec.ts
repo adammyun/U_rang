@@ -20,7 +20,7 @@ test('실제 공개 기억을 미리보고 검색·상세·탐색으로 이동�
   const browserErrors: string[] = [];
   page.on('pageerror', (error) => browserErrors.push(error.message));
   await page.goto('./');
-  const map = page.getByLabel('기억 지도. 지점을 클릭하거나 길게 눌러 기억을 남기세요.');
+  const map = page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.');
   await expect(map).toBeVisible();
   await expect(page.locator('.raster-memory-marker').first()).toBeVisible();
   const lineMap = page.locator('.ulsan-line-map');

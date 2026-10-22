@@ -79,7 +79,7 @@ const steps: TourStep[] = [
     eyebrow: 'LEAVE A MEMORY',
     title: '나의 기억을 지도에 남겨보세요',
     description:
-      '기억 남기기를 누르면 먼저 마커로 장소를 고를 수 있어요. 지도를 직접 누르면 그 위치에서 바로 기록을 시작합니다.',
+      '기억 남기기를 누른 다음 지도를 눌러 장소를 골라주세요. 이 위치 선택을 누르면 기록을 시작합니다.',
     selectors: ['[data-tour="create"]'],
   },
   {

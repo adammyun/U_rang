@@ -104,7 +104,7 @@ export function SpatialMemoryDetail({
         <div className={`spatial-detail-hero ${memory.media.length ? '' : 'without-photo'}`}>
           {memory.media[0] ? <><Image src={memory.media[0].url} alt={`${memory.title}의 기억 사진 1`} width={900} height={650} unoptimized /><span className="atlas-photo-caption">{memory.location_name} · {formatDate(memory.memory_date)}</span></> : <span className="atlas-no-photo"><strong>{emotions[memory.emotion].label}</strong><span>{memory.location_name}</span></span>}
         </div>
-        {memory.media.length > 1 && <div className="atlas-scene-scraps" aria-hidden="true">{memory.media.slice(1,3).map((media) => <Image key={media.id} src={media.url} alt="" width={300} height={250} unoptimized />)}</div>}
+        {memory.media.length > 1 && <div className="spatial-detail-gallery" aria-label="기억 사진">{memory.media.slice(1).map((media, index) => <Image key={media.id} src={media.url} alt={`${memory.title}의 기억 사진 ${index + 2}`} width={700} height={500} unoptimized />)}</div>}
         </div>
         <article className="spatial-detail-content">
 
@@ -115,7 +115,7 @@ export function SpatialMemoryDetail({
           <p className="spatial-detail-place"><MapPin size={14} /> {memory.location_name}</p>
           <div className="spatial-detail-date"><span />{formatDate(memory.memory_date)}</div>
           <p className="spatial-detail-body">{memory.content}</p>
-          {memory.media.length > 1 && <div className="spatial-detail-gallery" aria-label="기억 사진">{memory.media.slice(1).map((media, index) => <Image key={media.id} src={media.url} alt={`${memory.title}의 기억 사진 ${index + 2}`} width={700} height={500} unoptimized />)}</div>}
+
           <div className="spatial-detail-tools">
             <button type="button" onClick={() => leave(onLocate)}><MapPin size={16} /> 지도에서 보기</button>
             <button type="button" onClick={onOpenPanorama}><Eye size={16} /> 거리뷰</button>
