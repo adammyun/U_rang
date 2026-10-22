@@ -46,8 +46,8 @@ test('실제 공개 기억을 미리보고 검색·상세·탐색으로 이동�
   await capture(page, 'live-detail', testInfo.project.name);
   await detail.getByRole('button', { name: '다른 기억 읽기' }).click();
   await expect(page.getByLabel('장소의 기억 목록')).toBeVisible();
-  await page.getByRole('button', { name: '장소 기억 닫기' }).click();
-  await page.getByRole('button', { name: '미리보기 닫기' }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByLabel('장소의 기억 미리보기')).toBeHidden();
 
   await page.getByRole('combobox', { name: '장소 이름' }).fill('태화강');
   await expect(page.getByRole('region', { name: '장소 검색 결과' })).toBeVisible();

@@ -43,6 +43,10 @@ test('지도·탐색·내 기억의 하단 메뉴가 같은 위치에 남고 일
   await capture(page, 'explore', info.project.name);
   await nav.getByRole('link', { name: '내 기억', exact: true }).click();
   await expect(page).toHaveURL(/#\/my-map/);
+  // The hash changes before the owner route commits. Wait for its specific
+  // navigation control so a detached public nav cannot supply a null box.
+  await expect(nav.getByRole('button', { name: '내 기억 목록 펼치기' })).toBeVisible();
+  await expect(nav).toBeInViewport();
   expect((await labels()).map(t => t.trim())).toEqual(initialLabels);
   expect((await nav.boundingBox())!.y).toBe(initial.y);
   await map.click({ position: { x: 220, y: 360 }, force: true });

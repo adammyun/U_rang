@@ -25,7 +25,6 @@ import type { MapMode } from '@/src/features/map/appearance';
 import MemoryForm from './memories/memory-form';
 import MemoryMap, { type MapHandle } from './memories/map';
 import PanoramaViewer from './memories/panorama-viewer';
-import PlaceMemorySheet from './memories/place-memory-sheet';
 import { SpatialMemoryDetail, SpatialPlacePreview } from './memories/spatial-panels';
 import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
@@ -166,7 +165,7 @@ export default function MemoryApp({
   const [area, setArea] = useState('울산광역시');
   const [currentLocation, setCurrentLocation] = useState<Point | null>(null);
   const [expanded, setExpanded] = useState(initialExplore);
-  const [placeListOpen, setPlaceListOpen] = useState(false);
+  const [placeVisit, setPlaceVisit] = useState(0);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
   const [mapMode, setMapMode] = useState<MapMode>('calm');
@@ -232,7 +231,6 @@ export default function MemoryApp({
     setSelected(null);
     setPlaceAnchor(null);
     setPlaceGroup(null);
-    setPlaceListOpen(false);
     setFilters(next);
     replaceFilterUrl(next);
   }
@@ -244,8 +242,9 @@ export default function MemoryApp({
     setSelectedPlace(null);
     setDraftLocation(null);
     setPendingLocation(null);
+    setOpeningMemoryId(null);
+    setPlaceVisit(visit => visit + 1);
     setPlaceAnchor(memory);
-    setPlaceListOpen(false);
     setExpanded(false);
     setPlaceGroup(null);
     setPlaceError(false);
@@ -295,7 +294,6 @@ export default function MemoryApp({
       setSelectedPlace(null);
       setPlaceAnchor(null);
       setPlaceGroup(null);
-      setPlaceListOpen(false);
       setPendingLocation(null);
       setDraftLocation({ point, locationName });
     },
@@ -313,11 +311,18 @@ export default function MemoryApp({
     setSelectedPlace(null);
     setPlaceAnchor(null);
     setPlaceGroup(null);
-    setPlaceListOpen(false);
     setDraftLocation(null);
     setExpanded(false);
     setPendingLocation(mapRef.current?.center() ?? DEFAULT_MAP_CENTER);
   }, [isAuthenticated, router]);
+
+  const dismissPlace = useCallback(() => {
+    nearbyRequest.current?.abort();
+    detailRequest.current?.abort();
+    setOpeningMemoryId(null);
+    setPlaceAnchor(null);
+    setPlaceGroup(null);
+  }, []);
 
   const selectMapLocation = useCallback(
     (point: Point) => {
@@ -326,8 +331,9 @@ export default function MemoryApp({
         setPendingLocation(point);
         return;
       }
+      dismissPlace();
     },
-    [pendingLocation],
+    [pendingLocation, dismissPlace],
   );
 
   const selectMapMemory = useCallback(
@@ -412,7 +418,6 @@ export default function MemoryApp({
     setSelected(null);
     setPlaceAnchor(null);
     setPlaceGroup(null);
-    setPlaceListOpen(false);
     setDraftLocation(null);
     setPendingLocation(null);
     setSelectedPlace(place);
@@ -430,7 +435,6 @@ export default function MemoryApp({
     setSelected(null);
     setSelectedPlace(null);
     setPlaceAnchor(null);
-    setPlaceListOpen(false);
   }
 
   return (
@@ -652,7 +656,7 @@ export default function MemoryApp({
       <AtlasNavigation
         authenticated={isAuthenticated} expanded={expanded} selecting={Boolean(pendingLocation)}
         onCreate={beginLocationSelection}
-        onMap={() => { setPendingLocation(null); setExpanded(false); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); setPlaceListOpen(false); }}
+        onMap={() => { setPendingLocation(null); setExpanded(false); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); }}
         onExplore={showExplore}
       />
 
@@ -677,26 +681,25 @@ export default function MemoryApp({
           onOpenPanorama={() =>
             setPanoramaTarget(memoryPanoramaTarget(selected))
           }
-          onBack={() => { setSelected(null); setPlaceListOpen(false); }}
-          onOtherMemories={placeAnchor ? () => { setSelected(null); setPlaceListOpen(true); } : undefined}
+          onBack={() => { setSelected(null); }}
+          onOtherMemories={placeAnchor ? () => setSelected(null) : undefined}
           onClose={() => {
             setSelected(null);
             setPlaceAnchor(null);
             setPlaceGroup(null);
-            setPlaceListOpen(false);
           }}
           onLocate={() => {
             mapRef.current?.flyTo(selected);
             setSelected(null);
             setPlaceAnchor(null);
             setPlaceGroup(null);
-            setPlaceListOpen(false);
           }}
         />
       )}
 
-      {placeAnchor && !selected && !placeListOpen && (
+      {placeAnchor && !selected && (
         <SpatialPlacePreview
+          key={`${placeAnchor.id}:${placeVisit}`}
           anchor={placeAnchor}
           group={placeGroup}
           loading={placeLoading}
@@ -704,47 +707,13 @@ export default function MemoryApp({
           openingMemoryId={openingMemoryId}
           onRetry={() => openPlace(placeAnchor)}
           onOpenMemory={(id) => void openMemoryFromPlace(id)}
-          onOpenPlace={() => setPlaceListOpen(true)}
-          onClose={() => {
-            nearbyRequest.current?.abort();
-            setPlaceAnchor(null);
-            setPlaceGroup(null);
-          }}
-        />
-      )}
-
-      {placeAnchor && !selected && placeListOpen && (
-        <PlaceMemorySheet
-          anchor={placeAnchor}
-          group={placeGroup}
-          loading={placeLoading}
-          error={placeError}
-          openingMemoryId={openingMemoryId}
-          onRetry={() => openPlace(placeAnchor)}
-          onOpenPanorama={() =>
-            setPanoramaTarget(
-              memoryPanoramaTarget(
-                placeAnchor,
-                placeGroup?.placeName || placeAnchor.location_name,
-              ),
-            )
-          }
-          onOpenMemory={(id) => void openMemoryFromPlace(id)}
-          onClose={() => {
-            setPlaceListOpen(false);
-          }}
+          onClose={dismissPlace}
           onLocate={() => {
-            const center = placeGroup
-              ? {
-                  lng: placeGroup.center.longitude,
-                  lat: placeGroup.center.latitude,
-                }
-              : placeAnchor;
+            const center = placeGroup ? { lng: placeGroup.center.longitude, lat: placeGroup.center.latitude } : placeAnchor;
             mapRef.current?.flyTo(center);
-            setPlaceAnchor(null);
-            setPlaceGroup(null);
-            setPlaceListOpen(false);
+            dismissPlace();
           }}
+          onOpenPanorama={() => setPanoramaTarget(memoryPanoramaTarget(placeAnchor, placeGroup?.placeName || placeAnchor.location_name))}
         />
       )}
 

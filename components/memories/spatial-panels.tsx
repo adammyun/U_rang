@@ -4,49 +4,10 @@ import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
-import { useEffect, useRef, useState, type KeyboardEvent, type CSSProperties } from 'react';
-import { emotions, formatDate, type Memory, type PlaceMemoryGroup } from '@/lib/types';
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type CSSProperties } from 'react';
+import { emotions, formatDate, type Memory } from '@/lib/types';
 
-export function SpatialPlacePreview({
-  anchor, group, loading, error, openingMemoryId, onClose, onOpenMemory,
-  onOpenPlace, onRetry,
-}: {
-  anchor: Memory;
-  group: PlaceMemoryGroup | null;
-  loading: boolean;
-  error: boolean;
-  openingMemoryId: string | null;
-  onClose: () => void;
-  onOpenMemory: (id: string) => void;
-  onOpenPlace: () => void;
-  onRetry: () => void;
-}) {
-  const first = group?.memories.find((item) => item.id === anchor.id) ?? group?.memories[0];
-  const title = first?.title ?? anchor.title;
-  const preview = first?.contentPreview ?? anchor.content;
-  const photo = first?.firstImageUrl ?? anchor.media[0]?.url;
-  const date = first?.memoryDate ?? anchor.memory_date;
-  const emotion = first?.emotion ?? anchor.emotion;
-  const count = group?.memoryCount ?? 1;
-  return (
-    <aside className="spatial-context spatial-surface atlas-contact-sheet" aria-label="장소의 기억 미리보기" style={{ '--scene-color': emotions[emotion].color } as CSSProperties}>
-      <span className="spatial-context-handle" aria-hidden="true" />
-      <div className="spatial-context-topline">
-
-        <button className="spatial-round-close" type="button" onClick={onClose} aria-label="미리보기 닫기"><X size={16} /></button>
-      </div>
-      <div className="spatial-context-location"><MapPin size={17} /><strong>{group?.placeName || anchor.location_name}</strong><small>기억 {count}개</small></div>
-      <button className={`spatial-context-story ${photo ? '' : 'without-photo'}`} type="button" onClick={() => onOpenMemory(first?.id ?? anchor.id)} disabled={Boolean(openingMemoryId)} aria-label="선택한 기억 자세히 읽기">
-        {photo && <Image src={photo} alt={`${title}의 기억 사진`} width={120} height={112} unoptimized />}
-        <span className="spatial-context-copy"><strong>{title}</strong><small>{formatDate(date)} · {emotions[emotion].label}</small><span>{preview}</span></span>
-        <ArrowRight size={16} aria-hidden="true" />
-      </button>
-      {error && <p className="spatial-context-status">주변 기억을 불러오지 못했어요. <button type="button" onClick={onRetry}>다시 시도</button></p>}
-      {loading && <p className="spatial-context-status">주변의 기억을 찾고 있어요…</p>}
-      <button className="spatial-context-all" type="button" onClick={onOpenPlace} aria-label="이 장소의 다른 기억 보기"><span>{count > 1 ? `이곳의 이야기 ${count}편` : '이곳의 이야기'}</span> <ArrowRight size={14} /></button>
-    </aside>
-  );
-}
+export { default as SpatialPlacePreview } from './place-note-board';
 
 export function SpatialMemoryDetail({
   memory, onClose, onBack, onOtherMemories, onLocate, onOpenPanorama,
@@ -72,7 +33,7 @@ export function SpatialMemoryDetail({
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [leaving, setLeaving] = useState(false);
   useEffect(() => () => { if (exitTimer.current) clearTimeout(exitTimer.current); }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     heading.current?.focus({ preventScroll: true });
     return () => { if (previous?.isConnected) previous.focus({ preventScroll: true }); };

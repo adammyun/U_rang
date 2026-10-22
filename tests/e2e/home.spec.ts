@@ -47,9 +47,8 @@ test('지도 조정과 장소 기억 열람이 동작한다', async ({ page }) =
   await expect(marker).toBeVisible({ timeout: 20_000 });
   await marker.click();
   await expect(page.getByLabel('장소의 기억 미리보기')).toBeVisible();
-  await page.getByRole('button', { name: '이 장소의 다른 기억 보기' }).click();
   await expect(page.getByLabel('장소의 기억 목록')).toBeVisible();
-  await page.getByRole('button', { name: '장소 기억 닫기' }).click();
+  await page.keyboard.press('Escape');
   await expect(page.getByLabel('장소의 기억 목록')).toBeHidden();
-  await expect(page.getByLabel('장소의 기억 미리보기')).toBeVisible();
+  await expect(page.getByLabel('장소의 기억 미리보기')).toBeHidden();
 });

@@ -67,7 +67,7 @@ const steps: TourStep[] = [
     eyebrow: 'A PLACE, MANY STORIES',
     title: '숫자가 있는 흔적에는 여러 이야기가 겹쳐 있어요',
     description:
-      '가까이 놓인 기억을 한데 모아 보여줘요. 서로 떨어진 장소는 확대해서, 같은 장소의 기억은 미리보기에서 만나보세요.',
+      '가까이 놓인 기억을 한데 모아 보여줘요. 같은 장소를 누르면 포스트잇으로 펼쳐집니다. 빈 지도를 누르면 다시 접혀요.',
     selectors: [
       '.atlas-stamp[data-memory-count]:not([data-memory-count="1"])',
       '.raster-memory-marker:not(:empty)',
