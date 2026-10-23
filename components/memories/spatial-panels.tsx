@@ -62,10 +62,10 @@ export function SpatialMemoryDetail({
       </header>
       <div className="spatial-detail-scroll" tabIndex={0} aria-label="기억 상세 내용">
         <div className="atlas-scene-photo-stack">
-        <div className={`spatial-detail-hero ${memory.media.length ? '' : 'without-photo'}`}>
+        <div className={`spatial-detail-hero ${memory.media.length ? 'atlas-taped-photo' : 'without-photo'}`}>
           {memory.media[0] ? <><Image src={memory.media[0].url} alt={`${memory.title}의 기억 사진 1`} width={900} height={650} unoptimized /><span className="atlas-photo-caption">{memory.location_name} · {formatDate(memory.memory_date)}</span></> : <span className="atlas-no-photo"><strong>{emotions[memory.emotion].label}</strong><span>{memory.location_name}</span></span>}
         </div>
-        {memory.media.length > 1 && <div className="spatial-detail-gallery" aria-label="기억 사진">{memory.media.slice(1).map((media, index) => <Image key={media.id} src={media.url} alt={`${memory.title}의 기억 사진 ${index + 2}`} width={700} height={500} unoptimized />)}</div>}
+        {memory.media.length > 1 && <div className="spatial-detail-gallery" aria-label="기억 사진">{memory.media.slice(1).map((media, index) => <figure key={media.id} className="atlas-taped-photo"><Image src={media.url} alt={`${memory.title}의 기억 사진 ${index + 2}`} width={700} height={500} unoptimized /></figure>)}</div>}
         </div>
         <article className="spatial-detail-content">
 

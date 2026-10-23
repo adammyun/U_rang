@@ -64,6 +64,7 @@ test('포스트잇을 직접 읽고 뒤로 돌아오며 스크롤·거리뷰·�
   await last.click();
   const detail=page.getByRole('dialog',{name:'기억 상세'});
   await expect(detail.getByRole('heading',{level:2})).toHaveText(title);
+  await capture(page,'detail',info.project.name);
   await detail.getByRole('button',{name:'뒤로가기'}).click();
   await expect(board).toBeVisible();
   await expect(board.locator('.atlas-place-note')).toHaveCount(5);
