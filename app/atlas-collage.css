@@ -138,6 +138,16 @@ body:has(.memory-atlas) :is(.close-button,.spatial-round-close):active,
   margin-top: -4px; padding: 28px 30px; background: var(--atlas-cutout);
   box-shadow: var(--atlas-paper-shadow); border-left: 2px solid #6f808255;
 }
+/* Tape sits across the paper edge; it never tilts copy or intercepts input. */
+.atlas.memory-atlas .spatial-detail-content::before,
+.atlas-place-note-open::after {
+  content: ''; display: block; position: absolute; z-index: 2;
+  top: -9px; left: 35%; width: 76px; max-width: 38%; height: 20px;
+  background: var(--atlas-tape); border: 1px solid #b4c0c226;
+  box-shadow: 0 1px 2px #080d1026; transform: rotate(2deg);
+  pointer-events: none;
+}
+.atlas-place-note-open::after { transform: rotate(calc(var(--note-tilt) - 5deg)); }
 .atlas.memory-atlas .spatial-detail-body { font-size: 16px; line-height: 2; }
 .atlas.memory-atlas .spatial-detail-place { margin-top: 18px; }
 .atlas.memory-atlas .spatial-detail-tools button { background: var(--atlas-surface); border: 0; padding: 8px 12px; }
