@@ -1,3 +1,4 @@
+import { demoJournalContent } from '@/src/features/memories/demo-journals';
 import { additionalDemoRows, demoMemoryPhotos, demoMediaId, demoPhotoAssets } from '@/src/features/memories/demo-catalog';
 import { env } from 'cloudflare:workers';
 import type { ChatGPTUser } from '@/app/chatgpt-auth';
@@ -52,18 +53,18 @@ export type StoredUpload = {
 
 const seedRows = [
   ...additionalDemoRows,
-  ['20000000-0000-4000-8000-000000000001', 'demo-user-1', '시험이 끝난 뒤의 밤 산책', '친구와 시험이 끝난 뒤 늦은 시간까지 강바람을 맞으며 걸었던 가상의 기억.', '태화강 국가정원', '2019-06-21', 'peaceful', 'public', 1, 'approximate', 35.5532, 129.2924],
-  ['20000000-0000-4000-8000-000000000002', 'demo-user-2', '파도 소리가 오래 남은 오후', '대왕암공원 산책길 끝에서 잠시 멈춰 바다를 바라보았던 가상의 기억.', '대왕암공원', '2021-10-16', 'meaningful', 'public', 0, 'exact', 35.4926, 129.4391],
-  ['20000000-0000-4000-8000-000000000005', 'demo-user-3', '가족과 처음 찾은 정원', '가족과 처음 국가정원을 둘러보며 사진을 여러 장 남겼던 가상의 기억.', '태화강 국가정원', '2020-10-04', 'happy', 'public', 0, 'exact', 35.5502, 129.2903],
-  ['20000000-0000-4000-8000-000000000006', 'demo-user-1', '혼자 달린 자전거 길', '복잡한 생각을 정리하려고 강변을 천천히 달렸던 가상의 기억.', '태화강 국가정원 산책로', '2022-08-27', 'lonely', 'public', 1, 'exact', 35.5503, 129.2897],
-  ['20000000-0000-4000-8000-000000000007', 'demo-user-2', '처음 마주한 봄 꽃밭', '햇빛 아래 펼쳐진 꽃밭의 색이 유난히 선명했던 가상의 순간.', '태화강 국가정원', '2023-04-09', 'excited', 'public', 0, 'exact', 35.5498, 129.2905],
-  ['20000000-0000-4000-8000-000000000008', 'demo-user-3', '오래된 친구와 다시 만난 곳', '오랫동안 연락하지 못했던 친구와 다시 만나 밀린 이야기를 나눈 가상의 기억.', '태화강 국가정원 산책로', '2025-09-13', 'love', 'public', 1, 'exact', 35.5497, 129.2896],
-  ['20000000-0000-4000-8000-000000000009', 'demo-user-1', '비가 그친 뒤의 잔디 냄새', '울산대공원을 천천히 걷다가 비가 그친 뒤의 공기를 기억해 둔 가상의 이야기.', '울산대공원', '2018-07-14', 'nostalgic', 'public', 0, 'exact', 35.5317, 129.2935],
-  ['20000000-0000-4000-8000-000000000010', 'demo-user-2', '골목의 작은 불빛', '성남동 골목을 지나며 가게 불빛이 하나씩 켜지는 모습을 바라본 가상의 기억.', '성남동 문화의거리', null, 'meaningful', 'public', 1, 'approximate', 35.5558, 129.3193],
-  ['20000000-0000-4000-8000-000000000011', 'demo-user-3', '수업이 끝난 늦은 오후', '울산대학교 주변을 걸으며 다음 학기를 천천히 상상해 본 가상의 기억.', '울산대학교 주변', '2024-03-22', 'meaningful', 'public', 0, 'exact', 35.5438, 129.2592],
-  ['20000000-0000-4000-8000-000000000012', 'demo-user-1', '여름 저녁의 모래사장', '일산해수욕장에서 해가 질 때까지 파도 소리를 들었던 가상의 기억.', '일산해수욕장', '2025-08-02', 'happy', 'public', 1, 'exact', 35.4975, 129.4283],
-  ['20000000-0000-4000-8000-000000000015', 'demo-user-2', '햇살이 따뜻했던 공원 벤치', '새 학기를 앞두고 울산대공원 벤치에 앉아 작은 계획을 적어 보았던 가상의 기억.', '울산대공원', '2026-03-07', 'happy', 'public', 1, 'exact', 35.5322, 129.2941],
-  ['20000000-0000-4000-8000-000000000099', 'local_seedy', '나만 간직한 골목의 저녁', '공개 지도에는 나타나지 않는 로컬 시연용 가상 비공개 기억.', '울산 주택가 골목', '2022-11-03', 'nostalgic', 'private', 0, 'exact', 35.5412, 129.3051],
+  ['20000000-0000-4000-8000-000000000001', 'demo-user-1', '시험이 끝난 뒤의 밤 산책', demoJournalContent('20000000-0000-4000-8000-000000000001'), '태화강 국가정원', '2019-06-21', 'peaceful', 'public', 1, 'approximate', 35.5532, 129.2924],
+  ['20000000-0000-4000-8000-000000000002', 'demo-user-2', '파도 소리가 오래 남은 오후', demoJournalContent('20000000-0000-4000-8000-000000000002'), '대왕암공원', '2021-10-16', 'meaningful', 'public', 0, 'exact', 35.4926, 129.4391],
+  ['20000000-0000-4000-8000-000000000005', 'demo-user-3', '가족과 처음 찾은 정원', demoJournalContent('20000000-0000-4000-8000-000000000005'), '태화강 국가정원', '2020-10-04', 'happy', 'public', 0, 'exact', 35.5502, 129.2903],
+  ['20000000-0000-4000-8000-000000000006', 'demo-user-1', '혼자 달린 자전거 길', demoJournalContent('20000000-0000-4000-8000-000000000006'), '태화강 국가정원 산책로', '2022-08-27', 'lonely', 'public', 1, 'exact', 35.5503, 129.2897],
+  ['20000000-0000-4000-8000-000000000007', 'demo-user-2', '처음 마주한 봄 꽃밭', demoJournalContent('20000000-0000-4000-8000-000000000007'), '태화강 국가정원', '2023-04-09', 'excited', 'public', 0, 'exact', 35.5498, 129.2905],
+  ['20000000-0000-4000-8000-000000000008', 'demo-user-3', '오래된 친구와 다시 만난 곳', demoJournalContent('20000000-0000-4000-8000-000000000008'), '태화강 국가정원 산책로', '2025-09-13', 'love', 'public', 1, 'exact', 35.5497, 129.2896],
+  ['20000000-0000-4000-8000-000000000009', 'demo-user-1', '비가 그친 뒤의 잔디 냄새', demoJournalContent('20000000-0000-4000-8000-000000000009'), '울산대공원', '2018-07-14', 'nostalgic', 'public', 0, 'exact', 35.5317, 129.2935],
+  ['20000000-0000-4000-8000-000000000010', 'demo-user-2', '골목의 작은 불빛', demoJournalContent('20000000-0000-4000-8000-000000000010'), '성남동 문화의거리', null, 'meaningful', 'public', 1, 'approximate', 35.5558, 129.3193],
+  ['20000000-0000-4000-8000-000000000011', 'demo-user-3', '수업이 끝난 늦은 오후', demoJournalContent('20000000-0000-4000-8000-000000000011'), '울산대학교 주변', '2024-03-22', 'meaningful', 'public', 0, 'exact', 35.5438, 129.2592],
+  ['20000000-0000-4000-8000-000000000012', 'demo-user-1', '여름 저녁의 모래사장', demoJournalContent('20000000-0000-4000-8000-000000000012'), '일산해수욕장', '2025-08-02', 'happy', 'public', 1, 'exact', 35.4975, 129.4283],
+  ['20000000-0000-4000-8000-000000000015', 'demo-user-2', '햇살이 따뜻했던 공원 벤치', demoJournalContent('20000000-0000-4000-8000-000000000015'), '울산대공원', '2026-03-07', 'happy', 'public', 1, 'exact', 35.5322, 129.2941],
+  ['20000000-0000-4000-8000-000000000099', 'local_seedy', '나만 간직한 골목의 저녁', demoJournalContent('20000000-0000-4000-8000-000000000099'), '울산 주택가 골목', '2022-11-03', 'nostalgic', 'private', 0, 'exact', 35.5412, 129.3051],
 ] as const;
 
 let seedPromise: Promise<void> | null = null;
@@ -87,9 +88,10 @@ export function ensureSeedData() {
 async function seedDemoRows() {
   const expectedIds = Object.entries(demoMemoryPhotos).flatMap(([memoryId, photos]) => photos.map((_,index) => demoMediaId(memoryId,index)));
   const existing = await database()
-    .prepare(`select count(*) as count from memory_media where id in (${expectedIds.map(() => '?').join(',')})`)
-    .bind(...expectedIds).first<{ count: number }>();
-  if (existing?.count === expectedIds.length) return;
+    .prepare(`select (select count(*) from memory_media where id in (${expectedIds.map(() => '?').join(',')})) as count,
+      (select content from memories where id = ?) as journal`)
+    .bind(...expectedIds, '20000000-0000-4000-8000-000000000031').first<{ count: number; journal: string }>();
+  if (existing?.count === expectedIds.length && existing.journal === demoJournalContent('20000000-0000-4000-8000-000000000031')) return;
   const created = '2026-09-10T00:00:00.000Z';
   await database().batch(
     seedRows.map((row) => {
@@ -106,6 +108,11 @@ async function seedDemoRows() {
           emotion, visibility, anonymous ? 1 : 0, precision, lat, lng, publicLat, publicLng, created, created);
     }),
   );
+  // Refresh reserved examples only. Records edited since creation retain their content.
+  await database().batch(seedRows.map(([id, userId, , content]) => database()
+    .prepare(`update memories set content = ? where id = ? and user_id = ?
+      and created_at = ? and updated_at = created_at and content <> ?`)
+    .bind(content, id, userId, created, content)));
   await database().batch(Object.entries(demoMemoryPhotos).flatMap(([memoryId, photos]) => photos.map((asset,index) => database()
     .prepare(`insert or ignore into memory_media (id,memory_id,storage_key,media_type,mime_type,file_size,sort_order,created_at) values (?,?,?,'image',?,0,?,?) on conflict(id) do update set storage_key=excluded.storage_key where memory_media.memory_id=excluded.memory_id and memory_media.storage_key like 'demo/%'`)
     .bind(demoMediaId(memoryId,index),memoryId,`demo/${demoMediaId(memoryId,index)}/${asset}`,asset.endsWith('.png') ? 'image/png' : 'image/jpeg',index,created))));

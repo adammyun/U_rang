@@ -161,7 +161,7 @@ export default function DevTools({
             <MapPin size={20} />
             <div>
               <h2>울산 시연 장소</h2>
-              <p>실제 장소명과 가상의 기억으로 준비된 확인 지점입니다. 사진 출처는 각 상세 보기에서 확인할 수 있습니다.</p>
+              <p>장소별 기억과 사진, 지도 탐색을 확인할 수 있는 지점입니다. 사진 출처는 각 상세 보기에서 확인할 수 있습니다.</p>
             </div>
           </div>
           <ul className="dev-place-list">

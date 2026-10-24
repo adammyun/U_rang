@@ -1,5 +1,6 @@
 import { mkdir } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
+import { demoJournalContent } from '../../src/features/memories/demo-journals';
 
 test.beforeEach(async ({page})=>{
   await page.addInitScript(()=>localStorage.setItem('yeoun_2:onboarding:v1',JSON.stringify({version:1,completed:true})));
@@ -15,6 +16,7 @@ test('공개 기억 문구 다섯 번 클릭·탭으로 개발 도구를 열고 
   for(let i=0;i<4;i++) { if(info.project.name.startsWith('mobile'))await caption.tap();else await caption.click(); }
   await expect(page.getByRole('heading',{name:'유랑 개발 도구'})).toBeVisible();
   await expect(page.getByText('브라우저 저장소 (기기 안에만 저장)')).toBeVisible();
+  expect(await page.locator('.dev-page').evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(25, 31, 33)');
   await page.screenshot({path:`test-results/screenshots/demo-dev-${info.project.name}.png`,animations:'disabled',fullPage:true});
   await page.getByRole('link',{name:'지도로 돌아가기',exact:true}).click();
   await expect(page.getByLabel('지도 메뉴',{exact:true})).toBeVisible();
@@ -33,7 +35,9 @@ test('사진이 여러 장인 가상 기억을 바로 읽고 출처와 테이프
   await expect(detail.getByRole('heading',{level:2})).toHaveText('바다 앞에서 약속한 다음 여행');
   await expect(detail.locator('.atlas-taped-photo img')).toHaveCount(2);
   for(const img of await detail.locator('.atlas-taped-photo img').all()) expect(await img.evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0)).toBe(true);
-  await expect(detail.getByLabel('예시 사진 출처')).toContainText('CC BY-SA 4.0');
+  await expect(detail.getByLabel('사진 출처')).toContainText('CC BY-SA 4.0');
+  await expect(detail).toContainText('다음 여행은 어디로 갈까');
+  await expect(detail).not.toContainText(/시연용|가상의|실제 인물|관계없습니다/);
   await page.screenshot({path:`test-results/screenshots/demo-photos-${info.project.name}.png`,animations:'disabled'});
   await detail.locator('.atlas-taped-photo img').last().scrollIntoViewIfNeeded();
   await expect(detail.locator('.atlas-taped-photo img').last()).toBeInViewport();
@@ -44,23 +48,28 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
   await page.route('**/yeoun_2/',route=>route.fulfill({contentType:'text/html',body:'<html><body>Migration fixture</body></html>'}));
   await page.goto('./');
   await page.evaluate(()=>new Promise<void>((resolve,reject)=>{
-    const request=indexedDB.open('yeoun_2',1);
+    const request=indexedDB.open('yeoun_2',2);
     request.onupgradeneeded=()=>request.result.createObjectStore('memories',{keyPath:'id'});
     request.onsuccess=()=>{
       const db=request.result; const tx=db.transaction('memories','readwrite');
       tx.objectStore('memories').put({id:'migration-owner-fixture',ownerId:'github-pages-user',title:'보존할 기존 기록',media:[{id:'existing-photo',dataUrl:'existing-private-bytes',sortOrder:0}]});
+      const base={title:'기존 예시',content:'이전 예시 본문',locationName:'태화강 국가정원',memoryDate:'2019-06-21',emotion:'peaceful',visibility:'public',isAnonymous:true,locationPrecision:'exact',exactLat:35.55,exactLng:129.29,publicLat:35.55,publicLng:129.29,createdAt:'2026-09-10T00:00:00.000Z',updatedAt:'2026-09-10T00:00:00.000Z',media:[]};
+      tx.objectStore('memories').put({...base,id:'20000000-0000-4000-8000-000000000001',ownerId:'demo-user-1'});
+      tx.objectStore('memories').put({...base,id:'20000000-0000-4000-8000-000000000099',ownerId:'github-pages-user',content:'직접 고친 나의 이야기',visibility:'private',updatedAt:'2026-10-25T00:00:00.000Z'});
       tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>reject(tx.error);
     };request.onerror=()=>reject(request.error);
   }));
   await page.unroute('**/yeoun_2/');await page.reload();
   await expect(page.locator('.atlas-stamp').first()).toBeVisible();
-  const state=await page.evaluate(()=>new Promise<{version:number;records:{id:string;title:string;media:unknown[]}[]}>((resolve,reject)=>{
+  const state=await page.evaluate(()=>new Promise<{version:number;records:{id:string;title:string;content:string;media:unknown[]}[]}>((resolve,reject)=>{
     const req=indexedDB.open('yeoun_2');req.onsuccess=()=>{
       const db=req.result;const get=db.transaction('memories').objectStore('memories').getAll();
       get.onsuccess=()=>{resolve({version:db.version,records:get.result});db.close();};get.onerror=()=>reject(get.error);
     };
   }));
-  expect(state.version).toBe(2);
+  expect(state.version).toBe(3);
+  expect(state.records.find(r=>r.id.endsWith('000000000001'))?.content).toBe(demoJournalContent('20000000-0000-4000-8000-000000000001'));
+  expect(state.records.find(r=>r.id.endsWith('000000000099'))?.content).toBe('직접 고친 나의 이야기');
   expect(state.records.find(r=>r.id==='migration-owner-fixture')).toMatchObject({title:'보존할 기존 기록',media:[{id:'existing-photo',dataUrl:'existing-private-bytes'}]});
   expect(state.records.filter(r=>r.id.startsWith('20000000')).length).toBe(24);
   expect(state.records.filter(r=>r.id.startsWith('20000000')&&r.media.length).length).toBe(5);

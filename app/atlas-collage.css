@@ -510,7 +510,7 @@ body:has(.memory-atlas) .memory-image-previews figure > button { width: 44px; he
 @media (prefers-reduced-motion: reduce) { .atlas-place-note-open { animation: none; transition: none; } .atlas-place-note-open::before { transition: none; } }
 
 /* The status caption is the unobtrusive five-tap developer entry. */
-.atlas.memory-atlas .developer-status { min-height: 44px; z-index: 13; text-align: left; cursor: default; user-select: none; touch-action: manipulation; }
+.atlas.memory-atlas .developer-status { min-height: 44px; z-index: 13; text-align: left; cursor: default; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 .atlas.memory-atlas .developer-status:focus-visible { outline: 2px solid var(--atlas-coral); outline-offset: 4px; }
 .atlas.memory-atlas .live-dot { background: var(--atlas-coral); box-shadow: 0 0 0 5px #e7a0881f; }
 /* Developer helpers use the same paper, coral actions and square edges. */
