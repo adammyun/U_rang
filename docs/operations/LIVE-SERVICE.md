@@ -65,3 +65,8 @@ VITE_LIVE_SERVICE_URL=https://yurang-memory-live.finn7132.chatgpt.site pnpm test
 ```
 
 동일한 `dist-pages`를 쓰는 빌드/브라우저 검사는 동시에 실행하지 않는다. [실서비스 메인](../design/demo-release/live-main.png), [Pages 데스크톱](../design/demo-release/demo-service-link-desktop-chromium.png), [Pages 모바일](../design/demo-release/demo-service-link-mobile-chromium.png), [사진 상세](../design/demo-release/photos-desktop.png), [개발 도구](../design/demo-release/developer-mobile.png)에 화면 증거를 보관했다.
+
+
+## GitHub 공개 게시 최종 확인
+
+2026-10-25 확인: `redesign/yeoun-2`의 `be1b4ddb2f3f83fbd377d9df0a2f0b8ac5075772` 소스로 [GitHub Pages 배포](https://github.com/adammyun/yeoun_2/actions/runs/40087359906)가 성공했다. 저장소 About 웹사이트 링크는 실서비스를 가리킨다. 실제 브라우저에서 Pages의 “공유·저장 실서비스 ↗” 링크를 클릭해 실서비스 메인으로 이동하는 것을 확인했다. 원본 `main`은 보존하므로 최신 README와 소스는 `redesign/yeoun-2` 브랜치에서 확인한다. Actions의 Node 20 action 실행 환경 폐기 예정 안내는 남아 있으나 이번 배포는 성공했다.
