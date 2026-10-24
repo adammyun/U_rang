@@ -1,5 +1,6 @@
 import { placeSearchQuerySchema } from '@/src/features/places/schemas';
 import { errorResponse, queryObject } from '@/src/server/responses';
+import { searchUlsanPlaces } from '@/src/features/places/browser-search';
 
 type PhotonFeature = {
   geometry?: { coordinates?: [number, number] };
@@ -9,6 +10,9 @@ type PhotonFeature = {
 export async function GET(request: Request) {
   try {
     const { q } = placeSearchQuerySchema.parse(queryObject(request));
+    // Ulsan's core locations remain searchable during upstream outages.
+    const local = searchUlsanPlaces(q);
+    if (local.length) return Response.json({ data: local });
     const url = new URL('https://photon.komoot.io/api/');
     url.searchParams.set('q', q);
     url.searchParams.set('limit', '7');
@@ -16,7 +20,7 @@ export async function GET(request: Request) {
     url.searchParams.set('lon', '129.3114');
     url.searchParams.set('zoom', '11');
     url.searchParams.set('location_bias_scale', '0.2');
-    const response = await fetch(url, { headers: { accept: 'application/geo+json, application/json' } });
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000), headers: { accept: 'application/geo+json, application/json' } });
     if (!response.ok) throw new Error('장소 검색 서비스에 연결하지 못했습니다.');
     const body = (await response.json()) as { features?: PhotonFeature[] };
     const data = (body.features ?? []).flatMap((feature) => {

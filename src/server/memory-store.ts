@@ -1,3 +1,4 @@
+import { additionalDemoRows, demoMemoryPhotos, demoMediaId, demoPhotoAssets } from '@/src/features/memories/demo-catalog';
 import { env } from 'cloudflare:workers';
 import type { ChatGPTUser } from '@/app/chatgpt-auth';
 import type {
@@ -50,6 +51,7 @@ export type StoredUpload = {
 };
 
 const seedRows = [
+  ...additionalDemoRows,
   ['20000000-0000-4000-8000-000000000001', 'demo-user-1', '시험이 끝난 뒤의 밤 산책', '친구와 시험이 끝난 뒤 늦은 시간까지 강바람을 맞으며 걸었던 가상의 기억.', '태화강 국가정원', '2019-06-21', 'peaceful', 'public', 1, 'approximate', 35.5532, 129.2924],
   ['20000000-0000-4000-8000-000000000002', 'demo-user-2', '파도 소리가 오래 남은 오후', '대왕암공원 산책길 끝에서 잠시 멈춰 바다를 바라보았던 가상의 기억.', '대왕암공원', '2021-10-16', 'meaningful', 'public', 0, 'exact', 35.4926, 129.4391],
   ['20000000-0000-4000-8000-000000000005', 'demo-user-3', '가족과 처음 찾은 정원', '가족과 처음 국가정원을 둘러보며 사진을 여러 장 남겼던 가상의 기억.', '태화강 국가정원', '2020-10-04', 'happy', 'public', 0, 'exact', 35.5502, 129.2903],
@@ -83,11 +85,11 @@ export function ensureSeedData() {
 }
 
 async function seedDemoRows() {
+  const expectedIds = Object.entries(demoMemoryPhotos).flatMap(([memoryId, photos]) => photos.map((_,index) => demoMediaId(memoryId,index)));
   const existing = await database()
-    .prepare("select id from memories where id = ?")
-    .bind(seedRows.at(-1)![0])
-    .first();
-  if (existing) return;
+    .prepare(`select count(*) as count from memory_media where id in (${expectedIds.map(() => '?').join(',')})`)
+    .bind(...expectedIds).first<{ count: number }>();
+  if (existing?.count === expectedIds.length) return;
   const created = '2026-09-10T00:00:00.000Z';
   await database().batch(
     seedRows.map((row) => {
@@ -101,9 +103,12 @@ async function seedDemoRows() {
            public_latitude, public_longitude, created_at, updated_at)
           values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
         .bind(id, userId, title, content, locationName, date,
-          emotion, visibility, anonymous, precision, lat, lng, publicLat, publicLng, created, created);
+          emotion, visibility, anonymous ? 1 : 0, precision, lat, lng, publicLat, publicLng, created, created);
     }),
   );
+  await database().batch(Object.entries(demoMemoryPhotos).flatMap(([memoryId, photos]) => photos.map((asset,index) => database()
+    .prepare(`insert or ignore into memory_media (id,memory_id,storage_key,media_type,mime_type,file_size,sort_order,created_at) values (?,?,?,'image',?,0,?,?) on conflict(id) do update set storage_key=excluded.storage_key where memory_media.memory_id=excluded.memory_id and memory_media.storage_key like 'demo/%'`)
+    .bind(demoMediaId(memoryId,index),memoryId,`demo/${demoMediaId(memoryId,index)}/${asset}`,asset.endsWith('.png') ? 'image/png' : 'image/jpeg',index,created))));
 }
 
 function blur(value: number) {
@@ -129,7 +134,9 @@ async function mediaByMemoryIds(ids: string[]) {
     .bind(...ids)
     .all<MediaRow>();
   for (const row of result.results) {
-    const item = { id: row.id, url: `/api/media/${row.id}`, sortOrder: row.sort_order };
+    const asset = row.storage_key.split('/').at(-1)!;
+    const seedAsset = row.id === demoMediaId(row.memory_id,row.sort_order) && row.storage_key.startsWith('demo/') && Object.hasOwn(demoPhotoAssets,asset);
+    const item = { id: row.id, url: seedAsset ? `/demo/${asset}` : `/api/media/${row.id}`, sortOrder: row.sort_order };
     map.set(row.memory_id, [...(map.get(row.memory_id) ?? []), item]);
   }
   return map;

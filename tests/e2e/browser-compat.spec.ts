@@ -1,3 +1,4 @@
+import { focusSeongnam } from './helpers/place';
 import { mkdir, readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 
@@ -16,6 +17,7 @@ test('지도 선은 확대해도 화면 두께를 유지하고 작성 핀은 아
   await page.goto('./');
   await page.locator('.ulsan-urban-layers').waitFor();
   await page.evaluate(() => document.fonts.ready);
+  await focusSeongnam(page);
   const map = page.locator('.ulsan-line-map');
   const road = map.locator('.ulsan-line-roads');
   const strokePixels = () => road.evaluate(el => parseFloat(getComputedStyle(el).strokeWidth) * (el as SVGGraphicsElement).getScreenCTM()!.a);

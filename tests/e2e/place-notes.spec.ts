@@ -1,3 +1,4 @@
+import { focusTaehwagang } from './helpers/place';
 import { mkdir } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 
@@ -6,6 +7,7 @@ test.beforeEach(async ({ page }) => {
   await mkdir('test-results/screenshots', {recursive:true});
 });
 async function openBoard(page: Page) {
+  await focusTaehwagang(page);
   await page.getByRole('button', {name:/태화강 국가정원.*기억/}).click();
   const board = page.getByLabel('장소의 기억 미리보기');
   await expect(board.locator('.atlas-place-note')).toHaveCount(5);

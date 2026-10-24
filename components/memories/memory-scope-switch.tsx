@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/ui/app-link';
 import { ArrowUpRight, Check } from 'lucide-react';
 import type { MemoryFilters } from '@/src/features/memories/schemas';
 

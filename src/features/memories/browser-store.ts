@@ -1,3 +1,4 @@
+import { additionalDemoRows, demoMemoryPhotos, demoMediaId } from './demo-catalog';
 import type {
   Bounds,
   Emotion,
@@ -14,7 +15,7 @@ import type {
 } from './schemas';
 
 const DATABASE_NAME = 'yeoun_2';
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 const STORE_NAME = 'memories';
 const LOCAL_USER_ID = 'github-pages-user';
 
@@ -60,14 +61,15 @@ type SeedRow = readonly [
 ];
 
 const seedRows: SeedRow[] = [
-  ['20000000-0000-4000-8000-000000000001', 'demo-user-1', '시험이 끝난 뒤의 밤 산책', '친구와 시험이 끝난 뒤 늦은 시간까지 강바람을 맞으며 걸었던 가상의 기억.', '태화강 국가정원', '2019-06-21', 'peaceful', 'public', true, 'approximate', 35.5532, 129.2924],
+  ...additionalDemoRows,
+  ['20000000-0000-4000-8000-000000000001', 'demo-user-1', '시험이 끝난 뒤의 밤 산책', '친구와 시험이 끝난 뒤 늦은 시간까지 강바람을 맞으며 걸었던 가상의 기억.', '태화강 국가정원', '2019-06-21', 'peaceful', 'public', true, 'approximate', 35.55, 129.29],
   ['20000000-0000-4000-8000-000000000002', 'demo-user-2', '파도 소리가 오래 남은 오후', '대왕암공원 산책길 끝에서 잠시 멈춰 바다를 바라보았던 가상의 기억.', '대왕암공원', '2021-10-16', 'meaningful', 'public', false, 'exact', 35.4926, 129.4391],
   ['20000000-0000-4000-8000-000000000005', 'demo-user-3', '가족과 처음 찾은 정원', '가족과 처음 국가정원을 둘러보며 사진을 여러 장 남겼던 가상의 기억.', '태화강 국가정원', '2020-10-04', 'happy', 'public', false, 'exact', 35.5502, 129.2903],
   ['20000000-0000-4000-8000-000000000006', 'demo-user-1', '혼자 달린 자전거 길', '복잡한 생각을 정리하려고 강변을 천천히 달렸던 가상의 기억.', '태화강 국가정원 산책로', '2022-08-27', 'lonely', 'public', true, 'exact', 35.5503, 129.2897],
   ['20000000-0000-4000-8000-000000000007', 'demo-user-2', '처음 마주한 봄 꽃밭', '햇빛 아래 펼쳐진 꽃밭의 색이 유난히 선명했던 가상의 순간.', '태화강 국가정원', '2023-04-09', 'excited', 'public', false, 'exact', 35.5498, 129.2905],
   ['20000000-0000-4000-8000-000000000008', 'demo-user-3', '오래된 친구와 다시 만난 곳', '오랫동안 연락하지 못했던 친구와 다시 만나 밀린 이야기를 나눈 가상의 기억.', '태화강 국가정원 산책로', '2025-09-13', 'love', 'public', true, 'exact', 35.5497, 129.2896],
   ['20000000-0000-4000-8000-000000000009', 'demo-user-1', '비가 그친 뒤의 잔디 냄새', '울산대공원을 천천히 걷다가 비가 그친 뒤의 공기를 기억해 둔 가상의 이야기.', '울산대공원', '2018-07-14', 'nostalgic', 'public', false, 'exact', 35.5317, 129.2935],
-  ['20000000-0000-4000-8000-000000000010', 'demo-user-2', '골목의 작은 불빛', '성남동 골목을 지나며 가게 불빛이 하나씩 켜지는 모습을 바라본 가상의 기억.', '성남동 문화의거리', null, 'meaningful', 'public', true, 'approximate', 35.5558, 129.3193],
+  ['20000000-0000-4000-8000-000000000010', 'demo-user-2', '골목의 작은 불빛', '성남동 골목을 지나며 가게 불빛이 하나씩 켜지는 모습을 바라본 가상의 기억.', '성남동 문화의거리', null, 'meaningful', 'public', true, 'approximate', 35.56, 129.32],
   ['20000000-0000-4000-8000-000000000011', 'demo-user-3', '수업이 끝난 늦은 오후', '울산대학교 주변을 걸으며 다음 학기를 천천히 상상해 본 가상의 기억.', '울산대학교 주변', '2024-03-22', 'meaningful', 'public', false, 'exact', 35.5438, 129.2592],
   ['20000000-0000-4000-8000-000000000012', 'demo-user-1', '여름 저녁의 모래사장', '일산해수욕장에서 해가 질 때까지 파도 소리를 들었던 가상의 기억.', '일산해수욕장', '2025-08-02', 'happy', 'public', true, 'exact', 35.4975, 129.4283],
   ['20000000-0000-4000-8000-000000000015', 'demo-user-2', '햇살이 따뜻했던 공원 벤치', '새 학기를 앞두고 울산대공원 벤치에 앉아 작은 계획을 적어 보았던 가상의 기억.', '울산대공원', '2026-03-07', 'happy', 'public', true, 'exact', 35.5322, 129.2941],
@@ -102,7 +104,7 @@ function seedMemory(row: SeedRow): StoredMemory {
     publicLng: locationPrecision === 'approximate' ? blur(lng) : lng,
     createdAt,
     updatedAt: createdAt,
-    media: [],
+    media: (demoMemoryPhotos[id] ?? []).map((asset,index) => ({ id: demoMediaId(id,index), dataUrl: `${import.meta.env.BASE_URL}demo/${asset}`, sortOrder:index })),
   };
 }
 
@@ -117,9 +119,23 @@ function database() {
       const store = db.objectStoreNames.contains(STORE_NAME)
         ? request.transaction!.objectStore(STORE_NAME)
         : db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      for (const row of seedRows) store.put(seedMemory(row));
+      for (const row of seedRows) {
+        const lookup = store.get(row[0]);
+        lookup.onsuccess = () => {
+          const existing = lookup.result as StoredMemory | undefined;
+          const fixture = seedMemory(row);
+          if (!existing) store.add(fixture);
+          else if (existing.ownerId === fixture.ownerId && existing.ownerId !== LOCAL_USER_ID && !existing.media.length && fixture.media.length) {
+            store.put({ ...existing, media: fixture.media });
+          }
+        };
+      }
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onblocked = () => reject(new Error('다른 유랑 탭을 새로고침한 뒤 다시 시도해 주세요.'));
+    request.onsuccess = () => {
+      request.result.onversionchange = () => request.result.close();
+      resolve(request.result);
+    };
   });
   return databasePromise;
 }

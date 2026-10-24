@@ -1,6 +1,6 @@
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { YurangMark } from '@/components/ui/yurang-mark';
-import Link from 'next/link';
+import Link from '@/components/ui/app-link';
 import { chatGPTSignInPath } from '@/app/chatgpt-auth';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {

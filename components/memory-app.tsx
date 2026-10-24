@@ -2,9 +2,9 @@
 
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 
-import Link from 'next/link';
+import Link from '@/components/ui/app-link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useAppNavigation } from '@/src/lib/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight,
@@ -132,13 +132,15 @@ export default function MemoryApp({
   initialFilters,
   naverMapsClientId,
   initialExplore = false,
+  liveServiceUrl,
 }: {
   isAuthenticated: boolean;
   initialFilters: MemoryFilters;
   naverMapsClientId: string;
   initialExplore?: boolean;
+  liveServiceUrl?: string;
 }) {
-  const router = useRouter();
+  const router = useAppNavigation();
   const mapRef = useRef<MapHandle | null>(null);
   const detailRequest = useRef<AbortController | null>(null);
   const nearbyRequest = useRef<AbortController | null>(null);
@@ -458,7 +460,7 @@ export default function MemoryApp({
           <YurangMark />
           <b>유랑</b>
         </button>
-        <DeveloperHotspot />
+        {liveServiceUrl && <a className="pages-service-link" href={liveServiceUrl}>공유·저장 실서비스 ↗</a>}
         <nav className="app-nav" aria-label="주요 메뉴" data-tour="account-navigation">
           {isAuthenticated ? (
             <>
@@ -633,9 +635,9 @@ export default function MemoryApp({
         )}
       </aside>
 
-      <div className={`map-caption ${selectedPlace ? 'is-hidden' : ''}`}>
+      <DeveloperHotspot className={`map-caption ${selectedPlace ? 'is-hidden' : ''}`}>
         <span className="live-dot" /> {area} · 공개된 기억 <strong>{loading ? '…' : memories.length}</strong>
-      </div>
+      </DeveloperHotspot>
       {!pendingLocation && (
         <div className="map-guide">
           <span className="guide-trace" />

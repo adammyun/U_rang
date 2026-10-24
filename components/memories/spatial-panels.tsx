@@ -1,6 +1,7 @@
 'use client';
 
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
+import { DemoPhotoCredits } from './demo-photo-credits';
 
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
@@ -86,6 +87,7 @@ export function SpatialMemoryDetail({
             {onDelete && <button type="button" className="danger-action" onClick={onDelete} disabled={deleting}>{deleting ? <LoaderCircle size={16} className="spin" /> : <Trash2 size={16} />}{deleting ? '삭제 중…' : '삭제'}</button>}
           </div>}
           {memory.owned && <p className="atlas-owner-visibility">{memory.visibility === 'private' ? '나만 보기' : memory.visibility === 'unlisted' ? '링크로 공유' : '공개된 기억'}</p>}
+          <DemoPhotoCredits media={memory.media} />
           <footer className="spatial-detail-footer"><span>{memory.owned ? '나의 기록' : memory.is_anonymous ? '익명으로 남긴 기억' : '한 사람이 남긴 기억'}</span>{onOtherMemories && <button type="button" onClick={onOtherMemories}>다른 기억 읽기 <ArrowRight size={15} /></button>}</footer>
           </div>
         </article>

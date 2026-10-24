@@ -15,7 +15,8 @@ export async function GET(_: Request, context: Context) {
   return new Response(object.body, {
     headers: {
       'content-type': media.mime_type,
-      'cache-control': media.visibility === 'public' ? 'public, max-age=3600' : 'private, no-store',
+      // Re-check permission after a public record becomes private or is deleted.
+      'cache-control': 'private, no-store',
       'x-content-type-options': 'nosniff',
     },
   });

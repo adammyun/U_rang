@@ -1,6 +1,10 @@
 # 유랑 — 기억이 머무는 지도
 
-**리디자인 사이트:** [유랑 열기](https://adammyun.github.io/yeoun_2/)
+**실서비스:** [유랑 — 서버에 기억 남기기](https://yurang-memory-live.finn7132.chatgpt.site/)
+
+**GitHub Pages 시연판:** [유랑 시연판 열기](https://adammyun.github.io/yeoun_2/)
+
+실서비스는 공개 기억을 누구나 읽고, 로그인 후 작성한 기억과 사진을 서버 DB·사진 저장소에 보관합니다. Pages 시연판의 기존 브라우저 기록은 실서비스로 자동 업로드되지 않습니다. [운영·거리뷰 설정 안내](docs/operations/LIVE-SERVICE.md)
 
 **저장소:** [adammyun/yeoun_2](https://github.com/adammyun/yeoun_2)
 
@@ -135,7 +139,7 @@ NAVER Client Secret, API secret, DB credential을 `NEXT_PUBLIC_*`에 넣지 마�
 
 ## 울산 Demo Data
 
-seed에는 실제 개인과 무관한 가상 이야기만 들어 있습니다.
+seed에는 실제 개인과 무관한 가상 이야기만 들어 있습니다. 공개 예시는 23개이며 5개에는 사진이 있습니다. 추가 예시와 미디어 목록은 `src/features/memories/demo-catalog.ts`를 Pages/서버가 공유하고, D1은 첫 공개 조회에서 중복 없이 추가합니다. Pages v2 업그레이드는 기존 기록을 보존하면서 예시·예시 사진만 추가합니다.
 
 - 태화강 국가정원·산책로: 50~100m 안에 날짜, 감정, 익명 여부가 다른 공개 기억 5개
 - 울산대공원, 대왕암공원, 일산해수욕장, 성남동, 울산대학교 주변의 공개 기억
@@ -232,3 +236,7 @@ OpenStreetMap tile은 화면에 필요한 범위만 요청하며 offline downloa
 ## yeoun_2 리디자인
 
 Memory Atlas — Spatial Paper: 어두운 전체 지도, 사진/글 스탬프, 맥락 미리보기, 감정 색조와 비대칭 읽기 장면을 사용합니다. 실제 기억 API·검색·사진 작성·내 기억 CRUD를 재사용합니다. [구현 및 검증 기록](docs/design/MEMORY-ATLAS-IMPLEMENTATION.md)을 참고하세요.
+
+## 숨겨진 개발 도구
+
+지도 상태 문구(울산광역시 · 공개된 기억)를 2초 안에 빠르게 5번 클릭하거나 탭하면 `/dev`가 열립니다. 튜토리얼과 환경 상태를 확인하는 보조 화면이며 관리자 권한이나 DB 관리 기능을 제공하지 않습니다.

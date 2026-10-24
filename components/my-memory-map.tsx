@@ -3,9 +3,9 @@
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { YurangMark } from './ui/yurang-mark';
 
-import Link from 'next/link';
+import Link from '@/components/ui/app-link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useAppNavigation } from '@/src/lib/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
@@ -120,7 +120,7 @@ export default function MyMemoryMap({
   initialFilters: MyFilters;
   naverMapsClientId: string;
 }) {
-  const router = useRouter();
+  const router = useAppNavigation();
   const mapRef = useRef<MapHandle | null>(null);
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -279,7 +279,6 @@ export default function MyMemoryMap({
           <YurangMark />
           <b>유랑</b>
         </button>
-        <DeveloperHotspot />
         <nav className="app-nav" aria-label="주요 메뉴">
           <Link href="/" className="my-map-back" aria-label="모두의 지도로 돌아가기"><ArrowLeft size={18} /> 지도로 돌아가기</Link>
           <button onClick={() => void signOut()}>
@@ -461,10 +460,10 @@ export default function MyMemoryMap({
         </div>
       </aside>
 
-      <div className="map-caption">
+      <DeveloperHotspot className="map-caption">
         <span className="live-dot" /> 나의 기억 지도
         <span>정확한 위치는 로그인한 나에게만 표시됩니다</span>
-      </div>
+      </DeveloperHotspot>
       <div className="map-zoom">
         <button aria-label="지도 확대" onClick={() => mapRef.current?.zoom(1)}><Plus size={18} /></button>
         <button aria-label="지도 축소" onClick={() => mapRef.current?.zoom(-1)}><Minus size={18} /></button>

@@ -21,7 +21,7 @@ import {
   type NaverPanoramaInstance,
 } from '@/src/features/panorama/naver-maps';
 
-type ViewerState = 'loading' | 'ready' | 'unavailable' | 'missing-config' | 'error';
+type ViewerState = 'loading' | 'ready' | 'unavailable' | 'missing-config' | 'auth-error' | 'error';
 
 export default function PanoramaViewer({
   clientId,
@@ -102,7 +102,8 @@ export default function PanoramaViewer({
           reason instanceof NaverPanoramaLoadError &&
             reason.code === 'missing-client-id'
             ? 'missing-config'
-            : 'error',
+            : reason instanceof NaverPanoramaLoadError && reason.code === 'authentication-failed'
+              ? 'auth-error' : 'error',
         );
         if (process.env.NODE_ENV !== 'production') {
           console.error('NAVER Panorama initialization failed', reason);
@@ -174,6 +175,13 @@ export default function PanoramaViewer({
               <button type="button" onClick={retry}>
                 <RotateCcw size={15} /> 다시 확인
               </button>
+            </div>
+          )}
+          {state === 'auth-error' && (
+            <div className="panorama-state panorama-state-error" role="alert">
+              <strong>NAVER에서 이 사이트의 거리뷰 인증을 승인하지 않았어요.</strong>
+              <span>NAVER Maps Application의 Client ID, Web 서비스 URL과 Maps 사용 설정을 확인해 주세요.</span>
+              <button type="button" onClick={retry}><RotateCcw size={15} /> 다시 시도</button>
             </div>
           )}
           {state === 'error' && (

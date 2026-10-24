@@ -134,6 +134,7 @@ function PagesApp() {
   if (route.path === '/dev') {
     return (
       <DevTools
+        storageMode="browser"
         databaseConfigured
         panoramaConfigured={Boolean(clientId.trim())}
       />
@@ -144,6 +145,7 @@ function PagesApp() {
 
   return (
     <MemoryApp
+      liveServiceUrl={import.meta.env.VITE_LIVE_SERVICE_URL}
       initialExplore={route.search.get('explore') === '1'}
       isAuthenticated={authenticated}
       initialFilters={

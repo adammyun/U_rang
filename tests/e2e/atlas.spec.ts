@@ -1,3 +1,4 @@
+import { focusSeongnam, focusTaehwagang } from './helpers/place';
 import { mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
@@ -76,6 +77,7 @@ test('현재 위치와 움직임 줄이기 및 같은 장소의 다음 기억이
   await page.getByRole('button', { name: '현재 위치로 이동' }).click();
   await expect(page.getByLabel('현재 위치', { exact: true })).toBeVisible();
   await expect(page.locator('.atlas-pointer-ring')).toBeHidden();
+  await focusTaehwagang(page);
   await page.getByRole('button', { name: /태화강 국가정원.*기억/ }).click();
   await page.getByRole('button', { name: '선택한 기억 자세히 읽기' }).click();
   const detail = page.getByRole('dialog', { name: '기억 상세' });
@@ -245,6 +247,7 @@ test('지도 컨트롤 아이콘이 중앙 정렬되고 조정·작성·로그�
 
 test('긴 감정 이름은 한 줄로 읽히며 상세와 제목은 고딕으로 표시된다', async ({ page }, info) => {
   await page.goto('./');
+  await focusSeongnam(page);
   await page.getByRole('button', {name:'골목의 작은 불빛',exact:true}).click();
   await page.getByRole('button', {name:'선택한 기억 자세히 읽기'}).click();
   const detail = page.getByRole('dialog',{name:'기억 상세'});
@@ -266,7 +269,8 @@ test('긴 감정 이름은 한 줄로 읽히며 상세와 제목은 고딕으로
 });
 
 test('울산 5개 구군 경계와 확대 시 동·도로명을 표시한다', async ({ page }, info) => {
-  await page.goto('./');
+  // Isolate cartographic labels from marker collision avoidance.
+  await page.goto('./#/?year=2018');
   const map = page.locator('.ulsan-line-map');
   await expect(map.locator('[data-district]')).toHaveCount(5);
   expect((await map.locator('.ulsan-line-boundary').getAttribute('d'))!.length).toBeGreaterThan(100);
@@ -299,6 +303,7 @@ test('기본 지도에서 시가지와 확대된 실제 건물을 구분할 수 
   expect(await page.locator('.ulsan-line-map').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(96, 118, 120)');
   await expect(page.getByRole('button', { name: '이곳에 기억 남기기' })).toBeVisible();
   await page.screenshot({ path: `test-results/screenshots/buildings-close-${info.project.name}.png`, animations: 'disabled' });
+  await focusSeongnam(page);
   await page.getByRole('button', { name: '골목의 작은 불빛', exact: true }).click();
   await expect(page.getByRole('button', { name: '선택한 기억 자세히 읽기' })).toBeVisible();
   expect(errors).toEqual([]);
@@ -310,6 +315,7 @@ test('건물 데이터가 실패해도 기존 지도와 기억 탐색이 유지�
   await expect(page.locator('.ulsan-line-map')).toBeVisible();
   await expect(page.locator('[data-district]')).toHaveCount(5);
   await expect(page.locator('.atlas-stamp').first()).toBeVisible();
+  await focusSeongnam(page);
   await page.getByRole('button', { name: '골목의 작은 불빛', exact: true }).click();
   await page.getByRole('button', { name: '선택한 기억 자세히 읽기' }).click();
   await expect(page.getByRole('heading', { name: '골목의 작은 불빛', exact: true })).toBeVisible();
@@ -330,6 +336,7 @@ test('건물 데이터가 실패해도 기존 지도와 기억 탐색이 유지�
 
 test('포스트잇 미리보기에서 같은 톤의 장소 목록·상세·조정으로 이동한다', async ({ page }, info) => {
   await page.goto('./');
+  await focusTaehwagang(page);
   await page.getByRole('button', { name: /태화강 국가정원.*기억/ }).click();
   const preview = page.getByLabel('장소의 기억 미리보기');
   await expect(preview).toBeVisible();
@@ -471,7 +478,13 @@ test('감정 태그는 옆으로 펼쳐지고 지도 제스처에 접혀도 선�
   await page.screenshot({ path: `test-results/screenshots/emotion-expanded-${info.project.name}.png`, animations: 'disabled' });
   const map = page.locator('.ulsan-line-map');
   const before = await map.getAttribute('viewBox');
-  const point = { x: info.project.name.startsWith('mobile') ? 200 : 800, y: 400 };
+  const point = await page.evaluate(() => {
+    for (let y=300;y<innerHeight-240;y+=40) for(let x=20;x<innerWidth-20;x+=40) {
+      const el=document.elementFromPoint(x,y);
+      if(el?.closest('.map-surface')&&!el.closest('button,a,input,textarea,select'))return {x,y};
+    }
+    throw new Error('No unobstructed map gesture target');
+  });
   if (info.project.name.startsWith('mobile')) {
     const touch = await context.newCDPSession(page);
     // Swiping the tag row scrolls its options without closing it or moving the map.

@@ -41,6 +41,7 @@ jobs:
         run: pnpm build:pages
         env:
           VITE_NAVER_MAPS_CLIENT_ID: ${{ vars.NAVER_MAPS_CLIENT_ID }}
+          VITE_LIVE_SERVICE_URL: https://yurang-memory-live.finn7132.chatgpt.site
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

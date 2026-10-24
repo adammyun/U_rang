@@ -1,6 +1,7 @@
 'use client';
 
-/* eslint-disable @next/next/no-html-link-for-pages -- The vinext preview needs full-document navigation from the developer helper page. */
+import Link from '@/components/ui/app-link';
+import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 
 import { useEffect, useState } from 'react';
 import {
@@ -22,6 +23,7 @@ import {
 type DevToolsProps = {
   databaseConfigured: boolean;
   panoramaConfigured: boolean;
+  storageMode?: 'browser' | 'server';
 };
 
 const demoPlaces = [
@@ -37,6 +39,7 @@ const demoPlaces = [
 export default function DevTools({
   databaseConfigured,
   panoramaConfigured,
+  storageMode = 'server',
 }: DevToolsProps) {
   const [tutorialComplete, setTutorialComplete] = useState<boolean | null>(null);
   const [resetMessage, setResetMessage] = useState('');
@@ -65,15 +68,15 @@ export default function DevTools({
         <header className="dev-header">
           <div>
 
-            <h1>유랑 개발 도구</h1>
+            <h1><AtlasHeadingLabel>유랑 개발 도구</AtlasHeadingLabel></h1>
             <p>
               시연 흐름과 브라우저 기능 상태를 확인하는 안전한 보조 화면입니다.
               관리자 권한이나 데이터 접근 권한을 제공하지 않습니다.
             </p>
           </div>
-          <a href="/" className="dev-back-link">
+          <Link href="/" className="dev-back-link">
             <ArrowLeft size={17} /> 지도로 돌아가기
-          </a>
+          </Link>
         </header>
 
         <section className="dev-card dev-tour-card">
@@ -95,9 +98,9 @@ export default function DevTools({
             </strong>
           </div>
           <div className="dev-actions">
-            <a href="/?tutorial=1" className="dev-primary" onClick={startTutorial}>
+            <Link href="/?tutorial=1" className="dev-primary" onClick={startTutorial}>
               <BookOpen size={17} /> 튜토리얼 시작
-            </a>
+            </Link>
             <button type="button" className="dev-secondary" onClick={resetTutorial}>
               <RotateCcw size={17} /> 완료 상태 초기화
             </button>
@@ -115,10 +118,10 @@ export default function DevTools({
               </div>
             </div>
             <nav className="dev-links" aria-label="시연 화면 바로가기">
-              <a href="/"><Map size={17} /> 공개 지도</a>
-              <a href="/my-map"><UserRound size={17} /> 내 기억 지도</a>
-              <a href="/login"><ExternalLink size={17} /> 로그인</a>
-              <a href="/signup"><ExternalLink size={17} /> 회원가입 안내</a>
+              <Link href="/"><Map size={17} /> 공개 지도</Link>
+              <Link href="/my-map"><UserRound size={17} /> 내 기억 지도</Link>
+              <Link href="/login"><ExternalLink size={17} /> 로그인</Link>
+              <Link href="/signup"><ExternalLink size={17} /> 회원가입 안내</Link>
             </nav>
           </section>
 
@@ -132,15 +135,15 @@ export default function DevTools({
             </div>
             <dl className="dev-status-list">
               <div>
-                <dt>데이터베이스 연결</dt>
+                <dt>{storageMode === 'browser' ? '브라우저 저장소 (기기 안에만 저장)' : '서버 DB 연결'}</dt>
                 <dd className={databaseConfigured ? 'ready' : 'missing'}>
                   {databaseConfigured ? '사용 가능' : '사용 불가'}
                 </dd>
               </div>
               <div>
-                <dt>NAVER 거리뷰 설정</dt>
+                <dt>NAVER 거리뷰 연결 설정</dt>
                 <dd className={panoramaConfigured ? 'ready' : 'missing'}>
-                  {panoramaConfigured ? '설정됨' : '설정 안 됨'}
+                  {panoramaConfigured ? '설정됨 · 제공사 인증 별도 확인' : '설정 안 됨'}
                 </dd>
               </div>
               <div>
@@ -158,7 +161,7 @@ export default function DevTools({
             <MapPin size={20} />
             <div>
               <h2>울산 시연 장소</h2>
-              <p>실제 장소명과 가상의 기억으로 준비된 확인 지점입니다.</p>
+              <p>실제 장소명과 가상의 기억으로 준비된 확인 지점입니다. 사진 출처는 각 상세 보기에서 확인할 수 있습니다.</p>
             </div>
           </div>
           <ul className="dev-place-list">

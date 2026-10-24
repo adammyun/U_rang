@@ -5,6 +5,7 @@ const LOAD_TIMEOUT_MS = 15_000;
 export type NaverPanoramaLoadErrorCode =
   | 'missing-client-id'
   | 'script-failed'
+  | 'authentication-failed'
   | 'module-unavailable';
 
 export class NaverPanoramaLoadError extends Error {
@@ -57,6 +58,7 @@ declare global {
   interface Window {
     naver?: { maps?: NaverMapsApi };
     __yeounNaverPanoramaReady?: () => void;
+    navermap_authFailure?: () => void;
   }
 }
 
@@ -104,6 +106,7 @@ export function loadNaverMapsPanorama(clientId: string | undefined) {
     );
 
     window[CALLBACK_NAME] = finish;
+    window.navermap_authFailure = () => fail('authentication-failed');
     const current = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
     if (current) {
       current.addEventListener('load', finish, { once: true });

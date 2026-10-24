@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/ui/app-link';
 import { Compass, MapPin, Plus, UserRound } from 'lucide-react';
 import type { Ref } from 'react';
 

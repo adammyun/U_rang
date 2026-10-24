@@ -508,3 +508,27 @@ body:has(.memory-atlas) .memory-image-previews figure > button { width: 44px; he
 }
 @media (max-width: 360px) { .atlas-place-notes { grid-template-columns: minmax(0,1fr); } }
 @media (prefers-reduced-motion: reduce) { .atlas-place-note-open { animation: none; transition: none; } .atlas-place-note-open::before { transition: none; } }
+
+/* The status caption is the unobtrusive five-tap developer entry. */
+.atlas.memory-atlas .developer-status { min-height: 44px; z-index: 13; text-align: left; cursor: default; user-select: none; touch-action: manipulation; }
+.atlas.memory-atlas .developer-status:focus-visible { outline: 2px solid var(--atlas-coral); outline-offset: 4px; }
+.atlas.memory-atlas .live-dot { background: var(--atlas-coral); box-shadow: 0 0 0 5px #e7a0881f; }
+/* Developer helpers use the same paper, coral actions and square edges. */
+.dev-page { --muted: var(--atlas-muted); --line: var(--atlas-border); background: var(--atlas-charcoal); color: var(--atlas-text); }
+.dev-header h1 { font-weight: 600; line-height: 1.65; }
+.dev-card { position: relative; border-radius: 0; border: 1px solid var(--atlas-border); background: var(--atlas-surface); box-shadow: var(--atlas-paper-shadow); }
+.dev-card-heading > svg,.dev-place-list svg,.dev-state-line strong,.dev-message { color: var(--atlas-coral); }
+.dev-back-link,.dev-secondary,.dev-links a,.dev-state-line,.dev-place-list li { border-radius: 0; color: var(--atlas-text); background: var(--atlas-raised); border-color: var(--atlas-border); }
+.dev-actions a,.dev-actions button,.dev-status-list dd { border-radius: 0; }
+.dev-primary { background: var(--atlas-action); color: var(--atlas-action-ink); }
+.dev-status-list dd.ready { background: #e7a08824; color: var(--atlas-coral); }
+.dev-status-list dd.missing { background: var(--atlas-raised); color: var(--atlas-muted); }
+.dev-page :is(a,button):hover { filter: brightness(1.12); }
+.dev-page :is(a,button):focus-visible { outline: 2px solid var(--atlas-coral); outline-offset: 3px; }
+.dev-photo-credits { margin-top: 22px; color: var(--atlas-muted); font-size: 11px; line-height: 1.8; }
+.dev-photo-credits a { color: var(--atlas-coral); text-decoration: underline; }
+.pages-service-link { position: absolute; top: 2px; left: 50%; translate: -50% 0; display: inline-flex; align-items: center; min-height: 44px; padding: 9px 13px; color: var(--atlas-action-ink); background: var(--atlas-action); border: 1px solid var(--atlas-border); box-shadow: var(--atlas-paper-shadow); font-size: 12px; white-space: nowrap; }
+.pages-service-link:hover { background: var(--atlas-action-hover); }
+.pages-service-link:focus-visible { outline: 2px solid var(--atlas-text); outline-offset: 3px; }
+@media (max-width:767px) { .pages-service-link { position: fixed; top: calc(73px + env(safe-area-inset-top)); left: auto; right: 20px; translate: none; min-height: 44px; padding: 7px 10px; font-size: 11px; } }
+body:has(.atlas-place-board,.spatial-detail,.story-sheet,.discovery.expanded,.onboarding-tour,.place-search-results) .pages-service-link { display: none; }

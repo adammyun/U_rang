@@ -1,3 +1,4 @@
+import { focusTaehwagang } from './helpers/place';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
@@ -43,7 +44,8 @@ test('지도 조정과 장소 기억 열람이 동작한다', async ({ page }) =
   await expect(detailMode).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: '지도 조정 닫기' }).click();
 
-  const marker = page.locator('.raster-memory-marker').first();
+  await focusTaehwagang(page);
+  const marker = page.getByRole('button', { name: '태화강 국가정원 산책로의 기억 5개', exact: true });
   await expect(marker).toBeVisible({ timeout: 20_000 });
   await marker.click();
   await expect(page.getByLabel('장소의 기억 미리보기')).toBeVisible();

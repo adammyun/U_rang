@@ -10,12 +10,16 @@ const ULSAN_PLACES: PlaceSearchResult[] = [
   { id: 'ulsan:taehwawalk', name: '태화강 산책로', displayName: '태화강 산책로 · 울산광역시 중구', longitude: 129.2897, latitude: 35.5503, type: 'path' },
 ];
 
-export async function browserPlaceSearch(query: string, signal: AbortSignal) {
-  if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+export function searchUlsanPlaces(query: string) {
   const terms = query.trim().toLocaleLowerCase('ko-KR').split(/\s+/).filter(Boolean);
   return ULSAN_PLACES.filter((place) => {
     const haystack = `${place.name} ${place.displayName}`.toLocaleLowerCase('ko-KR');
     return terms.every((term) => haystack.includes(term));
   }).slice(0, 7);
+}
+
+export async function browserPlaceSearch(query: string, signal: AbortSignal) {
+  if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+  return searchUlsanPlaces(query);
 }
 

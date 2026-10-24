@@ -90,6 +90,15 @@ test('reports an SDK script failure and allows a later retry', async () => {
   }
 });
 
+test('reports provider authentication rejection without a missing-key message', async () => {
+  const restore = installBrowserFixture((script, browserWindow) => {
+    queueMicrotask(() => browserWindow.navermap_authFailure());
+  });
+  try {
+    await assert.rejects(loadNaverMapsPanorama('public-client-id'), error => error.code === 'authentication-failed');
+  } finally { restore(); }
+});
+
 test('shares one SDK request and loads only the panorama submodule', async () => {
   let appendCount = 0;
   let scriptUrl = '';

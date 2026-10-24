@@ -1,3 +1,4 @@
+import { focusTaehwagang } from './helpers/place';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
@@ -36,6 +37,7 @@ test('실제 공개 기억을 미리보고 검색·상세·탐색으로 이동�
 
   // Marker order changes with viewport grouping. A cross-place cluster opens
   // a closer map, while this known 100m place group opens the reading preview.
+  await focusTaehwagang(page);
   await page.getByRole('button', { name: /태화강 국가정원.*기억/ }).click();
   await expect(page.getByLabel('장소의 기억 미리보기')).toBeVisible();
   await capture(page, 'live-preview', testInfo.project.name);
