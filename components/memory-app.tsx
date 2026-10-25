@@ -791,7 +791,6 @@ export default function MemoryApp({
         <SpatialPlacePreview
           key={`${placeAnchor.id}:${placeVisit}`}
           anchor={placeAnchor}
-          authenticated={isAuthenticated}
           group={placeGroup}
           loading={placeLoading}
           error={placeError}

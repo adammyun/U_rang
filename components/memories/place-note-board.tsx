@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { Eye, MapPin } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { emotions, formatDate, type Memory, type PlaceMemoryGroup, type PlaceMemoryItem } from '@/lib/types';
-import MemoryActivityBar from './memory-activity';
 
 function anchorItem(memory: Memory): PlaceMemoryItem {
   return { id: memory.id, title: memory.title, contentPreview: memory.content, memoryDate: memory.memory_date, emotion: memory.emotion, latitude: memory.lat, longitude: memory.lng, isAnonymous: memory.is_anonymous, distanceMeters: 0, firstImageUrl: memory.media[0]?.url ?? null };
@@ -23,7 +22,7 @@ function noteLayout(id: string, seed: number): CSSProperties {
   } as CSSProperties;
 }
 
-export default function PlaceNoteBoard({ anchor, group, loading, error, openingMemoryId, onClose, onOpenMemory, onRetry, onLocate, onOpenPanorama, authenticated=false }: {
+export default function PlaceNoteBoard({ anchor, group, loading, error, openingMemoryId, onClose, onOpenMemory, onRetry, onLocate, onOpenPanorama }: {
   anchor: Memory;
   group: PlaceMemoryGroup | null;
   loading: boolean;
@@ -34,7 +33,6 @@ export default function PlaceNoteBoard({ anchor, group, loading, error, openingM
   onRetry: () => void;
   onLocate: () => void;
   onOpenPanorama: () => void;
-  authenticated?: boolean;
 }) {
   const [seed] = useState(() => Math.floor(Math.random() * 0x7fffffff));
   const board = useRef<HTMLElement>(null);
@@ -62,7 +60,6 @@ export default function PlaceNoteBoard({ anchor, group, loading, error, openingM
         <button type="button" onClick={onOpenPanorama} aria-label="거리뷰"><Eye size={16} /><span>거리뷰</span></button>
       </nav>
     </header>
-    <div className="place-memory-activity"><span>{anchor.title}</span><MemoryActivityBar key={anchor.id} memoryId={anchor.id} authenticated={authenticated}/></div>
     <div className="atlas-place-board-scroll" role="region" aria-label="장소의 기억 목록" tabIndex={0}>
       <div className="atlas-place-notes" aria-busy={loading}>
         {notes.map((memory, index) => <article key={memory.id} className="atlas-place-note" style={noteLayout(memory.id, seed)}>
