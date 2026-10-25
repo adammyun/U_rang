@@ -2,6 +2,7 @@
 
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { DemoPhotoCredits } from './demo-photo-credits';
+import MemoryActivityBar from './memory-activity';
 
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
@@ -13,7 +14,7 @@ export { default as SpatialPlacePreview } from './place-note-board';
 export function SpatialMemoryDetail({
   memory, onClose, onBack, onOtherMemories, onLocate, onOpenPanorama,
   onPrevious, onNext, positionLabel, changing = false,
-  onEdit, onDelete, deleting = false,
+  onEdit, onDelete, deleting = false, authenticated = false,
 }: {
   memory: Memory;
   onClose: () => void;
@@ -28,6 +29,7 @@ export function SpatialMemoryDetail({
   onEdit?: () => void;
   onDelete?: () => void;
   deleting?: boolean;
+  authenticated?: boolean;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const dialog = useRef<HTMLElement>(null);
@@ -77,6 +79,7 @@ export function SpatialMemoryDetail({
           <p className="spatial-detail-place"><MapPin size={14} /> {memory.location_name}</p>
           <div className="spatial-detail-date"><span />{formatDate(memory.memory_date)}</div>
           <p className="spatial-detail-body">{memory.content}</p>
+          <MemoryActivityBar key={memory.id} memoryId={memory.id} authenticated={authenticated||memory.owned}/>
 
           <div className="spatial-detail-tools">
             <button type="button" onClick={() => leave(onLocate)}><MapPin size={16} /> 지도에서 보기</button>

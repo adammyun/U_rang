@@ -89,11 +89,10 @@ test('격리된 브라우저에서 사진 첨부·공개 기록 작성·수정·
   await expect(page.getByRole('heading', { name: title })).toBeVisible();
   await expect(page.locator('.spatial-detail-hero img')).toBeVisible();
   await page.getByRole('button', { name: '기억 닫기' }).click();
-  await expect(page.getByLabel('지도 메뉴').getByRole('link', { name: '내 기억' })).toBeVisible();
-  await page.getByLabel('지도 메뉴').getByRole('link', { name: '내 기억' }).click();
-  await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
-  await expect(page.getByLabel('내 기억 목록').getByText(title)).toBeVisible();
-  await page.getByLabel('내 기억 목록').getByText(title).click();
+  await expect(page.getByLabel('지도 메뉴').getByRole('button', { name: '내 기억' })).toBeVisible();
+  await page.getByLabel('지도 메뉴').getByRole('button', { name: '내 기억' }).click();
+  await expect(page.getByRole('dialog', { name: '마이페이지' }).getByText(title)).toBeVisible();
+  await page.getByRole('dialog', { name: '마이페이지' }).getByText(title).click();
   await page.getByRole('button', { name: '수정' }).click();
   const editForm = page.locator('.create-sheet');
   const editedTitle = `${title} 수정`;
@@ -102,6 +101,6 @@ test('격리된 브라우저에서 사진 첨부·공개 기록 작성·수정·
   await expect(page.getByLabel('기억 상세 내용').getByRole('heading', { name: editedTitle })).toBeVisible();
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: '삭제', exact: true }).click();
-  await expect(page.getByLabel('내 기억 목록').getByText(editedTitle)).toBeHidden();
+  await expect(page.getByRole('dialog', { name: '마이페이지' }).getByText(editedTitle)).toBeHidden();
   await capture(page, 'live-my-map', testInfo.project.name);
 });

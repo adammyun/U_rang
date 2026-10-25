@@ -17,7 +17,7 @@ import type {
   UserMemoryFilters,
 } from '@/src/features/memories/schemas';
 
-type MemoryRow = {
+export type MemoryRow = {
   id: string;
   user_id: string;
   title: string;
@@ -149,7 +149,7 @@ async function mediaByMemoryIds(ids: string[]) {
   return map;
 }
 
-async function toMemories(rows: MemoryRow[], viewerId?: string | null, ownerCoordinates = false) {
+export async function toMemories(rows: MemoryRow[], viewerId?: string | null, ownerCoordinates = false) {
   const media = await mediaByMemoryIds(rows.map((row) => row.id));
   return rows.map((row): Memory => ({
     id: row.id,

@@ -1,0 +1,90 @@
+import {mkdir} from 'node:fs/promises';
+import {expect,test} from '@playwright/test';
+import {focusSeongnam} from './helpers/place';
+
+test.beforeEach(async({page})=>{
+ await mkdir('test-results/screenshots',{recursive:true});
+ await page.addInitScript(()=>localStorage.setItem('yeoun_2:onboarding:v1',JSON.stringify({version:1,completed:true})));
+});
+
+test('같은 지도에서 내 정보·저장한 기억·추천을 열고 표시 항목을 조합한다',async({page},info)=>{
+ test.setTimeout(60000);
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('./#/login');await page.getByRole('button',{name:'로컬 시연 세션 시작'}).click();
+ await focusSeongnam(page);
+ const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});await map.evaluate(el=>el.setAttribute('data-retained-map','yes'));
+ const camera=await page.locator('.ulsan-line-map').getAttribute('viewBox');const url=page.url();
+ await expect(page.getByRole('navigation',{name:'주요 메뉴'}).getByText('내 기억')).toHaveCount(0);
+ await expect(page.getByLabel('기억 반응')).toHaveCount(0);
+ await page.getByRole('button',{name:'골목의 작은 불빛',exact:true}).click();
+ const activity=page.getByLabel('기억 반응');
+ await expect(activity.getByRole('button',{name:'좋아요',exact:true})).toBeEnabled();
+ await activity.getByRole('button',{name:'좋아요',exact:true}).click();
+ await expect(activity.getByRole('button',{name:'좋아요',exact:true})).toHaveAttribute('aria-pressed','true');
+ await activity.getByRole('button',{name:'북마크',exact:true}).click();
+ await expect(activity.getByRole('button',{name:'북마크',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(activity.getByLabel('조회수 1',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'선택한 기억 자세히 읽기'}).click();
+ const detail=page.getByRole('dialog',{name:'기억 상세'});await expect(detail.getByLabel('조회수 1',{exact:true})).toBeVisible();
+ await detail.getByRole('button',{name:'기억 닫기'}).click();
+ await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel).toBeVisible();
+ await expect(page).toHaveURL(url);await expect(map).toHaveAttribute('data-retained-map','yes');
+ await expect(page.locator('.ulsan-line-map')).toHaveAttribute('viewBox',camera!);
+ await expect(panel.getByRole('checkbox',{name:'내 기억',exact:true})).toBeChecked();
+ await expect(panel.getByRole('checkbox',{name:'북마크한 기억',exact:true})).not.toBeChecked();
+ await expect(page.getByRole('button',{name:'골목의 작은 불빛',exact:true})).toBeHidden();
+ await panel.getByRole('checkbox',{name:'북마크한 기억',exact:true}).check();
+ await expect(page.getByRole('button',{name:'골목의 작은 불빛',exact:true})).toBeVisible();
+ await panel.getByRole('checkbox',{name:'내 기억',exact:true}).uncheck();
+ await panel.getByRole('tab',{name:'북마크',exact:true}).click();
+ await expect(panel.getByRole('button',{name:/골목의 작은 불빛/})).toBeVisible();
+ await page.screenshot({path:`test-results/screenshots/personal-bookmarks-${info.project.name}.png`,animations:'disabled'});
+ await panel.getByRole('checkbox',{name:'북마크한 기억',exact:true}).uncheck();
+ await expect(page.locator('.raster-memory-marker')).toHaveCount(0);
+ await panel.getByRole('checkbox',{name:'좋아요한 기억',exact:true}).check();
+ await expect(page.getByRole('button',{name:'골목의 작은 불빛',exact:true})).toBeVisible();
+ await panel.getByRole('tab',{name:'좋아요',exact:true}).click();
+ await expect(panel.getByRole('button',{name:/골목의 작은 불빛/})).toBeVisible();
+ await panel.getByRole('tab',{name:'추천',exact:true}).click();
+ await expect(panel.getByRole('button',{name:/내가 남긴/})).toHaveCount(0);
+ await expect(panel.locator('.personal-memory-card').first()).toBeVisible();
+ await page.screenshot({path:`test-results/screenshots/personal-recommendations-${info.project.name}.png`,animations:'disabled'});
+ await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
+ await expect(page.getByRole('button',{name:'골목의 작은 불빛',exact:true})).toBeVisible();
+ await page.getByLabel('지도 메뉴').getByRole('button',{name:'지도',exact:true}).click();
+ await expect(page.getByLabel('기억 반응')).toHaveCount(0);await expect(map).toHaveAttribute('data-retained-map','yes');
+ await page.getByRole('button',{name:'골목의 작은 불빛',exact:true}).click();
+ await page.getByRole('button',{name:'선택한 기억 자세히 읽기'}).click();
+ await detail.getByRole('button',{name:'좋아요',exact:true}).click();
+ await expect(detail.getByRole('button',{name:'좋아요',exact:true})).toHaveAttribute('aria-pressed','false');
+ await detail.getByRole('button',{name:'북마크',exact:true}).click();
+ await expect(detail.getByRole('button',{name:'북마크',exact:true})).toHaveAttribute('aria-pressed','false');
+ await expect(detail.getByLabel('조회수 1',{exact:true})).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
+test('로그인 전 내 기억은 이동 없는 안내이며 반응과 비공개 기록은 로그인 경계를 지킨다',async({page})=>{
+ await page.goto('./');const url=page.url();
+ await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel.getByRole('link',{name:'로그인하고 기억 모으기'})).toBeVisible();
+ await expect(page).toHaveURL(url);
+ await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
+ await focusSeongnam(page);await page.getByRole('button',{name:'골목의 작은 불빛',exact:true}).click();
+ const reaction=page.getByLabel('기억 반응');await expect(reaction.getByRole('button',{name:'좋아요',exact:true})).toBeEnabled();
+ await reaction.getByRole('button',{name:'좋아요',exact:true}).click();await expect(reaction.getByRole('link',{name:'로그인',exact:true})).toBeVisible();
+ await expect(reaction.getByRole('button',{name:'좋아요',exact:true})).toHaveAttribute('aria-pressed','false');
+});
+
+test('기존 내 기억 주소도 같은 개인 공간과 소유자 필터를 연다',async({page})=>{
+ await page.goto('./#/login');await page.getByRole('button',{name:'로컬 시연 세션 시작'}).click();
+ const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});await expect(map).toBeVisible();await map.evaluate(el=>el.setAttribute('data-legacy-map','retained'));
+ await page.goto('./#/my-map?visibility=private&year=2022');
+ const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel).toBeVisible();await expect(map).toHaveAttribute('data-legacy-map','retained');
+ await panel.locator('.personal-filter-details summary').click();
+ await expect(panel.getByRole('combobox',{name:'내 공간 공개 범위'})).toHaveValue('private');
+ await expect(panel.getByRole('combobox',{name:'내 공간 연도'})).toHaveValue('2022');
+ await expect(panel.getByRole('button',{name:/나만 간직한 골목의 저녁/})).toBeVisible();
+ await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
+ await expect(page.getByLabel('지도 위 기억 마커').getByRole('button',{name:'나만 간직한 골목의 저녁',exact:true})).toBeVisible();
+});

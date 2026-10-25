@@ -9,6 +9,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
   return (
     <MemoryApp
       initialExplore={parameters.explore === '1'}
+      initialPersonal={parameters.personal === '1'}
       isAuthenticated={Boolean(await getChatGPTUser())}
       initialFilters={parseMemoryFilters(parameters)}
       naverMapsClientId={process.env.NEXT_PUBLIC_NAVER_MAPS_CLIENT_ID ?? ''}

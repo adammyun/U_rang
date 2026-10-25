@@ -5,6 +5,10 @@ import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import Link from '@/components/ui/app-link';
 import Image from 'next/image';
 import { useAppNavigation } from '@/src/lib/navigation';
+import PersonalSpacePanel from './memories/personal-space';
+import { ACTIVITY_CHANGED_EVENT, fetchPersonalSpace } from '@/src/features/memories/personal-api';
+import { DEFAULT_PERSONAL_SELECTION, type PersonalSpace, type PersonalSelection } from '@/src/features/memories/personal-model';
+import { deleteMemory } from '@/src/features/memories/api';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight,
@@ -15,7 +19,6 @@ import {
   MapPin,
   Minus,
   Plus,
-  UserRound,
   X,
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -133,12 +136,16 @@ export default function MemoryApp({
   naverMapsClientId,
   initialExplore = false,
   liveServiceUrl,
+  initialPersonal = false,
+  initialVisibility = '',
 }: {
   isAuthenticated: boolean;
   initialFilters: MemoryFilters;
   naverMapsClientId: string;
   initialExplore?: boolean;
   liveServiceUrl?: string;
+  initialPersonal?: boolean;
+  initialVisibility?: Memory['visibility']|'';
 }) {
   const router = useAppNavigation();
   const mapRef = useRef<MapHandle | null>(null);
@@ -167,10 +174,35 @@ export default function MemoryApp({
   const [area, setArea] = useState('울산광역시');
   const [currentLocation, setCurrentLocation] = useState<Point | null>(null);
   const [expanded, setExpanded] = useState(initialExplore);
+  const [personalMode,setPersonalMode]=useState(initialPersonal && isAuthenticated);
+  const [profileOpen,setProfileOpen]=useState(initialPersonal);
+  const [personalSelection,setPersonalSelection]=useState<PersonalSelection>(DEFAULT_PERSONAL_SELECTION);
+  const [personalData,setPersonalData]=useState<PersonalSpace|null>(null);
+  const [personalVisibility,setPersonalVisibility]=useState<Memory['visibility']|''>(initialVisibility);
+  const [detailFromProfile,setDetailFromProfile]=useState(false);
+  const [editing,setEditing]=useState<Memory|null>(null);
+  const [deleting,setDeleting]=useState(false);
   const [placeVisit, setPlaceVisit] = useState(0);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
   const [mapMode, setMapMode] = useState<MapMode>('calm');
+  const previousAuth=useRef(isAuthenticated);
+  const previousPersonalRoute=useRef(initialPersonal);
+  useEffect(()=>{
+    // A legacy Pages hash link can reuse this mounted component. Open its
+    // personal state without replacing the map when that route is entered.
+    if(initialPersonal&&!previousPersonalRoute.current){
+      setProfileOpen(true);setPersonalMode(isAuthenticated);setPersonalVisibility(initialVisibility);setFilters(initialFilters);setPersonalSelection(DEFAULT_PERSONAL_SELECTION);setPublicRows([]);setPersonalData(null);setSelected(null);setPlaceAnchor(null);setPlaceGroup(null);setSelectedPlace(null);setPendingLocation(null);setDraftLocation(null);setExpanded(false);
+    }
+    previousPersonalRoute.current=initialPersonal;
+  },[initialPersonal,isAuthenticated,initialVisibility,initialFilters]);
+  useEffect(()=>{
+    if(previousAuth.current&&!isAuthenticated){
+      // Remove owner-only content when a second tab ends the Pages session.
+      setSelected(null);setEditing(null);setDraftLocation(null);setProfileOpen(false);setPersonalMode(false);setPersonalData(null);setPublicRows([]);setCreatedRows([]);
+    }
+    previousAuth.current=isAuthenticated;
+  },[isAuthenticated]);
 
   // oxlint-disable react/react-compiler -- Loading state is reset when a new viewport request begins.
   useEffect(() => {
@@ -181,7 +213,12 @@ export default function MemoryApp({
     setLoading(true);
     setLoadError(false);
     const timer = setTimeout(() => {
-      fetchPublicMemories(bounds, filters, controller.signal)
+      (personalMode && isAuthenticated
+        ? fetchPersonalSpace({...bounds,...filters,...personalSelection,visibility:personalVisibility||undefined},controller.signal).then(result=>{
+          if(!controller.signal.aborted)setPersonalData(result);
+          return {memories:result.mapMemories,hasMore:result.hasMore};
+        })
+        : fetchPublicMemories(bounds, filters, controller.signal))
         .then((result) => {
           if (!controller.signal.aborted) {
             setPublicRows(result.memories);
@@ -199,7 +236,7 @@ export default function MemoryApp({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [bounds, filters, revision]);
+  }, [bounds, filters, revision, personalMode, personalSelection, isAuthenticated, personalVisibility]);
   // oxlint-enable react/react-compiler
 
   useEffect(
@@ -211,6 +248,7 @@ export default function MemoryApp({
   );
 
   const rows = useMemo(() => {
+    if(personalMode) return publicRows;
     const byId = new Map(publicRows.map((memory) => [memory.id, memory]));
     for (const memory of createdRows) {
       if (
@@ -222,9 +260,15 @@ export default function MemoryApp({
       }
     }
     return Array.from(byId.values());
-  }, [bounds, createdRows, filters, publicRows]);
+  }, [bounds, createdRows, filters, publicRows, personalMode]);
 
-  const memories = rows;
+  useEffect(()=>{
+    const changed=()=>setRevision(value=>value+1);
+    window.addEventListener(ACTIVITY_CHANGED_EVENT,changed);
+    return()=>window.removeEventListener(ACTIVITY_CHANGED_EVENT,changed);
+  },[]);
+
+  const memories = personalMode&&!isAuthenticated?[]:rows;
   const hasActiveFilters = Boolean(filters.year || filters.emotions.length);
   const selectedPlaceIndex = placeGroup?.memories.findIndex((item) => item.id === selected?.id) ?? -1;
 
@@ -247,6 +291,8 @@ export default function MemoryApp({
     setOpeningMemoryId(null);
     setPlaceVisit(visit => visit + 1);
     setPlaceAnchor(memory);
+    setProfileOpen(false);
+    setDetailFromProfile(false);
     setExpanded(false);
     setPlaceGroup(null);
     setPlaceError(false);
@@ -315,6 +361,7 @@ export default function MemoryApp({
     setPlaceGroup(null);
     setDraftLocation(null);
     setExpanded(false);
+    setProfileOpen(false);
     setPendingLocation(mapRef.current?.center() ?? DEFAULT_MAP_CENTER);
   }, [isAuthenticated, router]);
 
@@ -345,13 +392,17 @@ export default function MemoryApp({
         setPendingLocation({ lng: memory.lng, lat: memory.lat });
         return;
       }
-      openPlace(memory);
+      if(personalMode) {
+        setProfileOpen(false);setDetailFromProfile(false);setPlaceAnchor(null);setPlaceGroup(null);
+        void openMemoryFromPlace(memory.id);
+      } else openPlace(memory);
     },
-    [openPlace, pendingLocation],
+    [openPlace, pendingLocation, personalMode, openMemoryFromPlace],
   );
 
   async function signOut() {
     try {
+      setPersonalMode(false);setProfileOpen(false);setPersonalData(null);setPublicRows([]);
       await logout();
       setCreatedRows([]);
       router.refresh();
@@ -366,9 +417,8 @@ export default function MemoryApp({
       ...current.filter((item) => item.id !== memory.id),
     ]);
     setDraftLocation(null);
-    if (memory.visibility === 'public') {
-      setRevision((value) => value + 1);
-    }
+    setEditing(null);
+    setRevision((value) => value + 1);
     setSelected(memory);
     toast.success(
       memory.visibility === 'public'
@@ -432,6 +482,8 @@ export default function MemoryApp({
   }
 
   function showExplore() {
+    setPersonalMode(false);setProfileOpen(false);setPublicRows([]);
+    setRevision(value=>value+1);
     setPendingLocation(null);
     setExpanded(true);
     setSelected(null);
@@ -439,8 +491,32 @@ export default function MemoryApp({
     setPlaceAnchor(null);
   }
 
+  function showPersonal() {
+    detailRequest.current?.abort();nearbyRequest.current?.abort();
+    setSelected(null);setPlaceAnchor(null);setPlaceGroup(null);setSelectedPlace(null);setPendingLocation(null);setExpanded(false);
+    if(!personalMode&&isAuthenticated){setPublicRows([]);setPersonalSelection(DEFAULT_PERSONAL_SELECTION);}
+    setPersonalMode(isAuthenticated);setProfileOpen(true);
+  }
+
+  function showPublicMap() {
+    setPersonalMode(false);setProfileOpen(false);setPublicRows([]);setRevision(value=>value+1);setPendingLocation(null);setExpanded(false);setSelected(null);setSelectedPlace(null);setPlaceAnchor(null);setPlaceGroup(null);
+  }
+
+  function closePersonal() {
+    setProfileOpen(false);
+    requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.spatial-nav [data-tour="my-memories"]')?.focus());
+  }
+
+  async function removeSelected() {
+    if(!selected?.owned||!window.confirm('이 기억을 삭제할까요?'))return;
+    setDeleting(true);
+    try {await deleteMemory(selected.id);setCreatedRows(rows=>rows.filter(row=>row.id!==selected.id));setSelected(null);setRevision(value=>value+1);setProfileOpen(personalMode);toast.success('기억을 삭제했어요.');}
+    catch(reason){toast.error(reason instanceof Error?reason.message:'삭제하지 못했어요.');}
+    finally {setDeleting(false);}
+  }
+
   return (
-    <main className={`atlas spatial-atlas memory-atlas${selected || placeAnchor || expanded ? ' has-spatial-panel' : ''}`}>
+    <main className={`atlas spatial-atlas memory-atlas${selected || placeAnchor || expanded || profileOpen ? ' has-spatial-panel' : ''}${profileOpen?' has-personal-panel':''}`}>
       <a className="skip-link" href="#public-memory-list" onClick={(event) => {
         event.preventDefault();
         showExplore();
@@ -464,9 +540,6 @@ export default function MemoryApp({
         <nav className="app-nav" aria-label="주요 메뉴" data-tour="account-navigation">
           {isAuthenticated ? (
             <>
-              <Link href="/my-map">
-                <UserRound size={15} /> 내 기억
-              </Link>
               <button onClick={() => void signOut()}>
                 <LogOut size={15} /> 로그아웃
               </button>
@@ -482,7 +555,7 @@ export default function MemoryApp({
         mode={mapMode}
         presentation="stamp"
         hideMemories={Boolean(pendingLocation || draftLocation)}
-        reserveIntroSpace={!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace}
+        reserveIntroSpace={!personalMode && !profileOpen && !selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace}
         mapRef={mapRef}
         draftPoint={
           draftLocation?.point ??
@@ -502,17 +575,18 @@ export default function MemoryApp({
       <AtlasAtmosphere emotion={selected?.emotion ?? placeAnchor?.emotion} />
       <PlaceSearch onSelect={selectSearchResult} />
       <MemoryFilterSheet
+        scope={personalMode?'mine':'all'} onScopeChange={value=>value==='mine'?showPersonal():showPublicMap()}
         filters={filters}
         onChange={changeFilters}
         mapMode={mapMode}
         onMapModeChange={setMapMode}
       />
 
-      {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
+      {!personalMode && !profileOpen && !selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
         <AtlasIntro />
       )}
 
-      {!selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
+      {!personalMode && !profileOpen && !selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
         <AtlasEmotionPicker selected={filters.emotions} onChange={(emotions) => changeFilters({ ...filters, emotions })} />
       )}
       <span className="atlas-edge-note" aria-hidden="true">PLACES HOLD OUR STORIES · ULSAN</span>
@@ -636,7 +710,7 @@ export default function MemoryApp({
       </aside>
 
       <DeveloperHotspot className={`map-caption ${selectedPlace ? 'is-hidden' : ''}`}>
-        <span className="live-dot" /> {area} · 공개된 기억 <strong>{loading ? '…' : memories.length}</strong>
+        <span className="live-dot" /> {personalMode ? '나의 지도 · 선택한 기억' : `${area} · 공개된 기억`} <strong>{loading ? '…' : memories.length}</strong>
       </DeveloperHotspot>
       {!pendingLocation && (
         <div className="map-guide">
@@ -657,10 +731,20 @@ export default function MemoryApp({
       </div>
       <AtlasNavigation
         authenticated={isAuthenticated} expanded={expanded} selecting={Boolean(pendingLocation)}
+        personal={personalMode||profileOpen} personalExpanded={profileOpen} onPersonal={showPersonal}
         onCreate={beginLocationSelection}
-        onMap={() => { setPendingLocation(null); setExpanded(false); setSelected(null); setSelectedPlace(null); setPlaceAnchor(null); }}
+        onMap={showPublicMap}
         onExplore={showExplore}
       />
+
+      {profileOpen && (isAuthenticated ? <PersonalSpacePanel
+        data={personalData} selection={personalSelection} onSelection={value=>{setPersonalSelection(value);setPublicRows([]);}}
+        filters={filters} onFilters={changeFilters} loading={loading} error={loadError} onRetry={()=>setRevision(value=>value+1)}
+        visibility={personalVisibility} onVisibility={setPersonalVisibility} mapMode={mapMode} onMapMode={setMapMode}
+        onClose={closePersonal} onSelect={memory=>{setDetailFromProfile(true);setProfileOpen(false);setPlaceAnchor(null);setPlaceGroup(null);void openMemoryFromPlace(memory.id);}}
+      /> : <section id="personal-space-panel" className="personal-panel personal-guest" role="dialog" aria-label="마이페이지"><button type="button" aria-label="마이페이지 닫기" onClick={()=>setProfileOpen(false)}><X size={18}/></button><h2><AtlasHeadingLabel>나의 유랑</AtlasHeadingLabel></h2><p>로그인하고 내 기록과 마음에 남은 이야기를 한곳에 모아 보세요.</p><Link href="/login?next=%2F%3Fpersonal%3D1">로그인하고 기억 모으기</Link></section>)}
+
+      {editing && isAuthenticated && <MemoryForm key={`edit:${editing.id}`} memory={editing} point={editing} onClose={()=>setEditing(null)} onSaved={memorySaved}/>}
 
       {draftLocation && (
         <MemoryForm
@@ -672,10 +756,14 @@ export default function MemoryApp({
         />
       )}
 
-      {selected && (
+      {selected && (isAuthenticated || selected.visibility==='public') && (
         <SpatialMemoryDetail
           key={selected.id}
           memory={selected}
+          authenticated={isAuthenticated}
+          onEdit={selected.owned?()=>setEditing(selected):undefined}
+          onDelete={selected.owned?()=>void removeSelected():undefined}
+          deleting={deleting}
           positionLabel={selectedPlaceIndex >= 0 && placeGroup ? `${selectedPlaceIndex + 1} / ${placeGroup.memories.length}` : undefined}
           onPrevious={selectedPlaceIndex > 0 && placeGroup ? () => void openMemoryFromPlace(placeGroup.memories[selectedPlaceIndex - 1].id) : undefined}
           onNext={placeGroup && selectedPlaceIndex >= 0 && selectedPlaceIndex < placeGroup.memories.length - 1 ? () => void openMemoryFromPlace(placeGroup.memories[selectedPlaceIndex + 1].id) : undefined}
@@ -683,7 +771,7 @@ export default function MemoryApp({
           onOpenPanorama={() =>
             setPanoramaTarget(memoryPanoramaTarget(selected))
           }
-          onBack={() => { setSelected(null); }}
+          onBack={() => { setSelected(null);if(detailFromProfile)setProfileOpen(true); }}
           onOtherMemories={placeAnchor ? () => setSelected(null) : undefined}
           onClose={() => {
             setSelected(null);
@@ -703,6 +791,7 @@ export default function MemoryApp({
         <SpatialPlacePreview
           key={`${placeAnchor.id}:${placeVisit}`}
           anchor={placeAnchor}
+          authenticated={isAuthenticated}
           group={placeGroup}
           loading={placeLoading}
           error={placeError}

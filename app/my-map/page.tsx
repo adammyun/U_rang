@@ -1,15 +1,17 @@
-import MyMemoryMap from '@/components/my-memory-map';
-import { parseUserMemoryFilters } from '@/src/features/memories/filters';
+import MemoryApp from '@/components/memory-app';
+import { parseMemoryFilters, parseUserMemoryFilters } from '@/src/features/memories/filters';
 import { requireChatGPTUser } from '@/app/chatgpt-auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function MyMapPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const user = await requireChatGPTUser('/my-map');
+  await requireChatGPTUser('/my-map');
+  const query=await searchParams;
   return (
-    <MyMemoryMap
-      displayName={user.displayName}
-      initialFilters={parseUserMemoryFilters(await searchParams)}
+    <MemoryApp
+      isAuthenticated initialPersonal
+      initialFilters={parseMemoryFilters(query)}
+      initialVisibility={parseUserMemoryFilters(query).visibility}
       naverMapsClientId={process.env.NEXT_PUBLIC_NAVER_MAPS_CLIENT_ID ?? ''}
     />
   );

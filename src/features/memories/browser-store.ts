@@ -1,4 +1,7 @@
 import { demoJournalContent } from '@/src/features/memories/demo-journals';
+import { isPagesAuthenticated } from '@/src/lib/runtime';
+import type { MemoryActivity, PersonalQuery, PersonalSpace } from './personal-model';
+import { emotions } from './model';
 import { additionalDemoRows, demoMemoryPhotos, demoMediaId } from './demo-catalog';
 import type {
   Bounds,
@@ -16,8 +19,9 @@ import type {
 } from './schemas';
 
 const DATABASE_NAME = 'yeoun_2';
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 4;
 const STORE_NAME = 'memories';
+const ACTIVITY_STORE = 'activity';
 const LOCAL_USER_ID = 'github-pages-user';
 
 type StoredMedia = {
@@ -117,6 +121,7 @@ function database() {
     request.onerror = () => reject(request.error ?? new Error('브라우저 저장소를 열지 못했습니다.'));
     request.onupgradeneeded = () => {
       const db = request.result;
+      if (!db.objectStoreNames.contains(ACTIVITY_STORE)) db.createObjectStore(ACTIVITY_STORE, { keyPath: 'id' });
       const store = db.objectStoreNames.contains(STORE_NAME)
         ? request.transaction!.objectStore(STORE_NAME)
         : db.createObjectStore(STORE_NAME, { keyPath: 'id' });
@@ -180,7 +185,7 @@ function media(record: StoredMemory): MemoryMedia[] {
 }
 
 function toMemory(record: StoredMemory, ownerCoordinates = false): Memory {
-  const owned = record.ownerId === LOCAL_USER_ID;
+  const owned = isPagesAuthenticated() && record.ownerId === LOCAL_USER_ID;
   return {
     id: record.id,
     title: record.title,
@@ -236,8 +241,9 @@ export async function getBrowserPublicMemory(id: string, signal?: AbortSignal) {
   checkAbort(signal);
   const row = await recordById(id);
   checkAbort(signal);
-  if (!row || row.visibility !== 'public') throw new Error('공개 기억을 찾지 못했습니다.');
-  return toMemory(row);
+  const owner = isPagesAuthenticated() && row?.ownerId === LOCAL_USER_ID;
+  if (!row || (row.visibility !== 'public' && !owner)) throw new Error('기억을 찾지 못했습니다.');
+  return toMemory(row, owner);
 }
 
 function fileDataUrl(file: File) {
@@ -260,6 +266,7 @@ async function storedMedia(files: File[], offset = 0) {
 }
 
 export async function createBrowserMemory(input: CreateMemoryInput, images: File[]) {
+  if(!isPagesAuthenticated()) throw new Error('로그인이 필요합니다.');
   const now = new Date().toISOString();
   const record: StoredMemory = {
     id: crypto.randomUUID(),
@@ -307,6 +314,7 @@ export async function updateBrowserMemory(
   images: File[],
   removeMediaIds: string[],
 ) {
+  if(!isPagesAuthenticated()) throw new Error('로그인이 필요합니다.');
   const current = await recordById(id);
   if (!current || current.ownerId !== LOCAL_USER_ID) throw new Error('수정할 수 있는 기억을 찾지 못했습니다.');
   const kept = current.media.filter((item) => !removeMediaIds.includes(item.id));
@@ -327,6 +335,7 @@ export async function updateBrowserMemory(
 }
 
 export async function deleteBrowserMemory(id: string) {
+  if(!isPagesAuthenticated()) throw new Error('로그인이 필요합니다.');
   const current = await recordById(id);
   if (!current || current.ownerId !== LOCAL_USER_ID) throw new Error('삭제할 수 있는 기억을 찾지 못했습니다.');
   const db = await database();
@@ -380,4 +389,49 @@ export async function browserPlaceMemoryGroup(
       firstImageUrl: row.media[0]?.dataUrl ?? null,
     })),
   };
+}
+
+type StoredActivity = { id:string; liked:boolean; bookmarked:boolean; viewed:boolean };
+async function activityRecords() {
+  const db = await database();
+  return requestResult(db.transaction(ACTIVITY_STORE).objectStore(ACTIVITY_STORE).getAll() as IDBRequest<StoredActivity[]>);
+}
+
+export async function browserActivity(id:string, action?:'like'|'bookmark'|'view', active=false):Promise<MemoryActivity> {
+  await getBrowserPublicMemory(id);
+  if(action && action!=='view' && !isPagesAuthenticated()) throw new Error('로그인이 필요합니다.');
+  const db=await database();
+  const tx=db.transaction(ACTIVITY_STORE,action?'readwrite':'readonly');
+  const store=tx.objectStore(ACTIVITY_STORE);
+  const current=await requestResult(store.get(id) as IDBRequest<StoredActivity|undefined>);
+  const next=current ?? {id,liked:false,bookmarked:false,viewed:false};
+  if(action) {
+    if(action==='view') next.viewed=true;
+    else if(action==='like') next.liked=active;
+    else next.bookmarked=active;
+    await requestResult(store.put(next));
+  }
+  return {likes:Number(next.liked),views:Number(next.viewed),liked:isPagesAuthenticated()&&next.liked,bookmarked:isPagesAuthenticated()&&next.bookmarked};
+}
+
+export async function browserPersonalSpace(query:PersonalQuery, signal?:AbortSignal):Promise<PersonalSpace> {
+  if(!isPagesAuthenticated()) throw new Error('로그인이 필요합니다.');
+  checkAbort(signal);
+  const rows=(await allRecords()).filter(row=>row.visibility==='public'||row.ownerId===LOCAL_USER_ID)
+    .sort((a,b)=>(b.memoryDate??b.createdAt).localeCompare(a.memoryDate??a.createdAt));
+  const activity=new Map((await activityRecords()).map(row=>[row.id,row]));
+  const mine=rows.filter(row=>row.ownerId===LOCAL_USER_ID);
+  const bookmarked=rows.filter(row=>activity.get(row.id)?.bookmarked);
+  const liked=rows.filter(row=>activity.get(row.id)?.liked);
+  const selected=new Set([...(query.mine?mine:[]),...(query.bookmarked?bookmarked:[]),...(query.liked?liked:[])].map(row=>row.id));
+  const mapped=rows.filter(row=>{
+    const lat=row.ownerId===LOCAL_USER_ID?row.exactLat:row.publicLat;
+    const lng=row.ownerId===LOCAL_USER_ID?row.exactLng:row.publicLng;
+    return selected.has(row.id)&&matchesFilters(row,query)&&(!query.visibility||row.visibility===query.visibility)&&lat>=query.south&&lat<=query.north&&lng>=query.west&&lng<=query.east;
+  });
+  const score=(row:StoredMemory)=>Number(mine.some(own=>own.locationName===row.locationName))*2+Number(mine.some(own=>own.emotion===row.emotion));
+  const recommendations=rows.filter(row=>row.visibility==='public'&&row.ownerId!==LOCAL_USER_ID).sort((a,b)=>score(b)-score(a)).slice(0,8).map(row=>({memory:toMemory(row),reason:mine.some(own=>own.locationName===row.locationName)?'내가 기록한 장소의 다른 이야기':mine.some(own=>own.emotion===row.emotion)?`내 기록과 닮은 ${emotions[row.emotion].label}의 순간`:'울산에서 만나는 다른 이야기'}));
+  checkAbort(signal);
+  const list=(records:StoredMemory[])=>records.filter(row=>matchesFilters(row,query)&&(!query.visibility||row.visibility===query.visibility)).slice(0,40).map(row=>toMemory(row,true));
+  return {displayName:'나',totals:{mine:mine.length,bookmarked:bookmarked.length,liked:liked.length},lists:{mine:list(mine),bookmarked:list(bookmarked),liked:list(liked)},mapMemories:mapped.slice(0,200).map(row=>toMemory(row,true)),hasMore:mapped.length>200,recommendations};
 }

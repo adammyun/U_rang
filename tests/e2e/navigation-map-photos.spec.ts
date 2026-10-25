@@ -41,21 +41,19 @@ test('지도·탐색·내 기억의 하단 메뉴가 같은 위치에 남고 일
   expect(panel.y + panel.height).toBeLessThan(initial.y);
   if (info.project.name.startsWith('mobile')) await expect(page.getByRole('button', { name: '지도 확대', exact: true })).toBeHidden();
   await capture(page, 'explore', info.project.name);
-  await nav.getByRole('link', { name: '내 기억', exact: true }).click();
-  await expect(page).toHaveURL(/#\/my-map/);
-  // The hash changes before the owner route commits. Wait for its specific
-  // navigation control so a detached public nav cannot supply a null box.
-  await expect(nav.getByRole('button', { name: '내 기억 목록 펼치기' })).toBeVisible();
-  await expect(nav).toBeInViewport();
-  expect((await labels()).map(t => t.trim())).toEqual(initialLabels);
+  const originalUrl=page.url();
+  await map.evaluate(el=>el.setAttribute('data-retained','yes'));
+  await nav.getByRole('button',{name:'내 기억',exact:true}).click();
+  const personal=page.getByRole('dialog',{name:'마이페이지'});
+  await expect(personal).toBeVisible();await expect(page).toHaveURL(originalUrl);
+  await expect(map).toHaveAttribute('data-retained','yes');
+  await expect(nav).toBeInViewport();expect((await labels()).map(t=>t.trim())).toEqual(initialLabels);
   expect((await nav.boundingBox())!.y).toBe(initial.y);
-  await map.click({ position: { x: 220, y: 360 }, force: true });
+  await expect.poll(async()=>{const box=(await personal.boundingBox())!;return box.y+box.height;}).toBeLessThan(initial.y);
+  await personal.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
+  await map.click({position:{x:220,y:360},force:true});
   await expect(page.locator('.create-sheet')).toHaveCount(0);
-  await expect(page.getByRole('region', { name: '기억을 남길 장소 선택' })).toHaveCount(0);
-  await nav.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
-  await expect(page.getByLabel('내 기억 목록', { exact: true })).toBeVisible();
-  await expect(nav).toBeInViewport();
-  await page.getByRole('button', { name: '내 기억 목록 닫기' }).click();
+  await expect(page.getByRole('region',{name:'기억을 남길 장소 선택'})).toHaveCount(0);
   await nav.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
   await expect(page.getByRole('img', { name: '선택한 기억 위치' })).toBeVisible();
   await map.click({ position: { x: 200, y: 400 }, force: true });
@@ -64,7 +62,7 @@ test('지도·탐색·내 기억의 하단 메뉴가 같은 위치에 남고 일
   await expect(page.locator('.create-sheet')).toBeVisible();
   await page.getByRole('button', { name: '기록 닫기' }).click();
   await capture(page, 'mine', info.project.name);
-  await nav.getByRole('link', { name: '탐색', exact: true }).click();
+  await nav.getByRole('button', { name: '탐색', exact: true }).click();
   await expect(page.getByLabel('주변의 공개 기억')).toBeVisible();
   await nav.getByRole('button', { name: '지도', exact: true }).click();
   await expect(page.getByLabel('주변의 공개 기억')).toBeHidden();

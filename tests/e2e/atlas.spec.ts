@@ -64,9 +64,8 @@ test('비공개 글 기록은 공개 스탬프에 나타나지 않고 내 기억
   await page.getByRole('button', { name: '탐색', exact: true }).click();
   await expect(page.getByLabel('주변의 공개 기억').getByText(title)).toHaveCount(0);
   await page.getByRole('button', { name: '탐색 닫기' }).click();
-  await page.getByLabel('지도 메뉴').getByRole('link', { name: '내 기억' }).click();
-  await page.getByRole('button', { name: '내 기억 목록 펼치기' }).click();
-  await expect(page.getByLabel('내 기억 목록').getByText(title)).toBeVisible();
+  await page.getByLabel('지도 메뉴').getByRole('button', { name: '내 기억' }).click();
+  await expect(page.getByRole('dialog', { name: '마이페이지' }).getByText(title)).toBeVisible();
 });
 
 test('현재 위치와 움직임 줄이기 및 같은 장소의 다음 기억이 동작한다', async ({ page, context }) => {
@@ -158,24 +157,21 @@ test('울산 라인 지도와 상세 지도는 같은 기억 앵커를 사용한
   await page.screenshot({ path: `test-results/screenshots/yurang-main-${info.project.name}.png`, animations: 'disabled' });
 });
 
-test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한다', async ({ page }) => {
-  await page.goto('./');
-  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
-  await page.getByRole('link', { name: '내 기억만 보기' }).click();
-  await expect(page.getByRole('button', { name: '로컬 시연 세션 시작' })).toBeVisible();
-  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
-  await expect(page).toHaveURL(/#\/my-map/);
-  await expect(page.getByLabel('내 기억 목록', { exact: true })).toBeHidden();
-  await expect(page.getByRole('link', { name: '모두의 지도로 돌아가기' })).toBeVisible();
-  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
-  await expect(page.getByRole('link', { name: '내 기억만 보기' })).toHaveAttribute('aria-current', 'page');
-  await page.getByRole('button', { name: '평온', exact: true }).click();
-  await expect(page.getByRole('link', { name: '모두의 기억 보기' })).toHaveAttribute('href', /emotion=peaceful/);
-  await page.getByRole('link', { name: '모두의 기억 보기' }).click();
-  await page.getByRole('button', { name: /^감정 태그 펼치기/ }).click();
-  await expect(page.getByLabel('감정으로 기억 탐색').getByRole('button', { name: '평온' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('.ulsan-line-map')).toBeVisible();
-  await expect(page.getByLabel('지도 메뉴')).toBeVisible();
+test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한다', async ({page})=>{
+ await page.goto('./');await page.getByRole('button',{name:/^지도 조정 열기/}).click();
+ await page.getByRole('button',{name:'내 기억만 보기',exact:true}).click();
+ const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel).toBeVisible();
+ await panel.getByRole('link',{name:'로그인하고 기억 모으기'}).click();
+ await page.getByRole('button',{name:'로컬 시연 세션 시작'}).click();
+ await expect(panel).toBeVisible();
+ await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
+ await page.getByRole('button',{name:/^지도 조정 열기/}).click();
+ await expect(page.getByRole('button',{name:'내 기억만 보기',exact:true})).toHaveAttribute('aria-current','page');
+ await page.getByRole('button',{name:'평온',exact:true}).click();
+ await page.getByRole('button',{name:'모두의 기억 보기',exact:true}).click();
+ await page.getByRole('button',{name:/^감정 태그 펼치기/}).click();
+ await expect(page.getByLabel('감정으로 기억 탐색').getByRole('button',{name:'평온'})).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('.ulsan-line-map')).toBeVisible();await expect(page.getByLabel('지도 메뉴')).toBeVisible();
 });
 
 test('라인 데이터 실패 시 raster를 유지하고 울산 밖 현재 위치는 지도 범위를 벗어나지 않는다', async ({ page, context }) => {

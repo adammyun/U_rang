@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowLeft, LogIn, MapPinned } from 'lucide-react';
 import MemoryApp from '@/components/memory-app';
-import MyMemoryMap from '@/components/my-memory-map';
 import DevTools from '@/components/dev/dev-tools';
 import {
   DEFAULT_MEMORY_FILTERS,
@@ -105,7 +104,8 @@ function PagesApp() {
       <LoginPage
         onLogin={() => {
           setPagesAuthenticated(true);
-          window.location.hash = '/';
+          const next=route.search.get('next')??'/';
+          window.location.hash=next.startsWith('/')&&!next.startsWith('//')?next:'/';
         }}
       />
     );
@@ -123,9 +123,10 @@ function PagesApp() {
       );
     }
     return (
-      <MyMemoryMap
-        displayName="나"
-        initialFilters={parseUserMemoryFilters(parameters(route.search))}
+      <MemoryApp
+        isAuthenticated initialPersonal
+        initialVisibility={parseUserMemoryFilters(parameters(route.search)).visibility}
+        initialFilters={parseMemoryFilters(parameters(route.search))}
         naverMapsClientId={clientId}
       />
     );
@@ -147,6 +148,7 @@ function PagesApp() {
     <MemoryApp
       liveServiceUrl={import.meta.env.VITE_LIVE_SERVICE_URL}
       initialExplore={route.search.get('explore') === '1'}
+      initialPersonal={route.search.get('personal') === '1'}
       isAuthenticated={authenticated}
       initialFilters={
         route.search.size

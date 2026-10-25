@@ -1,4 +1,5 @@
-import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { check, index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
 
 export const memories = sqliteTable(
   'memories',
@@ -46,3 +47,16 @@ export const memoryMedia = sqliteTable(
   },
   (table) => [index('memory_media_memory_sort_idx').on(table.memoryId, table.sortOrder)],
 );
+
+export const memoryReactions = sqliteTable('memory_reactions', {
+  memoryId:text('memory_id').notNull().references(()=>memories.id,{onDelete:'cascade'}),
+  userId:text('user_id').notNull(),
+  kind:text('kind',{enum:['like','bookmark']}).notNull(),
+  createdAt:text('created_at').notNull(),
+}, table=>[primaryKey({columns:[table.memoryId,table.userId,table.kind]}),index('memory_reactions_user_kind_idx').on(table.userId,table.kind,table.createdAt),check('memory_reactions_kind',sql`${table.kind} in ('like', 'bookmark')`)]);
+
+export const memoryViews = sqliteTable('memory_views', {
+  memoryId:text('memory_id').notNull().references(()=>memories.id,{onDelete:'cascade'}),
+  viewerKey:text('viewer_key').notNull(),
+  createdAt:text('created_at').notNull(),
+}, table=>[primaryKey({columns:[table.memoryId,table.viewerKey]})]);

@@ -23,7 +23,7 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern dist-pages --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build:pages",
-    "db:migrate": "node scripts/local-d1.mjs drizzle/0000_charming_sunfire.sql",
+    "db:migrate": "node scripts/local-d1.mjs drizzle/0000_charming_sunfire.sql && node scripts/local-d1.mjs drizzle/0001_memory_activity.sql",
     "db:seed": "node scripts/local-d1.mjs drizzle/seed.sql",
     "db:setup": "pnpm build && pnpm db:migrate && pnpm db:seed",
     "db:generate": "drizzle-kit generate"

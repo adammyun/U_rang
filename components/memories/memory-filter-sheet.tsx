@@ -24,12 +24,14 @@ export default function MemoryFilterSheet({
   mapMode,
   onMapModeChange,
   scope = 'all',
+  onScopeChange,
 }: {
   filters: MemoryFilters;
   onChange: (filters: MemoryFilters) => void;
   mapMode: MapMode;
   onMapModeChange: (mode: MapMode) => void;
   scope?: 'all' | 'mine';
+  onScopeChange?:(scope:'all'|'mine')=>void;
 }) {
   const [open, setOpen] = useState(false);
   const activeCount = Number(Boolean(filters.year)) + filters.emotions.length;
@@ -78,7 +80,7 @@ export default function MemoryFilterSheet({
             걷고 싶은 풍경과 만나고 싶은 기억을 골라보세요.
           </SheetDescription>
 
-          <MemoryScopeSwitch scope={scope} filters={filters} />
+          <MemoryScopeSwitch scope={scope} filters={filters} onChange={onScopeChange?value=>{setOpen(false);onScopeChange(value);}:undefined} />
 
           <fieldset className="map-appearance-field">
             <legend><Layers3 size={16} /> 지도 표현</legend>
