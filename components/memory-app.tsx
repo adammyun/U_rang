@@ -183,6 +183,7 @@ export default function MemoryApp({
   const [editing,setEditing]=useState<Memory|null>(null);
   const [deleting,setDeleting]=useState(false);
   const [placeVisit, setPlaceVisit] = useState(0);
+  const [commentFallbackId,setCommentFallbackId]=useState<string|null>(null);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
   const [mapMode, setMapMode] = useState<MapMode>('calm');
@@ -760,6 +761,8 @@ export default function MemoryApp({
         <SpatialMemoryDetail
           key={selected.id}
           memory={selected}
+          showComments={commentFallbackId===selected.id}
+          onOpenComments={()=>setPanoramaTarget({...memoryPanoramaTarget(selected),openComments:true})}
           authenticated={isAuthenticated}
           onEdit={selected.owned?()=>setEditing(selected):undefined}
           onDelete={selected.owned?()=>void removeSelected():undefined}
@@ -809,6 +812,12 @@ export default function MemoryApp({
 
       {panoramaTarget && (
         <PanoramaViewer
+          key={`panorama:${panoramaTarget.memoryId}`}
+          memoryId={panoramaTarget.memoryId}
+          memoryTitle={panoramaTarget.memoryTitle}
+          initialCommentsOpen={panoramaTarget.openComments}
+          authenticated={isAuthenticated}
+          onFallbackComments={()=>{setCommentFallbackId(panoramaTarget.memoryId);if(selected?.id!==panoramaTarget.memoryId)void openMemoryFromPlace(panoramaTarget.memoryId);setPanoramaTarget(null);}}
           clientId={naverMapsClientId}
           placeName={panoramaTarget.placeName}
           point={panoramaTarget.point}

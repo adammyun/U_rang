@@ -1,3 +1,4 @@
+import { COMMENT_PAGE_SIZE, encodeCommentCursor, type CommentCursor, type CommentPage, type MemoryComment } from './comments-model';
 import { demoJournalContent } from '@/src/features/memories/demo-journals';
 import { isPagesAuthenticated } from '@/src/lib/runtime';
 import type { MemoryActivity, PersonalQuery, PersonalSpace } from './personal-model';
@@ -19,7 +20,8 @@ import type {
 } from './schemas';
 
 const DATABASE_NAME = 'yeoun_2';
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
+const COMMENTS_STORE = 'comments';
 const STORE_NAME = 'memories';
 const ACTIVITY_STORE = 'activity';
 const LOCAL_USER_ID = 'github-pages-user';
@@ -121,6 +123,10 @@ function database() {
     request.onerror = () => reject(request.error ?? new Error('브라우저 저장소를 열지 못했습니다.'));
     request.onupgradeneeded = () => {
       const db = request.result;
+      if (!db.objectStoreNames.contains(COMMENTS_STORE)) {
+        const comments=db.createObjectStore(COMMENTS_STORE,{keyPath:'id'});
+        comments.createIndex('memoryId','memoryId');
+      }
       if (!db.objectStoreNames.contains(ACTIVITY_STORE)) db.createObjectStore(ACTIVITY_STORE, { keyPath: 'id' });
       const store = db.objectStoreNames.contains(STORE_NAME)
         ? request.transaction!.objectStore(STORE_NAME)
@@ -339,7 +345,13 @@ export async function deleteBrowserMemory(id: string) {
   const current = await recordById(id);
   if (!current || current.ownerId !== LOCAL_USER_ID) throw new Error('삭제할 수 있는 기억을 찾지 못했습니다.');
   const db = await database();
-  await requestResult(db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(id));
+  await new Promise<void>((resolve,reject)=>{
+    const tx=db.transaction([STORE_NAME,ACTIVITY_STORE,COMMENTS_STORE],'readwrite');
+    tx.oncomplete=()=>resolve(); tx.onabort=()=>reject(tx.error ?? new Error('삭제하지 못했습니다.'));
+    tx.objectStore(STORE_NAME).delete(id); tx.objectStore(ACTIVITY_STORE).delete(id);
+    const cursor=tx.objectStore(COMMENTS_STORE).index('memoryId').openKeyCursor(IDBKeyRange.only(id));
+    cursor.onsuccess=()=>{if(cursor.result){tx.objectStore(COMMENTS_STORE).delete(cursor.result.primaryKey);cursor.result.continue();}};
+  });
 }
 
 function haversineMeters(aLat: number, aLng: number, bLat: number, bLng: number) {
@@ -434,4 +446,35 @@ export async function browserPersonalSpace(query:PersonalQuery, signal?:AbortSig
   checkAbort(signal);
   const list=(records:StoredMemory[])=>records.filter(row=>matchesFilters(row,query)&&(!query.visibility||row.visibility===query.visibility)).slice(0,40).map(row=>toMemory(row,true));
   return {displayName:'나',totals:{mine:mine.length,bookmarked:bookmarked.length,liked:liked.length},lists:{mine:list(mine),bookmarked:list(bookmarked),liked:list(liked)},mapMemories:mapped.slice(0,200).map(row=>toMemory(row,true)),hasMore:mapped.length>200,recommendations};
+}
+
+
+type StoredComment = Omit<MemoryComment,'owned'> & {memoryId:string;ownerId:string};
+const commentDto = (row:StoredComment):MemoryComment => ({id:row.id,content:row.content,createdAt:row.createdAt,owned:isPagesAuthenticated() && row.ownerId===LOCAL_USER_ID});
+async function readableCommentMemory(id:string) {
+  if(!await getBrowserPublicMemory(id)) throw new Error('기억을 찾지 못했습니다.');
+}
+export async function browserComments(memoryId:string,cursor?:CommentCursor):Promise<CommentPage> {
+  await readableCommentMemory(memoryId);
+  const db=await database();
+  const rows=await requestResult(db.transaction(COMMENTS_STORE,'readonly').objectStore(COMMENTS_STORE).index('memoryId').getAll(memoryId) as IDBRequest<StoredComment[]>);
+  const sorted=rows.filter(row=>!cursor || row.createdAt>cursor.createdAt || (row.createdAt===cursor.createdAt && row.id>cursor.id)).sort((a,b)=>a.createdAt<b.createdAt?-1:a.createdAt>b.createdAt?1:a.id<b.id?-1:a.id>b.id?1:0);
+  const comments=sorted.slice(0,COMMENT_PAGE_SIZE).map(commentDto),last=comments.at(-1);
+  return {comments,nextCursor:sorted.length>COMMENT_PAGE_SIZE && last ? encodeCommentCursor({createdAt:last.createdAt,id:last.id}):null};
+}
+export async function createBrowserComment(memoryId:string,content:string):Promise<MemoryComment> {
+  if(!isPagesAuthenticated())throw new Error('로그인이 필요합니다.');
+  await readableCommentMemory(memoryId);
+  const row:StoredComment={id:crypto.randomUUID(),memoryId,ownerId:LOCAL_USER_ID,content,createdAt:new Date().toISOString()};
+  const db=await database();
+  await requestResult(db.transaction(COMMENTS_STORE,'readwrite').objectStore(COMMENTS_STORE).add(row));
+  return commentDto(row);
+}
+export async function deleteBrowserComment(memoryId:string,id:string) {
+  if(!isPagesAuthenticated())throw new Error('로그인이 필요합니다.');
+  await readableCommentMemory(memoryId);
+  const db=await database();
+  const row=await requestResult(db.transaction(COMMENTS_STORE,'readonly').objectStore(COMMENTS_STORE).get(id) as IDBRequest<StoredComment|undefined>);
+  if(!row || row.memoryId!==memoryId || row.ownerId!==LOCAL_USER_ID)throw new Error('삭제할 댓글을 찾지 못했습니다.');
+  await requestResult(db.transaction(COMMENTS_STORE,'readwrite').objectStore(COMMENTS_STORE).delete(id));
 }

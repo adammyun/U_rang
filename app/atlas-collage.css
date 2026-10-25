@@ -638,3 +638,53 @@ body:has(.personal-panel) .pages-service-link { display:none; }
  .personal-secondary-options summary { font-size:11px; }
  .personal-tabs { margin-bottom:10px; }
 }
+
+/* Memory-linked conversation; SDK canvas and NAVER controls remain independent. */
+.memory-comments { display:flex; flex-direction:column; min-height:0; gap:14px; color:var(--atlas-text); background:var(--atlas-surface); padding:20px; border:1px solid var(--atlas-border); }
+.memory-comments-heading h3 { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:600; margin:0; }
+.memory-comments-heading p { margin:7px 0 0; color:var(--atlas-muted); font-size:12px; overflow-wrap:anywhere; }
+.memory-comments-list { min-height:60px; max-height:320px; overflow:auto; overscroll-behavior:contain; touch-action:pan-y; scrollbar-width:thin; }
+.memory-comment { padding:13px 0; border-bottom:1px solid var(--atlas-rule); }
+.memory-comment:first-child { padding-top:0; }
+.memory-comment header { display:flex; align-items:center; gap:8px; }
+.memory-comment strong { font-size:12px; }
+.memory-comment time { color:var(--atlas-muted); font-size:10px; margin-left:auto; }
+.memory-comment header button { display:grid; place-items:center; min-width:44px; min-height:44px; color:var(--atlas-muted); }
+.memory-comment p { white-space:pre-wrap; overflow-wrap:anywhere; margin:5px 0 0; font-size:13px; line-height:1.85; }
+.memory-comments-empty { display:flex; align-items:center; gap:8px; color:var(--atlas-muted); font-size:12px; line-height:1.8; margin:12px 0; }
+.memory-comments-form label { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px; font-size:12px; }
+.memory-comments-form label span,.memory-comments-form>div>span { color:var(--atlas-muted); font-size:10px; }
+.memory-comments-form textarea { display:block; width:100%; min-height:74px; max-height:160px; resize:vertical; margin-top:8px; padding:10px; border:1px solid var(--atlas-border); background:var(--atlas-charcoal); color:var(--atlas-text); font:inherit; font-size:14px; line-height:1.7; touch-action:pan-y; }
+.memory-comments-form>div { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; }
+.memory-comments-form button { display:flex; align-items:center; gap:8px; min-height:44px; padding:8px 16px; color:var(--atlas-action-ink); background:var(--atlas-action); font-size:13px; font-weight:600; }
+.memory-comments button:disabled { opacity:.5; cursor:default; }
+.memory-comments button:not(:disabled):hover { filter:brightness(1.12); }
+.memory-comments :is(button,a,textarea):focus-visible { outline:2px solid var(--atlas-coral); outline-offset:3px; }
+.memory-comments-login { display:flex; flex-direction:column; gap:8px; margin:0; font-size:12px; }
+.memory-comments-login a { color:var(--atlas-coral); display:flex; align-items:center; min-height:44px; }
+.memory-comments-login span { color:var(--atlas-muted); font-size:11px; }
+.memory-comments-error { color:var(--atlas-coral); font-size:12px; line-height:1.7; margin:0; }
+.memory-comments-error button,.memory-comments-more { min-height:44px; color:var(--atlas-coral); font-size:12px; text-decoration:underline; text-underline-offset:4px; }
+.memory-comments-notice { margin:0; color:var(--atlas-muted); font-size:11px; }
+.atlas-reading-paper .memory-comments { margin-top:24px; }
+.panorama-comments-toggle { position:absolute; top:16px; left:70px; z-index:3; display:flex; align-items:center; gap:8px; min-height:44px; padding:10px 14px; background:var(--atlas-charcoal); color:var(--atlas-text); border:1px solid var(--atlas-border); box-shadow:3px 4px 0 #090e1040; }
+.panorama-comments-toggle[aria-expanded='true'] { color:var(--atlas-coral); }
+.panorama-comments-panel { position:absolute; z-index:3; top:72px; right:16px; bottom:48px; width:340px; max-width:calc(100% - 32px); box-shadow:var(--atlas-paper-shadow); touch-action:pan-y; animation:comment-panel-in 180ms var(--atlas-ease); }
+.panorama-comments-panel .memory-comments { height:100%; gap:10px; padding:18px; }
+.panorama-comments-panel .memory-comments-list { flex:1; max-height:none; min-height:0; }
+.panorama-comments-panel .memory-comments-heading p { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.panorama-comments-fallback { padding:14px 22px; background:var(--atlas-surface); color:var(--atlas-text); border-top:1px solid var(--atlas-border); }
+.panorama-comments-fallback p { font-size:12px; color:var(--atlas-muted); margin:0 0 8px; }
+.panorama-comments-fallback button { display:flex; align-items:center; gap:8px; min-height:44px; color:var(--atlas-coral); font-size:13px; }
+@keyframes comment-panel-in { from {opacity:0;transform:translateY(8px)} to {opacity:1;transform:translateY(0)} }
+@media(max-width:640px) {
+  .panorama-comments-panel { top:auto; left:16px; right:16px; width:auto; bottom:48px; height:min(440px,calc(100% - 76px)); }
+  .panorama-comments-panel .memory-comments { padding:14px; }
+  .panorama-comments-panel .memory-comments-heading h3 { font-size:14px; }
+  .memory-comments-form textarea { font-size:16px; }
+  .panorama-header [data-slot='dialog-description'] { font-size:11px; }
+}
+@media(prefers-reduced-motion:reduce) { .panorama-comments-panel {animation:none;} }
+/* Let the HTML thread pan normally without changing the SDK's drag surface. */
+.panorama-stage:has(.panorama-comments-panel) { touch-action:auto; }
+.panorama-canvas { touch-action:none; }

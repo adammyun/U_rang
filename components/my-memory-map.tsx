@@ -134,6 +134,7 @@ export default function MyMemoryMap({
   const [deleting, setDeleting] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const archiveToggle = useRef<HTMLButtonElement>(null);
+  const [commentFallbackId,setCommentFallbackId]=useState<string|null>(null);
   const [panoramaTarget, setPanoramaTarget] =
     useState<PanoramaTarget | null>(null);
   const [mapMode, setMapMode] = useState<MapMode>('calm');
@@ -494,6 +495,8 @@ export default function MyMemoryMap({
         <SpatialMemoryDetail
           key={selected.id}
           memory={selected}
+          showComments={commentFallbackId===selected.id}
+          onOpenComments={()=>setPanoramaTarget({...memoryPanoramaTarget(selected),openComments:true})}
           onBack={() => setSelected(null)}
           onOpenPanorama={() =>
             setPanoramaTarget(memoryPanoramaTarget(selected))
@@ -510,6 +513,12 @@ export default function MyMemoryMap({
       )}
       {panoramaTarget && (
         <PanoramaViewer
+          key={`panorama:${panoramaTarget.memoryId}`}
+          memoryId={panoramaTarget.memoryId}
+          memoryTitle={panoramaTarget.memoryTitle}
+          initialCommentsOpen={panoramaTarget.openComments}
+          authenticated={true}
+          onFallbackComments={()=>{setCommentFallbackId(panoramaTarget.memoryId);setPanoramaTarget(null);}}
           clientId={naverMapsClientId}
           placeName={panoramaTarget.placeName}
           point={panoramaTarget.point}

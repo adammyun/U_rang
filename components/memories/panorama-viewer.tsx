@@ -3,7 +3,8 @@
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 
 import { useEffect, useState } from 'react';
-import { LoaderCircle, RotateCcw, X } from 'lucide-react';
+import MemoryComments from './memory-comments';
+import { MessageCircle, LoaderCircle, RotateCcw, X } from 'lucide-react';
 import {
   Dialog,
   DialogClose,
@@ -27,8 +28,13 @@ export default function PanoramaViewer({
   clientId,
   placeName,
   point,
-  onClose,
+  onClose, memoryId, memoryTitle, authenticated = false, initialCommentsOpen = false, onFallbackComments,
 }: {
+  memoryId: string;
+  memoryTitle: string;
+  authenticated?: boolean;
+  initialCommentsOpen?: boolean;
+  onFallbackComments: () => void;
   clientId: string;
   placeName: string;
   point: Point;
@@ -37,6 +43,7 @@ export default function PanoramaViewer({
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [state, setState] = useState<ViewerState>('loading');
   const [attempt, setAttempt] = useState(0);
+  const [commentsOpen,setCommentsOpen]=useState(initialCommentsOpen);
 
   useEffect(() => {
     if (!container) return;
@@ -193,7 +200,12 @@ export default function PanoramaViewer({
               </button>
             </div>
           )}
+          {state==='ready'&&<>
+            <button type="button" className="panorama-comments-toggle" aria-label={commentsOpen?'거리뷰 댓글 닫기':'거리뷰 댓글 열기'} aria-expanded={commentsOpen} aria-controls="panorama-comment-panel" onClick={()=>setCommentsOpen(value=>!value)}><MessageCircle size={17}/><span>댓글</span>{commentsOpen&&<X size={15}/>}</button>
+            {commentsOpen&&<aside id="panorama-comment-panel" className="panorama-comments-panel"><MemoryComments key={`${memoryId}:${authenticated}`} memoryId={memoryId} memoryTitle={memoryTitle} authenticated={authenticated}/></aside>}
+          </>}
         </div>
+        {state!=='ready'&&state!=='loading'&&<div className="panorama-comments-fallback"><p>거리뷰 없이도 이 기억의 이야기를 나눌 수 있어요.</p><button type="button" onClick={onFallbackComments}><MessageCircle size={16}/> 기억 상세에서 댓글 보기</button></div>}
       </DialogContent>
     </Dialog>
   );

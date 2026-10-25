@@ -67,7 +67,7 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
       get.onsuccess=()=>{resolve({version:db.version,records:get.result});db.close();};get.onerror=()=>reject(get.error);
     };
   }));
-  expect(state.version).toBe(4);
+  expect(state.version).toBe(5);
   expect(state.records.find(r=>r.id.endsWith('000000000001'))?.content).toBe(demoJournalContent('20000000-0000-4000-8000-000000000001'));
   expect(state.records.find(r=>r.id.endsWith('000000000099'))?.content).toBe('직접 고친 나의 이야기');
   expect(state.records.find(r=>r.id==='migration-owner-fixture')).toMatchObject({title:'보존할 기존 기록',media:[{id:'existing-photo',dataUrl:'existing-private-bytes'}]});

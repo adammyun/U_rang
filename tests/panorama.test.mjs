@@ -128,6 +128,8 @@ test('shares one SDK request and loads only the panorama submodule', async () =>
 
 test('uses only coordinates already present in the authorized memory DTO', () => {
   const target = memoryPanoramaTarget({
+    id: 'memory-id',
+    title: '기억 제목',
     lat: 35.55,
     lng: 129.29,
     location_name: '태화강 국가정원',
@@ -137,6 +139,8 @@ test('uses only coordinates already present in the authorized memory DTO', () =>
 
   assert.deepEqual(target, {
     placeName: '태화강 국가정원',
+    memoryId: 'memory-id',
+    memoryTitle: '기억 제목',
     point: { lat: 35.55, lng: 129.29 },
   });
   assert.equal('raw_latitude' in target.point, false);

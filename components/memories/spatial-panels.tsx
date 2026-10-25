@@ -2,17 +2,18 @@
 
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { DemoPhotoCredits } from './demo-photo-credits';
+import MemoryComments from './memory-comments';
 import MemoryActivityBar from './memory-activity';
 
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MessageCircle, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type CSSProperties } from 'react';
 import { emotions, formatDate, type Memory } from '@/lib/types';
 
 export { default as SpatialPlacePreview } from './place-note-board';
 
 export function SpatialMemoryDetail({
-  memory, onClose, onBack, onOtherMemories, onLocate, onOpenPanorama,
+  memory, onClose, onBack, onOtherMemories, onLocate, onOpenPanorama, onOpenComments, showComments = false,
   onPrevious, onNext, positionLabel, changing = false,
   onEdit, onDelete, deleting = false, authenticated = false,
 }: {
@@ -22,6 +23,8 @@ export function SpatialMemoryDetail({
   onOtherMemories?: () => void;
   onLocate: () => void;
   onOpenPanorama: () => void;
+  onOpenComments?: () => void;
+  showComments?: boolean;
   onPrevious?: () => void;
   onNext?: () => void;
   positionLabel?: string;
@@ -33,6 +36,12 @@ export function SpatialMemoryDetail({
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const dialog = useRef<HTMLElement>(null);
+  const comments = useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    if(!showComments)return;
+    const frame=requestAnimationFrame(()=>comments.current?.scrollIntoView({block:'start'}));
+    return ()=>cancelAnimationFrame(frame);
+  },[showComments]);
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [leaving, setLeaving] = useState(false);
   useEffect(() => () => { if (exitTimer.current) clearTimeout(exitTimer.current); }, []);
@@ -50,7 +59,7 @@ export function SpatialMemoryDetail({
   function handleKeys(event: KeyboardEvent<HTMLElement>) {
     if (event.key === 'Escape') { event.stopPropagation(); leave(onClose); }
     if (event.key !== 'Tab') return;
-    const items = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],[tabindex="0"]') ?? []).filter((item) => item.getClientRects().length > 0);
+    const items = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),textarea:not(:disabled),input:not(:disabled),select:not(:disabled),a[href],[tabindex="0"]') ?? []).filter((item) => item.getClientRects().length > 0);
     const index = items.indexOf(document.activeElement as HTMLElement);
     if (!items.length) return;
     if (event.shiftKey && index <= 0) { event.preventDefault(); items[items.length - 1].focus(); }
@@ -84,7 +93,9 @@ export function SpatialMemoryDetail({
           <div className="spatial-detail-tools">
             <button type="button" onClick={() => leave(onLocate)}><MapPin size={16} /> 지도에서 보기</button>
             <button type="button" onClick={onOpenPanorama}><Eye size={16} /> 거리뷰</button>
+            {onOpenComments&&<button type="button" onClick={onOpenComments}><MessageCircle size={16}/> 댓글</button>}
           </div>
+          {showComments&&<div ref={comments}><MemoryComments key={`${memory.id}:${authenticated}`} memoryId={memory.id} memoryTitle={memory.title} authenticated={authenticated||memory.owned}/></div>}
           {memory.owned && (onEdit || onDelete) && <div className="atlas-owner-actions">
             {onEdit && <button type="button" onClick={onEdit} disabled={deleting}><Pencil size={16} /> 수정</button>}
             {onDelete && <button type="button" className="danger-action" onClick={onDelete} disabled={deleting}>{deleting ? <LoaderCircle size={16} className="spin" /> : <Trash2 size={16} />}{deleting ? '삭제 중…' : '삭제'}</button>}

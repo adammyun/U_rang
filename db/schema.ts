@@ -60,3 +60,11 @@ export const memoryViews = sqliteTable('memory_views', {
   viewerKey:text('viewer_key').notNull(),
   createdAt:text('created_at').notNull(),
 }, table=>[primaryKey({columns:[table.memoryId,table.viewerKey]})]);
+
+export const memoryComments = sqliteTable('memory_comments', {
+  id:text('id').primaryKey().notNull(),
+  memoryId:text('memory_id').notNull().references(()=>memories.id,{onDelete:'cascade'}),
+  userId:text('user_id').notNull(),
+  content:text('content').notNull(),
+  createdAt:text('created_at').notNull(),
+}, table=>[index('memory_comments_memory_created_idx').on(table.memoryId,table.createdAt,table.id),check('memory_comments_content',sql`length(trim(${table.content})) between 1 and 1000`)]);
