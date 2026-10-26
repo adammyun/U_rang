@@ -6,14 +6,14 @@ import MemoryComments from './memory-comments';
 import MemoryActivityBar from './memory-activity';
 
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, MessageCircle, Eye, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LoaderCircle, MapPin, Pencil, Trash2, X } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type CSSProperties } from 'react';
 import { emotions, formatDate, type Memory } from '@/lib/types';
 
 export { default as SpatialPlacePreview } from './place-note-board';
 
 export function SpatialMemoryDetail({
-  memory, onClose, onBack, onOtherMemories, onLocate, onOpenPanorama, onOpenComments, showComments = false,
+  memory, onClose, onBack, onOtherMemories, onLocate, onOpenPanorama, showComments = false,
   onPrevious, onNext, positionLabel, changing = false,
   onEdit, onDelete, deleting = false, authenticated = false,
 }: {
@@ -23,7 +23,6 @@ export function SpatialMemoryDetail({
   onOtherMemories?: () => void;
   onLocate: () => void;
   onOpenPanorama: () => void;
-  onOpenComments?: () => void;
   showComments?: boolean;
   onPrevious?: () => void;
   onNext?: () => void;
@@ -88,12 +87,10 @@ export function SpatialMemoryDetail({
           <p className="spatial-detail-place"><MapPin size={14} /> {memory.location_name}</p>
           <div className="spatial-detail-date"><span />{formatDate(memory.memory_date)}</div>
           <p className="spatial-detail-body">{memory.content}</p>
-          <MemoryActivityBar key={memory.id} memoryId={memory.id} authenticated={authenticated||memory.owned}/>
+          <MemoryActivityBar key={memory.id} memoryId={memory.id} authenticated={authenticated||memory.owned} onOpenPanorama={onOpenPanorama}/>
 
           <div className="spatial-detail-tools">
             <button type="button" onClick={() => leave(onLocate)}><MapPin size={16} /> 지도에서 보기</button>
-            <button type="button" onClick={onOpenPanorama}><Eye size={16} /> 거리뷰</button>
-            {onOpenComments&&<button type="button" onClick={onOpenComments}><MessageCircle size={16}/> 댓글</button>}
           </div>
           {showComments&&<div ref={comments}><MemoryComments key={`${memory.id}:${authenticated}`} memoryId={memory.id} memoryTitle={memory.title} authenticated={authenticated||memory.owned}/></div>}
           {memory.owned && (onEdit || onDelete) && <div className="atlas-owner-actions">

@@ -68,3 +68,11 @@ export const memoryComments = sqliteTable('memory_comments', {
   content:text('content').notNull(),
   createdAt:text('created_at').notNull(),
 }, table=>[index('memory_comments_memory_created_idx').on(table.memoryId,table.createdAt,table.id),check('memory_comments_content',sql`length(trim(${table.content})) between 1 and 1000`)]);
+
+// Optional 1:1 extension preserves existing text-only comments unchanged.
+export const memoryCommentAnchors = sqliteTable('memory_comment_anchors', {
+  commentId:text('comment_id').primaryKey().notNull().references(()=>memoryComments.id,{onDelete:'cascade'}),
+  panoId:text('pano_id').notNull(),
+  pan:real('pan').notNull(),
+  tilt:real('tilt').notNull(),
+}, table=>[check('memory_comment_anchor_pan',sql`${table.pan} between -180 and 180`),check('memory_comment_anchor_tilt',sql`${table.tilt} between -90 and 90`),check('memory_comment_anchor_id',sql`length(${table.panoId}) between 1 and 256`)]);

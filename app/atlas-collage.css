@@ -584,9 +584,9 @@ body:has(.atlas-place-board,.spatial-detail,.story-sheet,.discovery.expanded,.on
 @media (hover:hover) { .personal-memory-card:hover { transform:translateY(-2px); border-color:var(--atlas-coral); } .personal-panel-header button:hover,.memory-activity button:hover { background:var(--atlas-raised); } }
 .personal-memory-card:active { transform:translateY(1px); }
 .memory-activity { display:flex; align-items:center; flex-wrap:wrap; gap:9px; margin:18px 0; font-size:12px; }
-.memory-activity > button { display:flex; align-items:center; gap:7px; min-height:44px; padding:9px 12px; color:var(--atlas-text); background:var(--atlas-cutout); border:1px solid var(--atlas-border); }
-.memory-activity > button[aria-pressed=true] { color:var(--atlas-coral); border-color:var(--atlas-coral); }
-.memory-activity > button[aria-pressed=true] > svg { fill:currentColor; fill-opacity:.2; }
+.memory-activity-actions > button { display:flex; align-items:center; gap:7px; min-height:44px; padding:9px 12px; color:var(--atlas-text); background:var(--atlas-cutout); border:1px solid var(--atlas-border); }
+.memory-activity-actions > button[aria-pressed=true] { color:var(--atlas-coral); border-color:var(--atlas-coral); }
+.memory-activity-actions > button[aria-pressed=true] > svg { fill:currentColor; fill-opacity:.2; }
 .memory-activity button:disabled { opacity:.55; cursor:wait; }
 .memory-view-count { display:flex; align-items:center; gap:6px; color:var(--atlas-muted); padding:8px 0; }
 .memory-activity p { flex-basis:100%; line-height:1.8; color:var(--atlas-muted); font-size:12px; margin:0; }
@@ -603,7 +603,7 @@ body:has(.personal-panel) .pages-service-link { display:none; }
  .atlas.has-personal-panel .map-zoom,.atlas.has-personal-panel .map-caption { visibility:hidden; }
  .personal-memory-card { padding:12px; gap:9px; }
  .memory-activity { gap:7px; }
- .memory-activity > button { padding:8px 9px; }
+ .memory-activity-actions > button { padding:8px 9px; }
 }
 @media (prefers-reduced-motion:reduce) { .atlas.memory-atlas .personal-panel { animation:none; } .personal-memory-card { transition:none; } }
 .personal-visibility { display:flex; align-items:center; gap:15px; color:var(--atlas-muted); font-size:12px; margin-bottom:17px; }
@@ -688,3 +688,34 @@ body:has(.personal-panel) .pages-service-link { display:none; }
 /* Let the HTML thread pan normally without changing the SDK's drag surface. */
 .panorama-stage:has(.panorama-comments-panel) { touch-action:auto; }
 .panorama-canvas { touch-action:none; }
+
+/* One action row: street view is the comment entry; views stay at the far edge. */
+.memory-activity { display:block; }
+.memory-activity-actions { display:flex; align-items:center; flex-wrap:nowrap; gap:8px; width:100%; }
+.memory-activity-actions>button { flex-shrink:0; white-space:nowrap; }
+.memory-view-count { margin-left:auto; flex-shrink:0; white-space:nowrap; }
+.memory-activity>p { margin-top:8px; }
+.panorama-comment-points { position:absolute; inset:0; z-index:2; pointer-events:none; overflow:hidden; }
+.panorama-comment-point { position:absolute; display:flex; align-items:center; justify-content:center; gap:4px; min-width:44px; height:44px; padding:6px; transform:translate(-50%,-50%); pointer-events:auto; border:1px solid var(--atlas-coral); color:var(--atlas-text); background:var(--atlas-cutout); box-shadow:0 2px 10px #0005; border-radius:50%; font-size:11px; transition:box-shadow 160ms,border-color 160ms; }
+.panorama-comment-point.is-active { color:var(--atlas-action-ink); background:var(--atlas-action); box-shadow:0 0 0 8px #e7a08844,0 0 0 16px #e7a08822; }
+.panorama-comment-point:focus-visible { outline:2px solid var(--atlas-text); outline-offset:5px; }
+.panorama-selected-point { position:absolute; transform:translate(-50%,-50%); display:grid; place-items:center; width:44px; height:44px; border:2px solid var(--atlas-action); border-radius:50%; background:#11171980; color:var(--atlas-action); box-shadow:0 0 0 7px #e7a08833; font-size:26px; }
+.panorama-comment-peek { position:absolute; width:min(260px,calc(100% - 24px)); padding:14px; color:var(--atlas-text); background:var(--atlas-cutout); border:1px solid var(--atlas-coral); box-shadow:var(--atlas-paper-shadow); }
+.panorama-comment-peek strong { color:var(--atlas-coral); font-size:11px; }
+.panorama-comment-peek p { display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; white-space:pre-wrap; margin:6px 0 0; line-height:1.8; font-size:12px; }
+.panorama-comment-hint { position:absolute; z-index:2; top:66px; left:70px; max-width:calc(100% - 100px); margin:0; padding:7px 10px; background:#111719db; color:var(--atlas-text); pointer-events:none; font-size:11px; }
+.memory-comment.is-highlighted { background:var(--atlas-raised); outline:1px solid var(--atlas-coral); outline-offset:-1px; padding-left:8px; padding-right:8px; }
+.memory-comment-location { color:var(--atlas-coral); min-height:44px; font-size:11px; text-decoration:underline; text-underline-offset:4px; }
+.memory-comment-target { gap:8px; padding:7px; border-left:2px solid var(--atlas-coral); background:var(--atlas-raised); font-size:11px; }
+.memory-comment-target button { min-height:32px; padding:4px 8px; }
+.memory-comments-form .memory-comment-target>span { color:var(--atlas-coral); }
+@media(max-width:420px) {
+ .memory-activity-actions { gap:5px; font-size:11px; }
+ .memory-activity-actions>button { gap:5px; padding:7px 8px; }
+ .memory-view-count { gap:4px; font-size:11px; }
+ .panorama-comment-hint { top:65px; font-size:10px; }
+}
+@media(max-width:360px) {
+ .memory-activity-actions>button:nth-child(2)>span,.memory-activity-actions>button:nth-child(3)>span { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+ .memory-activity-actions>button { min-width:44px; justify-content:center; }
+}

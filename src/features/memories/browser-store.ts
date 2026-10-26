@@ -1,4 +1,4 @@
-import { COMMENT_PAGE_SIZE, encodeCommentCursor, type CommentCursor, type CommentPage, type MemoryComment } from './comments-model';
+import { COMMENT_PAGE_SIZE, encodeCommentCursor, type CommentCursor, type CommentPage, type MemoryComment, type PanoramaAnchor } from './comments-model';
 import { demoJournalContent } from '@/src/features/memories/demo-journals';
 import { isPagesAuthenticated } from '@/src/lib/runtime';
 import type { MemoryActivity, PersonalQuery, PersonalSpace } from './personal-model';
@@ -450,7 +450,7 @@ export async function browserPersonalSpace(query:PersonalQuery, signal?:AbortSig
 
 
 type StoredComment = Omit<MemoryComment,'owned'> & {memoryId:string;ownerId:string};
-const commentDto = (row:StoredComment):MemoryComment => ({id:row.id,content:row.content,createdAt:row.createdAt,owned:isPagesAuthenticated() && row.ownerId===LOCAL_USER_ID});
+const commentDto = (row:StoredComment):MemoryComment => ({id:row.id,content:row.content,createdAt:row.createdAt,anchor:row.anchor??null,owned:isPagesAuthenticated() && row.ownerId===LOCAL_USER_ID});
 async function readableCommentMemory(id:string) {
   if(!await getBrowserPublicMemory(id)) throw new Error('기억을 찾지 못했습니다.');
 }
@@ -462,10 +462,10 @@ export async function browserComments(memoryId:string,cursor?:CommentCursor):Pro
   const comments=sorted.slice(0,COMMENT_PAGE_SIZE).map(commentDto),last=comments.at(-1);
   return {comments,nextCursor:sorted.length>COMMENT_PAGE_SIZE && last ? encodeCommentCursor({createdAt:last.createdAt,id:last.id}):null};
 }
-export async function createBrowserComment(memoryId:string,content:string):Promise<MemoryComment> {
+export async function createBrowserComment(memoryId:string,content:string,anchor:PanoramaAnchor|null=null):Promise<MemoryComment> {
   if(!isPagesAuthenticated())throw new Error('로그인이 필요합니다.');
   await readableCommentMemory(memoryId);
-  const row:StoredComment={id:crypto.randomUUID(),memoryId,ownerId:LOCAL_USER_ID,content,createdAt:new Date().toISOString()};
+  const row:StoredComment={id:crypto.randomUUID(),memoryId,ownerId:LOCAL_USER_ID,content,anchor,createdAt:new Date().toISOString()};
   const db=await database();
   await requestResult(db.transaction(COMMENTS_STORE,'readwrite').objectStore(COMMENTS_STORE).add(row));
   return commentDto(row);

@@ -17,10 +17,12 @@ try {
  assert.equal((await post(path,{content:'x'.repeat(1001)},headers)).status,400);
  assert.equal((await post(path,{content:'식별자 위조',user_id:owner},headers)).status,400);
  assert.equal((await post(path,{content:'cross-origin'}, {...headers,origin:'https://example.com'})).status,403);
- const comment=await json(await post(path,{content:'  같은 길을 떠올렸어요.\n<script>plain text</script>  '},headers));
- assert.equal(comment.content,'같은 길을 떠올렸어요.\n<script>plain text</script>');assert.equal(comment.owned,true);
- const publicList=await json(await request(path));assert.equal(publicList.comments.length,1);assert.equal(publicList.comments[0].owned,false);
- assert.deepEqual(Object.keys(publicList.comments[0]).sort(),['content','createdAt','id','owned']);
+ const anchor={panoId:'test-scene==',pan:32.5,tilt:-12.25};
+ assert.equal((await post(path,{content:'잘못된 방향',anchor:{...anchor,pan:181}},headers)).status,400);
+ const comment=await json(await post(path,{anchor,content:'  같은 길을 떠올렸어요.\n<script>plain text</script>  '},headers));
+ assert.equal(comment.content,'같은 길을 떠올렸어요.\n<script>plain text</script>');assert.equal(comment.owned,true);assert.deepEqual(comment.anchor,anchor);
+ const publicList=await json(await request(path));assert.equal(publicList.comments.length,1);assert.equal(publicList.comments[0].owned,false);assert.deepEqual(publicList.comments[0].anchor,anchor);
+ assert.deepEqual(Object.keys(publicList.comments[0]).sort(),['anchor','content','createdAt','id','owned']);
  assert.equal((await request(path)).headers.get('cache-control'),'private, no-store');
  sql(`insert into memory_comments(id,memory_id,user_id,content,created_at) values('${otherCommentId}','${id}','another-account','다른 사용자의 댓글','2026-10-24T00:00:00.000Z')`);
  assert.equal((await request(`${path}/${otherCommentId}`,{method:'DELETE',headers:{...headers,origin:origin.origin}})).status,404);
@@ -38,15 +40,17 @@ try {
  }
  sql(`update memories set visibility='public' where id='${id}'`);
  assert.equal((await request(`${path}/${comment.id}`,{method:'DELETE',headers:{...headers,origin:origin.origin}})).status,204);
+ assert.match(sql(`select count(*) as remaining from memory_comment_anchors where comment_id='${comment.id}'`),/"remaining": 0/);
  const form=new FormData();form.set('memory',JSON.stringify({title:'비공개 댓글 검사',content:'검사 후 정리',location_name:'울산 검사 장소',emotion:'peaceful',visibility:'private',is_anonymous:true,location_precision:'approximate',lat:35.541234,lng:129.312345}));
  ownId=(await json(await request('/api/memories',{method:'POST',headers:{cookie,origin:origin.origin},body:form}))).id;
- await json(await post(`/api/memories/${ownId}/comments`,{content:'소유자의 비공개 댓글'},headers));
+ await json(await post(`/api/memories/${ownId}/comments`,{content:'소유자의 비공개 댓글',anchor},headers));
  assert.equal((await request(`/api/memories/${ownId}/comments`)).status,404);
  assert.equal((await json(await request(`/api/memories/${ownId}/comments`,{headers}))).comments.length,1);
  assert.equal((await request(`/api/memories/${ownId}`,{method:'DELETE',headers:{cookie,origin:origin.origin}})).status,204);
  const deletedId=ownId;ownId=undefined;
  assert.match(sql(`select count(*) as remaining from memory_comments where memory_id='${deletedId}'`),/"remaining": 0/);
- console.log('PASS: comment auth, validation, same-origin, anonymous DTO, pagination, private/unlisted exclusion, own-delete and cascading deletion.');
+ assert.match(sql(`select count(*) as remaining from memory_comment_anchors a left join memory_comments c on c.id=a.comment_id where c.id is null`),/"remaining": 0/);
+ console.log('PASS: panorama anchor persistence/cascade, comment auth, validation, same-origin, anonymous DTO, pagination, private/unlisted exclusion, own-delete and cascading deletion.');
 } finally {
  if(ownId)sql(`delete from memories where id='${ownId}'`);
  sql(`delete from memories where id='${id}' and user_id='${owner}'`);

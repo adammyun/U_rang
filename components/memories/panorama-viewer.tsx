@@ -2,8 +2,10 @@
 
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 
-import { useEffect, useState } from 'react';
-import MemoryComments from './memory-comments';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import PanoramaAnnotations from './panorama-annotations';
+import { normalizePan, type PanoramaFrame } from '@/src/features/panorama/projection';
+import type { PanoramaAnchor } from '@/src/features/memories/comments-model';
 import { MessageCircle, LoaderCircle, RotateCcw, X } from 'lucide-react';
 import {
   Dialog,
@@ -28,12 +30,11 @@ export default function PanoramaViewer({
   clientId,
   placeName,
   point,
-  onClose, memoryId, memoryTitle, authenticated = false, initialCommentsOpen = false, onFallbackComments,
+  onClose, memoryId, memoryTitle, authenticated = false, onFallbackComments,
 }: {
   memoryId: string;
   memoryTitle: string;
   authenticated?: boolean;
-  initialCommentsOpen?: boolean;
   onFallbackComments: () => void;
   clientId: string;
   placeName: string;
@@ -43,7 +44,14 @@ export default function PanoramaViewer({
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [state, setState] = useState<ViewerState>('loading');
   const [attempt, setAttempt] = useState(0);
-  const [commentsOpen,setCommentsOpen]=useState(initialCommentsOpen);
+  const api=useRef<NaverPanoramaInstance|null>(null);
+  const [frame,setFrame]=useState<PanoramaFrame|null>(null);
+  const lookAt=useCallback((anchor:PanoramaAnchor)=>{
+    const panorama=api.current;if(!panorama)return;
+    const pov={pan:anchor.pan,tilt:anchor.tilt,fov:panorama.getPov()?.fov??90};
+    if(panorama.getPanoId()===anchor.panoId)panorama.setPov(pov);
+    else panorama.setPanoIdWithPov(anchor.panoId,pov);
+  },[]);
 
   useEffect(() => {
     if (!container) return;
@@ -53,6 +61,15 @@ export default function PanoramaViewer({
     let panorama: NaverPanoramaInstance | null = null;
     let observer: ResizeObserver | null = null;
     let statusTimer: number | null = null;
+    let viewFrame:number|null=null;
+    const refreshFrame=()=>{
+      if(cancelled || viewFrame!==null)return;
+      viewFrame=requestAnimationFrame(()=>{
+        viewFrame=null;if(cancelled || !panorama)return;
+        const pov=panorama.getPov(),panoId=panorama.getPanoId(),rect=container.getBoundingClientRect();
+        if(pov && panoId && rect.width>0 && rect.height>0)setFrame({panoId,pov:{...pov,pan:normalizePan(pov.pan)},width:rect.width,height:rect.height});
+      });
+    };
     const listeners: NaverEventListener[] = [];
 
     const initialize = async () => {
@@ -75,6 +92,8 @@ export default function PanoramaViewer({
           zoomControl: true,
         });
 
+        api.current=panorama;
+        for(const event of ['init','pano_changed','pov_changed'])listeners.push(maps.Event.addListener(panorama,event,refreshFrame));
         listeners.push(
           maps.Event.addListener(panorama, 'pano_status', (...args) => {
             if (cancelled) return;
@@ -85,6 +104,7 @@ export default function PanoramaViewer({
               statusTimer = null;
             }
             setState(status === 'OK' ? 'ready' : 'unavailable');
+            if(status==='OK')refreshFrame();else setFrame(null);
           }),
         );
 
@@ -95,6 +115,7 @@ export default function PanoramaViewer({
             panorama.setSize(
               new maps.Size(Math.round(next.width), Math.round(next.height)),
             );
+            refreshFrame();
           }
         });
         observer.observe(container);
@@ -102,6 +123,7 @@ export default function PanoramaViewer({
         statusTimer = window.setTimeout(() => {
           if (cancelled) return;
           setState(panorama?.getPanoId() ? 'ready' : 'unavailable');
+          refreshFrame();
         }, 12_000);
       } catch (reason) {
         if (cancelled) return;
@@ -122,6 +144,8 @@ export default function PanoramaViewer({
 
     return () => {
       cancelled = true;
+      api.current=null;
+      if(viewFrame!==null)cancelAnimationFrame(viewFrame);
       if (statusTimer !== null) window.clearTimeout(statusTimer);
       observer?.disconnect();
       if (maps && panorama) {
@@ -200,10 +224,7 @@ export default function PanoramaViewer({
               </button>
             </div>
           )}
-          {state==='ready'&&<>
-            <button type="button" className="panorama-comments-toggle" aria-label={commentsOpen?'거리뷰 댓글 닫기':'거리뷰 댓글 열기'} aria-expanded={commentsOpen} aria-controls="panorama-comment-panel" onClick={()=>setCommentsOpen(value=>!value)}><MessageCircle size={17}/><span>댓글</span>{commentsOpen&&<X size={15}/>}</button>
-            {commentsOpen&&<aside id="panorama-comment-panel" className="panorama-comments-panel"><MemoryComments key={`${memoryId}:${authenticated}`} memoryId={memoryId} memoryTitle={memoryTitle} authenticated={authenticated}/></aside>}
-          </>}
+          {state==='ready'&&container&&<PanoramaAnnotations container={container} frame={frame} memoryId={memoryId} memoryTitle={memoryTitle} authenticated={authenticated} onLookAt={lookAt}/>}
         </div>
         {state!=='ready'&&state!=='loading'&&<div className="panorama-comments-fallback"><p>거리뷰 없이도 이 기억의 이야기를 나눌 수 있어요.</p><button type="button" onClick={onFallbackComments}><MessageCircle size={16}/> 기억 상세에서 댓글 보기</button></div>}
       </DialogContent>

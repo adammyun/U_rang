@@ -200,7 +200,7 @@ export default function MemoryApp({
   useEffect(()=>{
     if(previousAuth.current&&!isAuthenticated){
       // Remove owner-only content when a second tab ends the Pages session.
-      setSelected(null);setEditing(null);setDraftLocation(null);setProfileOpen(false);setPersonalMode(false);setPersonalData(null);setPublicRows([]);setCreatedRows([]);
+      setSelected(null);setPanoramaTarget(null);setCommentFallbackId(null);setEditing(null);setDraftLocation(null);setProfileOpen(false);setPersonalMode(false);setPersonalData(null);setPublicRows([]);setCreatedRows([]);
     }
     previousAuth.current=isAuthenticated;
   },[isAuthenticated]);
@@ -762,7 +762,6 @@ export default function MemoryApp({
           key={selected.id}
           memory={selected}
           showComments={commentFallbackId===selected.id}
-          onOpenComments={()=>setPanoramaTarget({...memoryPanoramaTarget(selected),openComments:true})}
           authenticated={isAuthenticated}
           onEdit={selected.owned?()=>setEditing(selected):undefined}
           onDelete={selected.owned?()=>void removeSelected():undefined}
@@ -815,7 +814,6 @@ export default function MemoryApp({
           key={`panorama:${panoramaTarget.memoryId}`}
           memoryId={panoramaTarget.memoryId}
           memoryTitle={panoramaTarget.memoryTitle}
-          initialCommentsOpen={panoramaTarget.openComments}
           authenticated={isAuthenticated}
           onFallbackComments={()=>{setCommentFallbackId(panoramaTarget.memoryId);if(selected?.id!==panoramaTarget.memoryId)void openMemoryFromPlace(panoramaTarget.memoryId);setPanoramaTarget(null);}}
           clientId={naverMapsClientId}

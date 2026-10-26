@@ -496,7 +496,6 @@ export default function MyMemoryMap({
           key={selected.id}
           memory={selected}
           showComments={commentFallbackId===selected.id}
-          onOpenComments={()=>setPanoramaTarget({...memoryPanoramaTarget(selected),openComments:true})}
           onBack={() => setSelected(null)}
           onOpenPanorama={() =>
             setPanoramaTarget(memoryPanoramaTarget(selected))
@@ -516,7 +515,6 @@ export default function MyMemoryMap({
           key={`panorama:${panoramaTarget.memoryId}`}
           memoryId={panoramaTarget.memoryId}
           memoryTitle={panoramaTarget.memoryTitle}
-          initialCommentsOpen={panoramaTarget.openComments}
           authenticated={true}
           onFallbackComments={()=>{setCommentFallbackId(panoramaTarget.memoryId);setPanoramaTarget(null);}}
           clientId={naverMapsClientId}

@@ -1,3 +1,4 @@
+import type { PanoramaPov } from './projection';
 const SCRIPT_ID = 'yeoun-naver-panorama-sdk';
 const CALLBACK_NAME = '__yeounNaverPanoramaReady';
 const LOAD_TIMEOUT_MS = 15_000;
@@ -22,6 +23,9 @@ export type NaverEventListener = object;
 
 export interface NaverPanoramaInstance {
   getPanoId(): string;
+  getPov(): PanoramaPov | null;
+  setPov(pov: PanoramaPov): void;
+  setPanoIdWithPov(panoId: string, pov: PanoramaPov): void;
   setSize(size: NaverSize): void;
   setVisible(visible: boolean): void;
 }

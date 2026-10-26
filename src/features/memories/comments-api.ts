@@ -1,6 +1,6 @@
 import { isPagesRuntime } from '@/src/lib/runtime';
 import { browserComments, createBrowserComment, deleteBrowserComment } from './browser-store';
-import { commentCursorSchema, commentInputSchema, type CommentPage, type MemoryComment } from './comments-model';
+import { commentCursorSchema, commentInputSchema, type CommentPage, type MemoryComment, type PanoramaAnchor } from './comments-model';
 
 async function data<T>(response:Response):Promise<T> {
   const body=await response.json() as {data:T;message?:string};
@@ -12,9 +12,9 @@ export async function fetchComments(id:string,signal:AbortSignal,cursor?:string)
   if(isPagesRuntime())return browserComments(id,cursor?commentCursorSchema.parse(cursor):undefined);
   return data(await fetch(endpoint(id)+(cursor?'?'+new URLSearchParams({cursor}):''),{signal,cache:'no-store'}));
 }
-export async function postComment(id:string,content:string):Promise<MemoryComment> {
-  const input=commentInputSchema.parse({content});
-  if(isPagesRuntime())return createBrowserComment(id,input.content);
+export async function postComment(id:string,content:string,anchor:PanoramaAnchor|null=null):Promise<MemoryComment> {
+  const input=commentInputSchema.parse({content,anchor});
+  if(isPagesRuntime())return createBrowserComment(id,input.content,input.anchor??null);
   return data(await fetch(endpoint(id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(input)}));
 }
 export async function removeComment(memoryId:string,id:string) {

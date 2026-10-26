@@ -133,6 +133,7 @@ test('uses only coordinates already present in the authorized memory DTO', () =>
     lat: 35.55,
     lng: 129.29,
     location_name: '태화강 국가정원',
+    location_precision: 'approximate',
     raw_latitude: 35.5532,
     raw_longitude: 129.2924,
   });
@@ -144,4 +145,10 @@ test('uses only coordinates already present in the authorized memory DTO', () =>
     point: { lat: 35.55, lng: 129.29 },
   });
   assert.equal('raw_latitude' in target.point, false);
+});
+
+test('an owner panorama cannot encode exact coordinates of an approximate memory',()=>{
+ const memory={id:'memory-id',title:'기억',location_name:'울산',lat:35.561234,lng:129.321234,location_precision:'approximate'};
+ assert.deepEqual(memoryPanoramaTarget(memory).point,{lat:35.56,lng:129.32});
+ assert.deepEqual(memoryPanoramaTarget({...memory,location_precision:'exact'}).point,{lat:35.561234,lng:129.321234});
 });

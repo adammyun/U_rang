@@ -21,7 +21,7 @@ export async function POST(request:Request, context:Context) {
     if(!user)return Response.json({message:'로그인이 필요합니다.'},{status:401,headers});
     const id=memoryIdSchema.parse((await context.params).id);
     const input=commentInputSchema.parse(await request.json());
-    const data=await createComment(id,user.userId,input.content);
+    const data=await createComment(id,user.userId,input.content,input.anchor??null);
     return data ? Response.json({data},{status:201,headers}) : Response.json({message:'기억을 찾지 못했습니다.'},{status:404,headers});
   } catch(error) { return errorResponse(error); }
 }

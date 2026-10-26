@@ -6,7 +6,7 @@ import Link from '@/components/ui/app-link';
 import { setActivity } from '@/src/features/memories/personal-api';
 import type { MemoryActivity } from '@/src/features/memories/personal-model';
 
-export default function MemoryActivityBar({memoryId,authenticated=false}:{memoryId:string;authenticated?:boolean}) {
+export default function MemoryActivityBar({memoryId,authenticated=false,onOpenPanorama}:{memoryId:string;authenticated?:boolean;onOpenPanorama?:()=>void}) {
   const [activity,setValue]=useState<MemoryActivity|null>(null);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
@@ -25,10 +25,12 @@ export default function MemoryActivityBar({memoryId,authenticated=false}:{memory
     finally {setBusy(false);}
   }
   return <div className="memory-activity" aria-label="기억 반응" aria-busy={busy||!activity}>
-    <button type="button" aria-label="좋아요" aria-pressed={activity?.liked??false} disabled={busy||!activity} onClick={()=>void toggle('like')}><Heart size={16}/><span>좋아요 {activity?.likes??'…'}</span></button>
+    <div className="memory-activity-actions">
+    <button type="button" aria-label="좋아요" aria-pressed={activity?.liked??false} disabled={busy||!activity} onClick={()=>void toggle('like')}>{busy?<LoaderCircle className="spin" size={16}/>:<Heart size={16}/>}<span>좋아요 {activity?.likes??'…'}</span></button>
     <button type="button" aria-label="북마크" aria-pressed={activity?.bookmarked??false} disabled={busy||!activity} onClick={()=>void toggle('bookmark')}><Bookmark size={16}/><span>{activity?.bookmarked?'저장됨':'북마크'}</span></button>
+    {onOpenPanorama&&<button type="button" aria-label="거리뷰" onClick={onOpenPanorama}><Eye size={16}/><span>거리뷰</span></button>}
     <span className="memory-view-count" aria-label={`조회수 ${activity?.views??'불러오는 중'}`}><Eye size={15}/>조회 {activity?.views??'…'}</span>
-    {busy&&<LoaderCircle className="spin" size={14}/>}
+    </div>
     {error&&<p role="status">{error} {!authenticated&&activity?<Link href="/login?next=/">로그인</Link>:<button type="button" onClick={()=>setRetry(value=>value+1)}>다시 시도</button>}</p>}
   </div>;
 }
