@@ -5,6 +5,7 @@ import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PanoramaAnnotations from './panorama-annotations';
 import { normalizePan, type PanoramaFrame } from '@/src/features/panorama/projection';
+import { trackPanoramaMotion } from '@/src/features/panorama/motion';
 import type { PanoramaAnchor } from '@/src/features/memories/comments-model';
 import { MessageCircle, LoaderCircle, RotateCcw, X } from 'lucide-react';
 import {
@@ -71,6 +72,7 @@ export default function PanoramaViewer({
       });
     };
     const listeners: NaverEventListener[] = [];
+    const motion=trackPanoramaMotion(container,refreshFrame);
 
     const initialize = async () => {
       try {
@@ -93,7 +95,8 @@ export default function PanoramaViewer({
         });
 
         api.current=panorama;
-        for(const event of ['init','pano_changed','pov_changed'])listeners.push(maps.Event.addListener(panorama,event,refreshFrame));
+        listeners.push(maps.Event.addListener(panorama,'init',refreshFrame));
+        for(const event of ['pano_changed','pov_changed'])listeners.push(maps.Event.addListener(panorama,event,()=>{motion.changed();refreshFrame();}));
         listeners.push(
           maps.Event.addListener(panorama, 'pano_status', (...args) => {
             if (cancelled) return;
@@ -145,6 +148,7 @@ export default function PanoramaViewer({
     return () => {
       cancelled = true;
       api.current=null;
+      motion.dispose();
       if(viewFrame!==null)cancelAnimationFrame(viewFrame);
       if (statusTimer !== null) window.clearTimeout(statusTimer);
       observer?.disconnect();

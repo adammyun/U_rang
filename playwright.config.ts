@@ -40,12 +40,12 @@ export default defineConfig({
     },
     {
       name: 'desktop-webkit',
-      testMatch: ['**/browser-compat.spec.ts', '**/usability.spec.ts', '**/navigation-map-photos.spec.ts', '**/place-notes.spec.ts', '**/demo-release.spec.ts', '**/personal-space.spec.ts', '**/comments.spec.ts', '**/density-emotions.spec.ts'],
+      testMatch: ['**/browser-compat.spec.ts', '**/usability.spec.ts', '**/navigation-map-photos.spec.ts', '**/place-notes.spec.ts', '**/demo-release.spec.ts', '**/personal-space.spec.ts', '**/comments.spec.ts', '**/density-emotions.spec.ts', '**/panorama-ux.spec.ts'],
       use: { browserName: 'webkit', viewport: { width: 1440, height: 900 } },
     },
     {
       name: 'mobile-webkit',
-      testMatch: ['**/browser-compat.spec.ts', '**/usability.spec.ts', '**/navigation-map-photos.spec.ts', '**/place-notes.spec.ts', '**/demo-release.spec.ts', '**/personal-space.spec.ts', '**/comments.spec.ts', '**/density-emotions.spec.ts'],
+      testMatch: ['**/browser-compat.spec.ts', '**/usability.spec.ts', '**/navigation-map-photos.spec.ts', '**/place-notes.spec.ts', '**/demo-release.spec.ts', '**/personal-space.spec.ts', '**/comments.spec.ts', '**/density-emotions.spec.ts', '**/panorama-ux.spec.ts'],
       use: { browserName: 'webkit', viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true },
     },
   ],

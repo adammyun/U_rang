@@ -700,9 +700,13 @@ body:has(.personal-panel) .pages-service-link { display:none; }
 .panorama-comment-point.is-active { color:var(--atlas-action-ink); background:var(--atlas-action); box-shadow:0 0 0 8px #e7a08844,0 0 0 16px #e7a08822; }
 .panorama-comment-point:focus-visible { outline:2px solid var(--atlas-text); outline-offset:5px; }
 .panorama-selected-point { position:absolute; transform:translate(-50%,-50%); display:grid; place-items:center; width:44px; height:44px; border:2px solid var(--atlas-action); border-radius:50%; background:#11171980; color:var(--atlas-action); box-shadow:0 0 0 7px #e7a08833; font-size:26px; }
-.panorama-comment-peek { position:absolute; width:min(260px,calc(100% - 24px)); padding:14px; color:var(--atlas-text); background:var(--atlas-cutout); border:1px solid var(--atlas-coral); box-shadow:var(--atlas-paper-shadow); }
+.panorama-comment-peek { position:absolute; z-index:5; pointer-events:none; width:min(300px,calc(100% - 24px)); padding:12px; color:var(--atlas-text); background:var(--atlas-cutout); border:1px solid var(--atlas-coral); box-shadow:var(--atlas-paper-shadow); }
+.panorama-comment-points,.panorama-comment-peek { opacity:1; transition:opacity 120ms ease-out; }
+.panorama-stage[data-panorama-moving='true'] .panorama-comment-points,.panorama-stage[data-panorama-moving='true'] .panorama-comment-peek { opacity:0; visibility:hidden; pointer-events:none; transition:none; }
+@media(prefers-reduced-motion:reduce) { .panorama-comment-points,.panorama-comment-peek { transition:none; } }
 .panorama-comment-peek strong { color:var(--atlas-coral); font-size:11px; }
 .panorama-comment-peek p { display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; white-space:pre-wrap; margin:6px 0 0; line-height:1.8; font-size:12px; }
+@media(max-width:640px) { .panorama-comment-peek { width:min(260px,calc(100% - 24px)); } .panorama-comment-peek p { -webkit-line-clamp:2; } }
 .panorama-comment-hint { position:absolute; z-index:2; top:66px; left:70px; max-width:calc(100% - 100px); margin:0; padding:7px 10px; background:#111719db; color:var(--atlas-text); pointer-events:none; font-size:11px; }
 .memory-comment.is-highlighted { background:var(--atlas-raised); outline:1px solid var(--atlas-coral); outline-offset:-1px; padding-left:8px; padding-right:8px; }
 .memory-comment-location { color:var(--atlas-coral); min-height:44px; font-size:11px; text-decoration:underline; text-underline-offset:4px; }

@@ -53,10 +53,11 @@ test('예시 댓글은 두 개씩 나타나고 표식·팝업이 회전과 줌�
  if(info.project.name.startsWith('mobile'))await pin.tap();else {await pin.hover();await pin.click();}
  await expect(viewer.getByRole('tooltip')).toContainText('골목');
  await page.evaluate(()=>{const api=(window as unknown as {__testPanorama:{setPov:(pov:{pan:number;tilt:number;fov:number})=>void}}).__testPanorama;api.setPov({pan:8,tilt:5,fov:75});});
+ await expect(pin).toBeVisible();
  await expect.poll(async()=>Math.abs((await pin.boundingBox())!.x-before!.x)).toBeGreaterThan(10);
  await expect(viewer.getByRole('tooltip')).toBeVisible();
  const tooltip=await viewer.getByRole('tooltip').boundingBox(),hint=await viewer.locator('.panorama-comment-hint').boundingBox();
- expect(tooltip!.y).toBeGreaterThanOrEqual(hint!.y+hint!.height);
+ expect(tooltip!.x+tooltip!.width<=hint!.x||hint!.x+hint!.width<=tooltip!.x||tooltip!.y+tooltip!.height<=hint!.y||hint!.y+hint!.height<=tooltip!.y).toBe(true);
  await page.screenshot({path:`test-results/screenshots/density-example-comments-${info.project.name}.png`,animations:'disabled'});
  await viewer.getByRole('button',{name:'거리뷰 닫기'}).click();
  await page.getByRole('dialog',{name:'기억 상세'}).getByRole('button',{name:'거리뷰',exact:true}).click();
