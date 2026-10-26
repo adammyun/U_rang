@@ -40,3 +40,11 @@
 - `tests/e2e/density-emotions.spec.ts`, 기존 comments/personal/place/usability tests, 단위 tests, API verification scripts.
 
 캡처는 이 폴더에 보존한다. 실제 거리뷰가 없는 회색 자동 테스트 화면은 SDK test double이며 서비스의 지도 실패 캡처가 아니다.
+
+## 공개 게시 확인
+
+Sites 버전 9(소스 `f8414d4b2a28c9a1a6ff6c5c09495c9903768d88`)가 공개 실서비스에 배포되었다. GitHub Pages는 `032c31beeeb177ef110901728d75148567222a87`를 [Actions 40299627493](https://github.com/adammyun/yeoun_2/actions/runs/40299627493)에서 성공적으로 게시했다. 후속 문서·캡처 커밋은 앱 소스를 바꾸지 않는다.
+
+실제 브라우저에서 실서비스 공개 지도 23개 예시의 묶음, 8개 감정 메뉴, 성남동 기억 상세와 NAVER 촬영 화면을 확인했다. 익명 예시 댓글 2개가 표시되며 표식 1을 클릭한 뒤 풍경을 드래그하자 표식과 팝업이 함께 이동했다. native 확대 버튼으로 확대해도 위치가 갱신되고 팝업이 유지되었다. `live-panorama-before.png`, `live-panorama-after.png`, `live-panorama-zoom.png`는 test double이 아닌 실제 NAVER 화면이다. `live-map.png`는 실제 서비스 지도다.
+
+GitHub Pages도 새 버전으로 다시 열어 묶음과 마이페이지의 감정 메뉴 설정 8개·내 기록 수정 버튼을 확인했다. 브라우저에 있던 사용자 기록과 설정은 변경하지 않았다. 실제 계정의 production 설정 변경·댓글 등록은 여전히 미검증이며 로컬 인증과 Pages 자동 테스트로 확인한 범위와 구분한다.
