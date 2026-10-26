@@ -33,3 +33,11 @@ Playwright는 Chromium/WebKit의 desktop 1440×900 및 mobile 390×844에서 번
 캡처와 실제 게시 후 결과는 같은 폴더에 보존한다.
 
 실행 결과: `pnpm check` 전체 통과(단위 24개), `pnpm test:ui tests/e2e/panorama-ux.spec.ts tests/e2e/comments.spec.ts tests/e2e/density-emotions.spec.ts --workers=1` 44/44 통과(2.7분). 팝업 위치 검사를 기존의 특정 y값 비교에서 안내/버튼/댓글 패널과 실제로 겹치지 않는지 검사하는 방식으로 강화했다. 중간 시점 이벤트가 없는 채로 누르고 있는 상태도 별도로 검증했다. 자동 캡처의 회색 배경은 SDK test double이다.
+
+## 배포 및 실제 NAVER 확인
+
+- Sites 버전 10, 소스 `a6a127975b54b27da9b5f132bf23bcdd590f09c3`, 공개 배포 성공.
+- Pages 소스 `b558f2873876f9890fa80fd2ba041a115b7434f3`, [Actions 40338212004](https://github.com/adammyun/yeoun_2/actions/runs/40338212004) 성공. 후속 검증 문서·캡처 커밋은 앱 코드 변경이 아니다.
+- 실제 실서비스의 성남동 기억에서 NAVER 촬영 화면과 댓글 2개를 열었다. 숫자 제거, 오른쪽 댓글의 팝업이 패널 왼쪽 빈 공간으로 옮겨져 읽히는 것을 확인했다. 휠·드래그 후 복원도 확인했다.
+- `live-before.png`: 이전 숫자 표식. `live-after.png`: 새 말풍선과 피해서 배치한 팝업. `live-moving.png`: 실제 드래그 직후 표식/팝업 숨김(목록은 유지). `live-restored.png`: 안정된 뒤 재표시. `live-wheel-settled.png`: 휠 이후 화면. 이 다섯 파일은 실제 NAVER 브라우저 캡처다.
+- 모바일 검사는 Chromium/WebKit viewport 및 터치 입력 기준이며 실물 iPhone/Android 기기에서 별도 검증하지 않았다. 이번 변경은 UI에 한정했고 운영 계정의 신규 댓글 등록 검사를 반복하지 않았다.
