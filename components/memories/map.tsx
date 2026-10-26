@@ -18,6 +18,7 @@ import {
 } from '@/src/features/map/constants';
 import { isPagesRuntime } from '@/src/lib/runtime';
 import MemoryStamp from './memory-stamp';
+import { groupMapMarkers } from '@/src/features/map/marker-groups';
 import type { MapMode } from '@/src/features/map/appearance';
 import UlsanLineMap, { type UlsanLineData } from './ulsan-line-map';
 
@@ -337,22 +338,16 @@ export default function MemoryMap({
     view.center.lat >= lineData.bbox[1] && view.center.lat <= lineData.bbox[3];
   const showRasterTiles = !showLineArt && (mode === 'detail' || mode === 'calm' || mode === 'dark' || error || !ready || !tilesReady || rasterCompatibilityActive);
 
+  const worldMarkerGroups = useMemo(() => {
+    const width=presentation==='stamp'?120:40,height=presentation==='stamp'?140:40;
+    return groupMapMarkers(memories.map(memory=>({...project(memory,view.zoom),value:memory})),width,height)
+      .map(group=>({x:group.x,y:group.y,memories:group.items,key:group.items.map(memory=>memory.id).join(':')}));
+  },[memories,view.zoom,presentation]);
   const markerGroups = useMemo(() => {
-    const center = project(view.center, view.zoom);
-    const groups: Array<{ x: number; y: number; memories: Memory[] }> = [];
-    for (const memory of memories) {
-      const point = project(memory, view.zoom);
-      const x = view.width / 2 + point.x - center.x;
-      const y = view.height / 2 + point.y - center.y;
-      const markerSize = presentation === 'stamp' ? 72 : 34;
-      const edgePadding = presentation === 'stamp' ? 80 : 40;
-      if (x < -edgePadding || y < -edgePadding || x > view.width + edgePadding || y > view.height + edgePadding) continue;
-      const group = groups.find((item) => Math.hypot(item.x - x, item.y - y) < markerSize);
-      if (group) group.memories.push(memory);
-      else groups.push({ x, y, memories: [memory] });
-    }
-    return groups;
-  }, [memories, view, presentation]);
+    const center=project(view.center,view.zoom),edgePadding=presentation==='stamp'?160:50;
+    return worldMarkerGroups.map(group=>({...group,x:view.width/2+group.x-center.x,y:view.height/2+group.y-center.y}))
+      .filter(group=>group.x>=-edgePadding&&group.y>=-edgePadding&&group.x<=view.width+edgePadding&&group.y<=view.height+edgePadding);
+  },[worldMarkerGroups,view,presentation]);
 
   const currentLocationPosition = useMemo(() => {
     if (!currentLocation || !view.width || !view.height) return null;
@@ -429,7 +424,7 @@ export default function MemoryMap({
           };
           if (presentation === 'stamp') return (
             <MemoryStamp
-              key={group.memories.map((item) => item.id).join(':')}
+              key={group.key}
               memory={memory}
               count={group.memories.length}
               selected={selected}
@@ -441,7 +436,7 @@ export default function MemoryMap({
           );
           return (
             <button
-              key={group.memories.map((item) => item.id).join(':')}
+              key={group.key}
               className={`raster-memory-marker${selected ? ' selected' : grouped ? ' grouped' : ''}`}
               style={{ left: group.x, top: group.y, '--marker-color': color } as React.CSSProperties}
               aria-label={group.memories.length > 1 ? `${memory.location_name}의 기억 ${group.memories.length}개` : memory.title}

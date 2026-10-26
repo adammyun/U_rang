@@ -50,7 +50,12 @@ try {
  const deletedId=ownId;ownId=undefined;
  assert.match(sql(`select count(*) as remaining from memory_comments where memory_id='${deletedId}'`),/"remaining": 0/);
  assert.match(sql(`select count(*) as remaining from memory_comment_anchors a left join memory_comments c on c.id=a.comment_id where c.id is null`),/"remaining": 0/);
- console.log('PASS: panorama anchor persistence/cascade, comment auth, validation, same-origin, anonymous DTO, pagination, private/unlisted exclusion, own-delete and cascading deletion.');
+ const examplePath='/api/memories/20000000-0000-4000-8000-000000000010/comments';
+ const examples=await json(await request(examplePath));
+ const fixtures=examples.comments.filter(row=>row.id.startsWith('40000000-'));
+ assert.equal(fixtures.length,2);assert.ok(fixtures.every(row=>!row.owned&&row.anchor===null&&!('user_id' in row)));
+ const repeated=await json(await request(examplePath));assert.equal(repeated.comments.filter(row=>row.id.startsWith('40000000-')).length,2);
+ console.log('PASS: public example seed idempotency, panorama anchor persistence/cascade, comment auth, validation, same-origin, anonymous DTO, pagination, private/unlisted exclusion, own-delete and cascading deletion.');
 } finally {
  if(ownId)sql(`delete from memories where id='${ownId}'`);
  sql(`delete from memories where id='${id}' and user_id='${owner}'`);

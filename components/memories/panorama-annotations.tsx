@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import MemoryComments from './memory-comments';
+import { exampleCommentAnchor } from '@/src/features/panorama/demo-comment-anchor';
 import { anchorToScreen, screenToAnchor, type PanoramaFrame } from '@/src/features/panorama/projection';
 import type { MemoryComment, PanoramaAnchor } from '@/src/features/memories/comments-model';
 
@@ -10,11 +11,15 @@ export default function PanoramaAnnotations({container,frame,memoryId,memoryTitl
   container:HTMLDivElement;frame:PanoramaFrame|null;memoryId:string;memoryTitle:string;authenticated:boolean;
   onLookAt:(anchor:PanoramaAnchor)=>void;
 }) {
+  const [initialFrame]=useState(frame);
+  const anchorForComment=useCallback((comment:MemoryComment)=>comment.anchor??exampleCommentAnchor(memoryId,comment.id,initialFrame),[memoryId,initialFrame]);
   const [open,setOpen]=useState(true);
   const [comments,setComments]=useState<MemoryComment[]>([]);
   const [selected,setSelected]=useState<PanoramaAnchor|null>(null);
+  const clearSelected=useCallback(()=>setSelected(null),[]);
   const [activeId,setActiveId]=useState<string|null>(null);
   const [peekId,setPeekId]=useState<string|null>(null);
+  const [peekLocked,setPeekLocked]=useState(false);
   const latestFrame=useRef(frame);
   const panel=useRef<HTMLElement>(null);
   const hoverTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -38,7 +43,7 @@ export default function PanoramaAnnotations({container,frame,memoryId,memoryTitl
       const anchor=screenToAnchor({...currentFrame,width:rect.width,height:rect.height},event.clientX-rect.left,event.clientY-rect.top);
       if(!anchor)return;
       event.preventDefault();event.stopPropagation();
-      setSelected(anchor);setActiveId(null);setPeekId(null);
+      setSelected(anchor);setActiveId(null);setPeekId(null);setPeekLocked(false);
     };
     container.addEventListener('pointerdown',down,true);container.addEventListener('pointermove',move,true);container.addEventListener('pointercancel',cancel,true);container.addEventListener('click',click,true);
     return ()=>{container.removeEventListener('pointerdown',down,true);container.removeEventListener('pointermove',move,true);container.removeEventListener('pointercancel',cancel,true);container.removeEventListener('click',click,true);};
@@ -60,7 +65,9 @@ export default function PanoramaAnnotations({container,frame,memoryId,memoryTitl
     setActiveId(comment.id);
     hoverTimer.current=setTimeout(()=>focusComment(comment),160);
   },[focusComment]);
-  const points=frame?comments.flatMap((comment,index)=>{
+  const focusedComment=useCallback((comment:MemoryComment)=>focusComment(comment,true),[focusComment]);
+  const anchoredComments=useMemo(()=>comments.map(comment=>({...comment,anchor:anchorForComment(comment)})),[comments,anchorForComment]);
+  const points=frame?anchoredComments.flatMap((comment,index)=>{
     const position=comment.anchor?anchorToScreen(frame,comment.anchor):null;
     return position?[{comment,index,position}]:[];
   }):[];
@@ -68,17 +75,17 @@ export default function PanoramaAnnotations({container,frame,memoryId,memoryTitl
   const selectedPoint=frame&&selected?anchorToScreen(frame,selected):null;
   return <>
     <div className="panorama-comment-points" aria-label="거리뷰에 남긴 댓글 지점">
-      {points.map(({comment,index,position})=><button key={comment.id} type="button" className={`panorama-comment-point${activeId===comment.id?' is-active':''}`} style={{left:position.x,top:position.y}} aria-label={`거리뷰 댓글 지점 ${index+1}`} aria-describedby={peekId===comment.id?`panorama-peek-${comment.id}`:undefined}
-        onMouseEnter={()=>{setActiveId(comment.id);setPeekId(comment.id);}} onMouseLeave={()=>{if(window.matchMedia('(hover:hover)').matches){setActiveId(null);setPeekId(null);}}}
-        onFocus={()=>{setActiveId(comment.id);setPeekId(comment.id);}} onBlur={()=>{if(window.matchMedia('(hover:hover)').matches){setActiveId(null);setPeekId(null);}}}
-        onClick={()=>{setActiveId(comment.id);setPeekId(comment.id);setOpen(true);}}><MessageCircle size={15}/><span>{index+1}</span></button>)}
+      {points.map(({comment,index,position})=><button key={comment.id} type="button" className={`panorama-comment-point${activeId===comment.id?' is-active':''}`} style={{left:0,top:0,transform:`translate3d(${position.x}px,${position.y}px,0) translate(-50%,-50%)`}} aria-label={`거리뷰 댓글 지점 ${index+1}`} aria-describedby={peekId===comment.id?`panorama-peek-${comment.id}`:undefined}
+        onMouseEnter={()=>{setActiveId(comment.id);setPeekId(comment.id);}} onMouseLeave={()=>{if(window.matchMedia('(hover:hover)').matches&&!peekLocked){setActiveId(null);setPeekId(null);}}}
+        onFocus={()=>{setActiveId(comment.id);setPeekId(comment.id);}} onBlur={()=>{if(window.matchMedia('(hover:hover)').matches&&!peekLocked){setActiveId(null);setPeekId(null);}}}
+        onClick={()=>{setActiveId(comment.id);setPeekId(comment.id);setPeekLocked(true);setOpen(true);}}><MessageCircle size={15}/><span>{index+1}</span></button>)}
       {selectedPoint&&<span className="panorama-selected-point" aria-label="선택한 댓글 지점" style={{left:selectedPoint.x,top:selectedPoint.y}}><span>+</span></span>}
-      {preview&&frame&&<div id={`panorama-peek-${preview.comment.id}`} className="panorama-comment-peek" role="tooltip" style={{left:Math.max(12,Math.min(frame.width-272,preview.position.x+24)),top:Math.max(12,Math.min(frame.height-180,preview.position.y-100))}}><strong>{preview.comment.owned?'나':'익명의 여행자'}</strong><p>{preview.comment.content}</p></div>}
+      {preview&&frame&&<div id={`panorama-peek-${preview.comment.id}`} className="panorama-comment-peek" role="tooltip" style={{left:Math.max(12,Math.min(frame.width-272,preview.position.x+24)),top:Math.max(112,Math.min(frame.height-180,preview.position.y-100))}}><strong>{preview.comment.owned?'나':'익명의 여행자'}</strong><p>{preview.comment.content}</p></div>}
     </div>
     <button type="button" className="panorama-comments-toggle" aria-label={open?'거리뷰 댓글 닫기':'거리뷰 댓글 열기'} aria-expanded={open} aria-controls="panorama-comment-panel" onClick={()=>setOpen(value=>!value)}><MessageCircle size={17}/><span>댓글</span>{open&&<X size={15}/>}</button>
     {open&&<p className="panorama-comment-hint">화면을 클릭해 지점에 댓글 남기기 · 드래그로 둘러보기</p>}
     <aside ref={panel} id="panorama-comment-panel" className="panorama-comments-panel" hidden={!open}>
-      <MemoryComments key={`${memoryId}:${authenticated}`} memoryId={memoryId} memoryTitle={memoryTitle} authenticated={authenticated} visible={open} selectedAnchor={selected} onClearAnchor={()=>setSelected(null)} onCommentsChange={setComments} activeCommentId={activeId} onHoverComment={hoverComment} onFocusAnchor={comment=>focusComment(comment,true)}/>
+      <MemoryComments key={`${memoryId}:${authenticated}`} memoryId={memoryId} memoryTitle={memoryTitle} authenticated={authenticated} visible={open} selectedAnchor={selected} onClearAnchor={clearSelected} anchorForComment={anchorForComment} onCommentsChange={setComments} activeCommentId={activeId} onHoverComment={hoverComment} onFocusAnchor={focusedComment}/>
     </aside>
   </>;
 }

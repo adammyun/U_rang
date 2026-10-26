@@ -1,0 +1,91 @@
+import {mkdir} from 'node:fs/promises';
+import {expect,test} from '@playwright/test';
+import {focusSeongnam} from './helpers/place';
+import {fakePanorama} from './helpers/panorama';
+
+test.beforeEach(async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('yeoun_2:onboarding:v1',JSON.stringify({version:1,completed:true})));
+ await mkdir('test-results/screenshots',{recursive:true});
+});
+test('8가지 감정으로 탐색하고 지도 조작 시 태그가 접혀도 선택은 유지된다',async({page},info)=>{
+ await page.goto('./');
+ await expect(page.locator('.atlas-stamp').first()).toBeVisible();
+ const picker=page.getByLabel('감정으로 기억 탐색');
+ await picker.getByRole('button',{name:/감정 태그 펼치기/}).click();
+ const tags=picker.getByRole('group',{name:'감정 선택'});
+ await expect(tags.getByRole('button')).toHaveCount(8);
+ for(const name of ['그리움','평온','사랑','행복','슬픔','설렘','외로움','의미 있는 순간'])await expect(tags.getByRole('button',{name,exact:true})).toHaveCount(1);
+ const sad=tags.getByRole('button',{name:'슬픔',exact:true});await sad.scrollIntoViewIfNeeded();await sad.click();
+ await expect(sad).toHaveAttribute('aria-pressed','true');await expect(page).toHaveURL(/emotion=sad/);
+ await page.screenshot({path:`test-results/screenshots/density-emotions-${info.project.name}.png`,animations:'disabled'});
+ await page.locator('.map-surface').first().dispatchEvent('wheel',{deltaY:100});
+ await expect(tags).toBeHidden();
+ await picker.getByRole('button',{name:/감정 태그 펼치기/}).click();
+ await expect(picker.getByRole('button',{name:'슬픔',exact:true})).toHaveAttribute('aria-pressed','true');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('마이페이지에서 내 기억의 감정을 바로 수정하고 원래 지도를 유지한다',async({page},info)=>{
+ await page.addInitScript(()=>localStorage.setItem('yeoun_2.pages.auth.v1','signed-in'));
+ await page.goto('./');const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});
+ await map.evaluate(el=>el.setAttribute('data-density-map','retained'));
+ await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ const personal=page.getByRole('dialog',{name:'마이페이지'});
+ await personal.getByRole('button',{name:'나만 간직한 골목의 저녁 감정 수정',exact:true}).click();
+ const form=page.locator('.create-sheet');await expect(form).toBeVisible();
+ await form.getByRole('combobox',{name:'그날의 감정'}).click();
+ await page.getByRole('option',{name:'슬픔',exact:true}).click();
+ await form.getByRole('button',{name:'변경 내용 저장하기',exact:true}).click();
+ await expect(form).toHaveCount(0);await expect(personal).toBeVisible();
+ await expect(personal.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toContainText('슬픔');
+ await expect(map).toHaveAttribute('data-density-map','retained');
+ await page.screenshot({path:`test-results/screenshots/density-personal-edit-${info.project.name}.png`,animations:'disabled'});
+});
+test('예시 댓글은 두 개씩 나타나고 표식·팝업이 회전과 줌에 함께 이동한다',async({page},info)=>{
+ await fakePanorama(page);await page.goto('./');await focusSeongnam(page);
+ await page.getByRole('button',{name:'골목의 작은 불빛',exact:true}).click();
+ await page.getByRole('button',{name:'선택한 기억 자세히 읽기'}).click();
+ await page.getByRole('dialog',{name:'기억 상세'}).getByRole('button',{name:'거리뷰',exact:true}).click();
+ const viewer=page.locator('.panorama-dialog'),thread=viewer.getByRole('region',{name:'기억 댓글'});
+ await expect(thread.locator('.memory-comment')).toHaveCount(2);
+ await expect(thread.getByRole('button',{name:'내 댓글 삭제'})).toHaveCount(0);
+ const pin=viewer.getByRole('button',{name:'거리뷰 댓글 지점 1',exact:true});await expect(pin).toBeVisible();
+ const before=await pin.boundingBox();
+ if(info.project.name.startsWith('mobile'))await pin.tap();else {await pin.hover();await pin.click();}
+ await expect(viewer.getByRole('tooltip')).toContainText('골목');
+ await page.evaluate(()=>{const api=(window as unknown as {__testPanorama:{setPov:(pov:{pan:number;tilt:number;fov:number})=>void}}).__testPanorama;api.setPov({pan:8,tilt:5,fov:75});});
+ await expect.poll(async()=>Math.abs((await pin.boundingBox())!.x-before!.x)).toBeGreaterThan(10);
+ await expect(viewer.getByRole('tooltip')).toBeVisible();
+ const tooltip=await viewer.getByRole('tooltip').boundingBox(),hint=await viewer.locator('.panorama-comment-hint').boundingBox();
+ expect(tooltip!.y).toBeGreaterThanOrEqual(hint!.y+hint!.height);
+ await page.screenshot({path:`test-results/screenshots/density-example-comments-${info.project.name}.png`,animations:'disabled'});
+ await viewer.getByRole('button',{name:'거리뷰 닫기'}).click();
+ await page.getByRole('dialog',{name:'기억 상세'}).getByRole('button',{name:'거리뷰',exact:true}).click();
+ await expect(viewer.getByRole('region',{name:'기억 댓글'}).locator('.memory-comment')).toHaveCount(2);
+});
+
+test('마이페이지의 감정 메뉴 설정이 저장되고 새로고침 뒤에도 유지된다',async({page},info)=>{
+ await page.addInitScript(()=>localStorage.setItem('yeoun_2.pages.auth.v1','signed-in'));
+ await page.goto('./');await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ const personal=page.getByRole('dialog',{name:'마이페이지'});
+ await personal.getByText('감정 메뉴 설정',{exact:true}).click();
+ const settings=personal.locator('.emotion-menu-settings');
+ const options=settings.getByRole('checkbox');await expect(options).toHaveCount(8);
+ for(const option of await options.all())await option.uncheck();
+ await expect(settings.getByRole('button',{name:'감정 메뉴 저장',exact:true})).toBeDisabled();
+ await settings.getByRole('checkbox',{name:'슬픔',exact:true}).check();
+ await settings.getByRole('checkbox',{name:'의미 있는 순간',exact:true}).check();
+ await settings.getByRole('button',{name:'감정 메뉴 저장',exact:true}).click();
+ await expect(settings.getByRole('status')).toContainText('저장했어요');
+ await page.screenshot({path:`test-results/screenshots/density-menu-settings-${info.project.name}.png`,animations:'disabled'});
+ await page.getByRole('button',{name:'지도',exact:true}).click();
+ await page.getByRole('button',{name:/감정 태그 펼치기/}).click();
+ let tags=page.getByRole('group',{name:'감정 선택'});
+ await expect(tags.getByRole('button')).toHaveCount(2);
+ await expect(tags.getByRole('button',{name:'슬픔',exact:true})).toBeVisible();
+ await page.reload();await page.getByRole('button',{name:/감정 태그 펼치기/}).click();
+ tags=page.getByRole('group',{name:'감정 선택'});await expect(tags.getByRole('button')).toHaveCount(2);
+ await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ await personal.getByText('감정 메뉴 설정',{exact:true}).click();
+ await expect(settings.getByRole('checkbox',{name:'슬픔',exact:true})).toBeChecked();
+ await expect(settings.getByRole('checkbox',{name:'행복',exact:true})).not.toBeChecked();
+});

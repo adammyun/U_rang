@@ -76,3 +76,5 @@ export const memoryCommentAnchors = sqliteTable('memory_comment_anchors', {
   pan:real('pan').notNull(),
   tilt:real('tilt').notNull(),
 }, table=>[check('memory_comment_anchor_pan',sql`${table.pan} between -180 and 180`),check('memory_comment_anchor_tilt',sql`${table.tilt} between -90 and 90`),check('memory_comment_anchor_id',sql`length(${table.panoId}) between 1 and 256`)]);
+
+export const userPreferences = sqliteTable('user_preferences', {userId:text('user_id').primaryKey().notNull(),emotionMenu:text('emotion_menu').notNull(),updatedAt:text('updated_at').notNull()});

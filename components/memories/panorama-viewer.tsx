@@ -224,7 +224,7 @@ export default function PanoramaViewer({
               </button>
             </div>
           )}
-          {state==='ready'&&container&&<PanoramaAnnotations container={container} frame={frame} memoryId={memoryId} memoryTitle={memoryTitle} authenticated={authenticated} onLookAt={lookAt}/>}
+          {state==='ready'&&container&&frame&&<PanoramaAnnotations container={container} frame={frame} memoryId={memoryId} memoryTitle={memoryTitle} authenticated={authenticated} onLookAt={lookAt}/>}
         </div>
         {state!=='ready'&&state!=='loading'&&<div className="panorama-comments-fallback"><p>거리뷰 없이도 이 기억의 이야기를 나눌 수 있어요.</p><button type="button" onClick={onFallbackComments}><MessageCircle size={16}/> 기억 상세에서 댓글 보기</button></div>}
       </DialogContent>

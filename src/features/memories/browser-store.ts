@@ -1,3 +1,4 @@
+import { demoCommentsForMemory } from './demo-comments';
 import { COMMENT_PAGE_SIZE, encodeCommentCursor, type CommentCursor, type CommentPage, type MemoryComment, type PanoramaAnchor } from './comments-model';
 import { demoJournalContent } from '@/src/features/memories/demo-journals';
 import { isPagesAuthenticated } from '@/src/lib/runtime';
@@ -454,8 +455,25 @@ const commentDto = (row:StoredComment):MemoryComment => ({id:row.id,content:row.
 async function readableCommentMemory(id:string) {
   if(!await getBrowserPublicMemory(id)) throw new Error('기억을 찾지 못했습니다.');
 }
+const exampleCommentSeeds=new Map<string,Promise<void>>();
+async function seedBrowserComments(memoryId:string){
+  const examples=demoCommentsForMemory(memoryId);if(!examples.length)return;
+  const memory=await recordById(memoryId);
+  if(!memory || memory.visibility!=='public' || memory.ownerId!==examples[0].memoryOwnerId)return;
+  let pending=exampleCommentSeeds.get(memoryId);
+  if(!pending){
+    pending=database().then(db=>new Promise<void>((resolve,reject)=>{
+      const tx=db.transaction(COMMENTS_STORE,'readwrite'),store=tx.objectStore(COMMENTS_STORE);
+      tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error??new Error('예시 댓글을 준비하지 못했어요.'));
+      for(const example of examples){const get=store.get(example.id);get.onsuccess=()=>{if(!get.result)store.add({id:example.id,memoryId,ownerId:example.ownerId,content:example.content,createdAt:example.createdAt,anchor:null});};}
+    })).catch(error=>{exampleCommentSeeds.delete(memoryId);throw error;});
+    exampleCommentSeeds.set(memoryId,pending);
+  }
+  await pending;
+}
 export async function browserComments(memoryId:string,cursor?:CommentCursor):Promise<CommentPage> {
   await readableCommentMemory(memoryId);
+  await seedBrowserComments(memoryId);
   const db=await database();
   const rows=await requestResult(db.transaction(COMMENTS_STORE,'readonly').objectStore(COMMENTS_STORE).index('memoryId').getAll(memoryId) as IDBRequest<StoredComment[]>);
   const sorted=rows.filter(row=>!cursor || row.createdAt>cursor.createdAt || (row.createdAt===cursor.createdAt && row.id>cursor.id)).sort((a,b)=>a.createdAt<b.createdAt?-1:a.createdAt>b.createdAt?1:a.id<b.id?-1:a.id>b.id?1:0);

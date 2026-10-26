@@ -125,7 +125,7 @@ test('마이페이지 목록·필터·상세에서 같은 지도의 공개 탐�
   await panel.getByRole('combobox',{name:'내 공간 연도'}).selectOption('2022');
   await panel.getByRole('combobox',{name:'내 공간 감정'}).selectOption('peaceful');
   await expect(panel.getByRole('tabpanel')).toHaveAttribute('aria-busy','false');
-  const card=panel.getByRole('button',{name:/돌아오는 길의 가상 기억/});
+  const card=panel.locator('.personal-memory-card').filter({hasText:'돌아오는 길의 가상 기억'});
   await expect(card).toBeVisible();
   expect(await panel.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
   await page.screenshot({path:`test-results/screenshots/usability-my-archive-${info.project.name}.png`,animations:'disabled'});

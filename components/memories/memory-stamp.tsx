@@ -19,8 +19,8 @@ export default function MemoryStamp({ memory, count, selected, grouped, x, y, on
   return (
     <button
       type="button"
-      className={`raster-memory-marker atlas-stamp ${photo ? 'has-photo' : 'is-note'}${selected ? ' selected' : grouped ? ' grouped' : ''}`}
-      style={{ left: x, top: y, '--stamp-tilt': `${(hash % 11) - 5}deg`, '--stamp-color': emotions[memory.emotion].color } as CSSProperties}
+      className={`raster-memory-marker atlas-stamp ${photo ? 'has-photo' : 'is-note'}${count>1?' is-stack':''}${selected ? ' selected' : grouped ? ' grouped' : ''}`}
+      style={{ left: x, top: y, '--stamp-tilt': `${count>1?(hash%5)-2:(hash%11)-5}deg`, '--stamp-color': emotions[memory.emotion].color } as CSSProperties}
       aria-label={count > 1 ? `${memory.location_name}의 기억 ${count}개` : memory.title}
       aria-pressed={selected || grouped}
       data-memory-count={count}

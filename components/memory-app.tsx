@@ -1,4 +1,6 @@
 'use client';
+import {DEFAULT_EMOTION_MENU} from '@/src/features/memories/emotion-preferences';
+import {fetchEmotionPreferences,updateEmotionPreferences} from '@/src/features/memories/emotion-preferences-api';
 
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 
@@ -41,6 +43,7 @@ import {
   emotions,
   formatDate,
   type Bounds,
+  type Emotion,
   type Memory,
   type PlaceMemoryGroup,
   type Point,
@@ -175,11 +178,21 @@ export default function MemoryApp({
   const [currentLocation, setCurrentLocation] = useState<Point | null>(null);
   const [expanded, setExpanded] = useState(initialExplore);
   const [personalMode,setPersonalMode]=useState(initialPersonal && isAuthenticated);
+  const [emotionMenuReady,setEmotionMenuReady]=useState(!isAuthenticated);
+  const [emotionMenu,setEmotionMenu]=useState<Emotion[]>([...DEFAULT_EMOTION_MENU]);
+  useEffect(()=>{
+    if(!isAuthenticated)return;
+    const controller=new AbortController();
+    fetchEmotionPreferences(controller.signal).then(value=>{if(!controller.signal.aborted){setEmotionMenu(value.emotionMenu);setEmotionMenuReady(true);}}).catch(()=>{if(!controller.signal.aborted)setEmotionMenuReady(true);});
+    return ()=>controller.abort();
+  },[isAuthenticated]);
+  async function saveEmotionMenu(value:Emotion[]){const saved=await updateEmotionPreferences({emotionMenu:value});setEmotionMenu(saved.emotionMenu);}
   const [profileOpen,setProfileOpen]=useState(initialPersonal);
   const [personalSelection,setPersonalSelection]=useState<PersonalSelection>(DEFAULT_PERSONAL_SELECTION);
   const [personalData,setPersonalData]=useState<PersonalSpace|null>(null);
   const [personalVisibility,setPersonalVisibility]=useState<Memory['visibility']|''>(initialVisibility);
   const [detailFromProfile,setDetailFromProfile]=useState(false);
+  const [editingFromProfile,setEditingFromProfile]=useState(false);
   const [editing,setEditing]=useState<Memory|null>(null);
   const [deleting,setDeleting]=useState(false);
   const [placeVisit, setPlaceVisit] = useState(0);
@@ -420,9 +433,9 @@ export default function MemoryApp({
     setDraftLocation(null);
     setEditing(null);
     setRevision((value) => value + 1);
-    setSelected(memory);
+    if(editingFromProfile){setEditingFromProfile(false);setSelected(null);setProfileOpen(true);}else setSelected(memory);
     toast.success(
-      memory.visibility === 'public'
+      editing ? '기억을 수정했어요.' : memory.visibility === 'public'
         ? '기억을 남겼어요. 지도에 새로운 흔적이 나타났습니다.'
         : '나만 보는 기억으로 저장했어요.',
     );
@@ -588,7 +601,7 @@ export default function MemoryApp({
       )}
 
       {!personalMode && !profileOpen && !selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace && (
-        <AtlasEmotionPicker selected={filters.emotions} onChange={(emotions) => changeFilters({ ...filters, emotions })} />
+        <AtlasEmotionPicker visible={isAuthenticated?emotionMenu:DEFAULT_EMOTION_MENU} selected={filters.emotions} onChange={(emotions) => changeFilters({ ...filters, emotions })} />
       )}
       <span className="atlas-edge-note" aria-hidden="true">PLACES HOLD OUR STORIES · ULSAN</span>
 
@@ -742,10 +755,12 @@ export default function MemoryApp({
         data={personalData} selection={personalSelection} onSelection={value=>{setPersonalSelection(value);setPublicRows([]);}}
         filters={filters} onFilters={changeFilters} loading={loading} error={loadError} onRetry={()=>setRevision(value=>value+1)}
         visibility={personalVisibility} onVisibility={setPersonalVisibility} mapMode={mapMode} onMapMode={setMapMode}
+        emotionMenu={emotionMenu} emotionMenuReady={emotionMenuReady} onSaveEmotionMenu={saveEmotionMenu}
+        onEdit={memory=>{setEditingFromProfile(true);setProfileOpen(false);setSelected(null);setEditing(memory);}}
         onClose={closePersonal} onSelect={memory=>{setDetailFromProfile(true);setProfileOpen(false);setPlaceAnchor(null);setPlaceGroup(null);void openMemoryFromPlace(memory.id);}}
       /> : <section id="personal-space-panel" className="personal-panel personal-guest" role="dialog" aria-label="마이페이지"><button type="button" aria-label="마이페이지 닫기" onClick={()=>setProfileOpen(false)}><X size={18}/></button><h2><AtlasHeadingLabel>나의 유랑</AtlasHeadingLabel></h2><p>로그인하고 내 기록과 마음에 남은 이야기를 한곳에 모아 보세요.</p><Link href="/login?next=%2F%3Fpersonal%3D1">로그인하고 기억 모으기</Link></section>)}
 
-      {editing && isAuthenticated && <MemoryForm key={`edit:${editing.id}`} memory={editing} point={editing} onClose={()=>setEditing(null)} onSaved={memorySaved}/>}
+      {editing && isAuthenticated && <MemoryForm key={`edit:${editing.id}`} memory={editing} point={editing} onClose={()=>{setEditing(null);if(editingFromProfile){setEditingFromProfile(false);setProfileOpen(true);}}} onSaved={memorySaved}/>}
 
       {draftLocation && (
         <MemoryForm

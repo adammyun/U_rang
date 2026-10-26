@@ -2,15 +2,16 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import { ChevronRight, Layers2 } from 'lucide-react';
+import { DEFAULT_EMOTION_MENU } from '@/src/features/memories/emotion-preferences';
 import { emotions, type Emotion } from '@/lib/types';
 
-const quickEmotions = ['nostalgic', 'peaceful', 'love', 'happy'] as const;
-
 /** Only controls presentation. Selection remains owned by the existing filters. */
-export default function AtlasEmotionPicker({ selected, onChange }: {
+export default function AtlasEmotionPicker({ selected, onChange,visible=DEFAULT_EMOTION_MENU }: {
   selected: Emotion[];
+  visible?:Emotion[];
   onChange: (emotions: Emotion[]) => void;
 }) {
+  const quickEmotions=DEFAULT_EMOTION_MENU.filter(emotion=>visible.includes(emotion)||selected.includes(emotion));
   const [open, setOpen] = useState(false);
   const [present, setPresent] = useState(false);
   const picker = useRef<HTMLElement>(null);
@@ -26,9 +27,9 @@ export default function AtlasEmotionPicker({ selected, onChange }: {
   useEffect(() => {
     if (open || !present) return;
     // Keep the inert chips mounted for the 180ms fold + reversed stagger.
-    const timer = window.setTimeout(() => setPresent(false), 260);
+    const timer = window.setTimeout(() => setPresent(false), 180+(quickEmotions.length-1)*20+20);
     return () => window.clearTimeout(timer);
-  }, [open, present]);
+  }, [open, present,quickEmotions.length]);
 
   useEffect(() => {
     if (!open) return;
@@ -73,7 +74,7 @@ export default function AtlasEmotionPicker({ selected, onChange }: {
       {selected.length > 0 && <span className="atlas-emotion-count" aria-hidden="true">{selected.length}</span>}
       <ChevronRight className="atlas-emotion-chevron" size={15} aria-hidden="true" />
     </button>
-    <div id={listId} className="atlas-emotion-tags" hidden={!present} inert={!open} aria-hidden={!open} role="group" aria-label="감정 선택">
+    <div id={listId} className="atlas-emotion-tags" style={{'--tag-count':quickEmotions.length} as CSSProperties} hidden={!present} inert={!open} aria-hidden={!open} role="group" aria-label="감정 선택">
       {present && quickEmotions.map((emotion, index) => <button key={emotion} type="button"
         aria-pressed={selected.includes(emotion)}
         style={{ '--chip-color': emotions[emotion].color, '--tag-index': index } as CSSProperties}

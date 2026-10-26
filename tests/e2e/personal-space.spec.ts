@@ -89,7 +89,7 @@ test('기존 내 기억 주소도 같은 개인 공간과 소유자 필터를 �
  await panel.locator('.personal-filter-details summary').click();
  await expect(panel.getByRole('combobox',{name:'내 공간 공개 범위'})).toHaveValue('private');
  await expect(panel.getByRole('combobox',{name:'내 공간 연도'})).toHaveValue('2022');
- await expect(panel.getByRole('button',{name:/나만 간직한 골목의 저녁/})).toBeVisible();
+ await expect(panel.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toBeVisible();
  await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
  await expect(page.getByLabel('지도 위 기억 마커').getByRole('button',{name:'나만 간직한 골목의 저녁',exact:true})).toBeVisible();
 });

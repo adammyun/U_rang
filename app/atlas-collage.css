@@ -56,7 +56,7 @@
 .atlas-emotion-picker[data-state='closing'] .atlas-emotion-tags { pointer-events: none; }
 .atlas-emotion-picker[data-state='closing'] .atlas-emotion-tags button {
   animation: atlas-tag-fold var(--atlas-tag-fold) var(--atlas-ease) both;
-  animation-delay: calc((3 - var(--tag-index)) * 20ms);
+  animation-delay: calc((var(--tag-count,4) - 1 - var(--tag-index)) * 20ms);
 }
 @keyframes atlas-tag-fold { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(-18px) scale(.94); } }
 @keyframes atlas-tag-reveal { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
@@ -719,3 +719,24 @@ body:has(.personal-panel) .pages-service-link { display:none; }
  .memory-activity-actions>button:nth-child(2)>span,.memory-activity-actions>button:nth-child(3)>span { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
  .memory-activity-actions>button { min-width:44px; justify-content:center; }
 }
+
+/* Tighter paper bundles; one DOM marker represents each spatial group. */
+.atlas.memory-atlas .atlas-stamp.is-stack .atlas-stamp-stack { transform:rotate(3deg); }
+.atlas-stamp.is-stack .atlas-stamp-stack::before { content:''; position:absolute; inset:2px -2px -2px 2px; background:var(--atlas-raised); border:1px solid var(--atlas-border); transform:rotate(-5deg); z-index:-1; }
+.atlas-stamp.is-stack .atlas-stamp-count { font-variant-numeric:tabular-nums; }
+.atlas-emotion-tags button { flex:0 0 auto; }
+
+.personal-memory-entry { min-width:0; display:flex; flex-direction:column; gap:0; }
+.personal-memory-edit { align-self:flex-end; display:flex; align-items:center; gap:7px; min-height:44px; padding:8px 12px; color:var(--atlas-coral); font-size:11px; }
+.personal-memory-edit:hover { background:var(--atlas-raised); }
+
+.emotion-menu-settings { padding:12px 0; border-block:1px solid var(--atlas-rule); margin:14px 0; }
+.emotion-menu-settings summary { min-height:44px; padding:12px 0; cursor:pointer; font-size:12px; color:var(--atlas-text); }
+.emotion-menu-settings p { color:var(--atlas-muted); font-size:11px; line-height:1.8; margin:8px 0; }
+.emotion-menu-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 10px; }
+.emotion-menu-options label { display:flex; align-items:center; gap:7px; min-height:44px; font-size:12px; }
+.emotion-menu-options input { width:16px; height:16px; accent-color:var(--atlas-coral); }
+.emotion-menu-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; }
+.emotion-menu-actions button { min-height:44px; display:flex; align-items:center; gap:6px; padding:8px 12px; font-size:12px; color:var(--atlas-coral); }
+.emotion-menu-actions button:last-child { background:var(--atlas-coral); color:var(--atlas-action-ink); }
+.emotion-menu-actions button:disabled { opacity:.5; }

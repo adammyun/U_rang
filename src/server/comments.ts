@@ -1,3 +1,4 @@
+import { demoCommentsForMemory } from '@/src/features/memories/demo-comments';
 import { database, getMemory } from './memory-store';
 import { COMMENT_PAGE_SIZE, encodeCommentCursor, type CommentCursor, type CommentPage, type MemoryComment, type PanoramaAnchor } from '@/src/features/memories/comments-model';
 
@@ -11,11 +12,25 @@ export function ensureCommentSchema() {
   ]).catch(error => { schemaReady = null; throw error; });
   return schemaReady;
 }
+const exampleSeeds=new Map<string,Promise<unknown>>();
+async function ensureExampleComments(memoryId:string){
+  const examples=demoCommentsForMemory(memoryId);if(!examples.length)return;
+  let pending=exampleSeeds.get(memoryId);
+  if(!pending){
+    pending=database().batch(examples.map(comment=>database().prepare(`insert or ignore into memory_comments(id,memory_id,user_id,content,created_at)
+      select ?,m.id,?,?,? from memories m where m.id=? and m.user_id=? and m.visibility='public'`)
+      .bind(comment.id,comment.ownerId,comment.content,comment.createdAt,comment.memoryId,comment.memoryOwnerId)))
+      .catch(error=>{exampleSeeds.delete(memoryId);throw error;});
+    exampleSeeds.set(memoryId,pending);
+  }
+  await pending;
+}
 const readable = `(m.visibility='public' or m.user_id=?)`;
 // Author identity never enters the DTO, including for non-anonymous memories.
 export async function listComments(memoryId: string, userId?: string, cursor?: CommentCursor): Promise<CommentPage | null> {
   if (!await getMemory(memoryId,userId)) return null;
   await ensureCommentSchema();
+  await ensureExampleComments(memoryId);
   const rows = await database().prepare(`select c.id,c.content,c.created_at as createdAt,(c.user_id=?) as owned,a.pano_id as panoId,a.pan,a.tilt
     from memory_comments c join memories m on m.id=c.memory_id left join memory_comment_anchors a on a.comment_id=c.id
     where c.memory_id=? and ${readable} ${cursor ? 'and (c.created_at,c.id)>(?,?)' : ''}

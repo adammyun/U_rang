@@ -458,7 +458,7 @@ test('감정 태그는 옆으로 펼쳐지고 지도 제스처에 접혀도 선�
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
   expect(Math.abs((await toggle.boundingBox())!.y - closedToggle.y)).toBeLessThan(1);
-  await expect(tags.getByRole('button')).toHaveCount(4);
+  await expect(tags.getByRole('button')).toHaveCount(8);
   await picker.getByRole('button', { name: '평온', exact: true }).click();
   await expect(picker.getByRole('button', { name: '평온', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect(page).toHaveURL(/emotion=peaceful/);
