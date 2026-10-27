@@ -12,7 +12,7 @@ export async function GET(_: Request, context: Context) {
     const user = await getChatGPTUser();
     const memory = await getMemory(id, user?.userId);
     if (!memory) return Response.json({ message: '기억을 찾지 못했습니다.' }, { status: 404 });
-    return Response.json({ data: memory });
+    return Response.json({ data: memory },{headers:{'cache-control':'private, no-store'}});
   } catch (error) { return errorResponse(error); }
 }
 

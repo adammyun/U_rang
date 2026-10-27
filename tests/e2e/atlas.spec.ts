@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 async function loginAndOpenForm(page: import('@playwright/test').Page) {
   await page.goto('./');
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
-  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
+  await page.getByRole('button', { name: '게스트로 시작' }).click();
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
   await page.getByRole('button', { name: '이 위치 선택' }).click();
   return page.locator('.create-sheet');
@@ -162,7 +162,7 @@ test('조정의 기억 전환은 로그인 경계와 공개 필터를 유지한�
  await page.getByRole('button',{name:'내 기억만 보기',exact:true}).click();
  const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel).toBeVisible();
  await panel.getByRole('link',{name:'로그인하고 기억 모으기'}).click();
- await page.getByRole('button',{name:'로컬 시연 세션 시작'}).click();
+ await page.getByRole('button',{name:'게스트로 시작'}).click();
  await expect(panel).toBeVisible();
  await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
  await page.getByRole('button',{name:/^지도 조정 열기/}).click();
@@ -232,7 +232,7 @@ test('지도 컨트롤 아이콘이 중앙 정렬되고 조정·작성·로그�
   await sheet.getByRole('button', { name: '지도 조정 닫기' }).click();
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
   expect(luminance(await page.locator('.auth-card').evaluate(el => getComputedStyle(el).backgroundColor))).toBeLessThan(.2);
-  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
+  await page.getByRole('button', { name: '게스트로 시작' }).click();
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
   await page.getByRole('button', { name: '이 위치 선택' }).click();
   const form = page.locator('.create-sheet');
@@ -368,7 +368,7 @@ test('포스트잇 미리보기에서 같은 톤의 장소 목록·상세·조�
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
   await expect(page.locator('.auth-card .atlas-heading-label')).toBeVisible();
   await page.screenshot({ path: `test-results/screenshots/collage-auth-${info.project.name}.png`, animations: 'disabled' });
-  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
+  await page.getByRole('button', { name: '게스트로 시작' }).click();
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
   await page.getByRole('button', { name: '이 위치 선택' }).click();
   const form = page.locator('.create-sheet');

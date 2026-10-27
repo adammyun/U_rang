@@ -36,6 +36,13 @@
       "when": 1793005991514,
       "tag": "0004_emotion_menu_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793029939842,
+      "tag": "0005_smiling_roughhouse",
+      "breakpoints": true
     }
   ]
 }

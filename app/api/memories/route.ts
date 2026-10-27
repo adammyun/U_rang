@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const query = boundsSchema.parse(queryObject(request));
     const viewer = await getChatGPTUser();
     const result = await listPublicMemories(query, query, query.limit, viewer?.userId);
-    return Response.json({ data: result.memories, meta: { hasMore: result.hasMore } });
+    return Response.json({ data: result.memories, meta: { hasMore: result.hasMore } },{headers:{'cache-control':'private, no-store'}});
   } catch (error) { return errorResponse(error); }
 }
 

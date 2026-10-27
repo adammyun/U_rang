@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowLeft, LogIn, MapPinned } from 'lucide-react';
 import MemoryApp from '@/components/memory-app';
+import {safeReturnPath} from '@/src/features/auth/return-path';
 import DevTools from '@/components/dev/dev-tools';
 import {
   DEFAULT_MEMORY_FILTERS,
@@ -47,7 +48,7 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
           브라우저의 IndexedDB에만 저장됩니다.
         </p>
         <button className="auth-submit" type="button" onClick={onLogin}>
-          <LogIn size={18} /> 로컬 시연 세션 시작
+          <LogIn size={18} /> 게스트로 시작
         </button>
         <a className="auth-back" href="#/">
           <ArrowLeft size={16} /> 지도로 돌아가기
@@ -104,8 +105,7 @@ function PagesApp() {
       <LoginPage
         onLogin={() => {
           setPagesAuthenticated(true);
-          const next=route.search.get('next')??'/';
-          window.location.hash=next.startsWith('/')&&!next.startsWith('//')?next:'/';
+          window.location.hash=safeReturnPath(route.search.get('next'));
         }}
       />
     );
@@ -124,7 +124,7 @@ function PagesApp() {
     }
     return (
       <MemoryApp
-        isAuthenticated initialPersonal
+        isAuthenticated initialPersonal guestSession
         initialVisibility={parseUserMemoryFilters(parameters(route.search)).visibility}
         initialFilters={parseMemoryFilters(parameters(route.search))}
         naverMapsClientId={clientId}
@@ -150,6 +150,7 @@ function PagesApp() {
       initialExplore={route.search.get('explore') === '1'}
       initialPersonal={route.search.get('personal') === '1'}
       isAuthenticated={authenticated}
+      guestSession={authenticated}
       initialFilters={
         route.search.size
           ? parseMemoryFilters(parameters(route.search))

@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 async function login(page: Page) {
   await page.goto('./');
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
-  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
+  await page.getByRole('button', { name: '게스트로 시작' }).click();
 }
 async function capture(page: Page, name: string, project: string) {
   await page.mouse.move(page.viewportSize()!.width - 10, 85);

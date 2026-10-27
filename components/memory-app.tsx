@@ -135,6 +135,7 @@ function MemoryCard({
 
 export default function MemoryApp({
   isAuthenticated,
+  guestSession=false,
   initialFilters,
   naverMapsClientId,
   initialExplore = false,
@@ -143,6 +144,7 @@ export default function MemoryApp({
   initialVisibility = '',
 }: {
   isAuthenticated: boolean;
+  guestSession?:boolean;
   initialFilters: MemoryFilters;
   naverMapsClientId: string;
   initialExplore?: boolean;
@@ -417,8 +419,10 @@ export default function MemoryApp({
   async function signOut() {
     try {
       setPersonalMode(false);setProfileOpen(false);setPersonalData(null);setPublicRows([]);
-      await logout();
+      const destination=await logout();
       setCreatedRows([]);
+      // A full server sign-out must not race a refresh of the old personal URL.
+      if(destination){window.location.assign(destination);return;}
       router.refresh();
     } catch {
       toast.error('로그아웃하지 못했어요. 다시 시도해 주세요.');
@@ -554,6 +558,7 @@ export default function MemoryApp({
         <nav className="app-nav" aria-label="주요 메뉴" data-tour="account-navigation">
           {isAuthenticated ? (
             <>
+              {guestSession&&<span className="guest-session-label">게스트</span>}
               <button onClick={() => void signOut()}>
                 <LogOut size={15} /> 로그아웃
               </button>
@@ -752,6 +757,7 @@ export default function MemoryApp({
       />
 
       {profileOpen && (isAuthenticated ? <PersonalSpacePanel
+        guestSession={guestSession} onGuestLogout={()=>void signOut()}
         data={personalData} selection={personalSelection} onSelection={value=>{setPersonalSelection(value);setPublicRows([]);}}
         filters={filters} onFilters={changeFilters} loading={loading} error={loadError} onRetry={()=>setRevision(value=>value+1)}
         visibility={personalVisibility} onVisibility={setPersonalVisibility} mapMode={mapMode} onMapMode={setMapMode}

@@ -4,9 +4,10 @@ export async function logout() {
   if (isPagesRuntime()) {
     setPagesAuthenticated(false);
     window.location.hash = '/';
-    return;
+    return null;
   }
-  // The hosting layer owns this top-level SIWC route.
-  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-  window.location.assign('/signout-with-chatgpt?return_to=%2F');
+  const response=await fetch('/api/auth/logout',{method:'POST'});
+  if(!response.ok)throw new Error('로그아웃하지 못했어요.');
+  const {redirectTo}=await response.json() as {redirectTo:string};
+  return redirectTo;
 }

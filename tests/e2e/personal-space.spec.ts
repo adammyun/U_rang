@@ -11,7 +11,7 @@ test('같은 지도에서 내 정보·저장한 기억·추천을 열고 표시 
  test.setTimeout(60000);
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  const activityRequests:string[]=[];page.on('request',request=>{if(request.url().includes('/activity'))activityRequests.push(request.url());});
- await page.goto('./#/login');await page.getByRole('button',{name:'로컬 시연 세션 시작'}).click();
+ await page.goto('./#/login');await page.getByRole('button',{name:'게스트로 시작'}).click();
  await focusSeongnam(page);
  const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});await map.evaluate(el=>el.setAttribute('data-retained-map','yes'));
  const camera=await page.locator('.ulsan-line-map').getAttribute('viewBox');const url=page.url();
@@ -82,7 +82,7 @@ test('로그인 전 내 기억은 이동 없는 안내이며 반응과 비공개
 });
 
 test('기존 내 기억 주소도 같은 개인 공간과 소유자 필터를 연다',async({page})=>{
- await page.goto('./#/login');await page.getByRole('button',{name:'로컬 시연 세션 시작'}).click();
+ await page.goto('./#/login');await page.getByRole('button',{name:'게스트로 시작'}).click();
  const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});await expect(map).toBeVisible();await map.evaluate(el=>el.setAttribute('data-legacy-map','retained'));
  await page.goto('./#/my-map?visibility=private&year=2022');
  const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel).toBeVisible();await expect(map).toHaveAttribute('data-legacy-map','retained');

@@ -272,6 +272,15 @@ body:has(.memory-atlas) .place-emotions span { border-radius: 0; background: var
 /* The same title/edge/close language continues through auth, tour and panorama. */
 .auth-page .auth-card { border: 0; border-left: 2px solid var(--atlas-border); border-radius: 0; box-shadow: var(--atlas-paper-shadow); }
 .auth-page .auth-card h1 { line-height: 1.8; }
+.auth-page .auth-card form { width:100%; }
+.auth-page .auth-card .auth-guest { width:100%; background:var(--atlas-action); color:var(--atlas-action-ink); font-weight:600; }
+.auth-page .auth-card .auth-account { background:var(--atlas-raised); color:var(--atlas-text); border:1px solid var(--atlas-border); }
+.auth-page .auth-card .auth-session-note { font-size:12px; line-height:1.9; color:var(--atlas-muted); }
+.auth-divider { display:flex; align-items:center; gap:12px; color:var(--atlas-muted); font-size:12px; margin:4px 0; }
+.auth-divider::before,.auth-divider::after { content:''; flex:1; height:1px; background:var(--atlas-border); }
+.guest-session-label { align-self:center; padding:4px 8px; border:1px solid var(--atlas-border); color:var(--atlas-coral); font-size:11px; white-space:nowrap; }
+.personal-guest-session { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 16px; padding:8px 0; border-bottom:1px solid var(--atlas-border); color:var(--atlas-muted); font-size:11px; }
+.personal-guest-session button { min-height:44px; padding:8px 10px; border:1px solid var(--atlas-border); color:var(--atlas-coral); white-space:nowrap; }
 body:has(.memory-atlas) .tour-panel { border: 0; border-left: 2px solid var(--atlas-border); border-radius: 0; box-shadow: var(--atlas-paper-shadow); }
 body:has(.memory-atlas) .tour-panel h2 { line-height: 1.7; }
 body:has(.memory-atlas) .tour-next,body:has(.memory-atlas) .tour-back { border-radius: 0; }

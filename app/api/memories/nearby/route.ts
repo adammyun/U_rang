@@ -7,6 +7,6 @@ export async function GET(request: Request) {
   try {
     const query = nearLocationSchema.parse(queryObject(request));
     const user = await getChatGPTUser();
-    return Response.json({ data: await nearbyMemories(query.lat, query.lng, query.radiusMeters, query.limit, user?.userId) });
+    return Response.json({ data: await nearbyMemories(query.lat, query.lng, query.radiusMeters, query.limit, user?.userId) },{headers:{'cache-control':'private, no-store'}});
   } catch (error) { return errorResponse(error); }
 }

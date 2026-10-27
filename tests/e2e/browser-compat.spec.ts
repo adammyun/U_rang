@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 
 async function chooseLocation(page: Page) {
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
-  await page.getByRole('button', { name: '로컬 시연 세션 시작' }).click();
+  await page.getByRole('button', { name: '게스트로 시작' }).click();
   await page.getByRole('button', { name: '기억을 남길 장소 선택하기' }).click();
 }
 

@@ -52,3 +52,5 @@ next-env.d.ts
 /outputs/
 /work/
 /uploads/
+/test-results-server/
+/playwright-report-server/
