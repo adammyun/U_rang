@@ -40,3 +40,14 @@ GitHub Pages는 기존 IndexedDB 시연 세션의 버튼을 같은 ‘게스트�
 - `playwright.server.config.ts`, `tests/server-e2e/guest-login.spec.ts`, `scripts/verify-guest-service.mjs`: 서버 검증.
 
 실행 결과와 공개 사이트 확인은 최종 검증 뒤 아래에 기록한다.
+
+## 완료 결과
+
+- `pnpm db:migrate` 0000–0005와 seed 실행 성공. `pnpm check`는 lint 경고 없이 typecheck·단위 25개·Worker/Pages 빌드까지 통과했다.
+- 실제 서버/D1 브라우저 검사 4/4 통과(Chromium/WebKit, desktop/mobile). 게스트 설정·비공개 사진 기록 작성/열람/삭제·재진입·마이페이지 로그아웃·비로그인 경계를 확인했다.
+- Pages의 기존 지도/사진/개인 공간/사용성 40개 통과 후, 마지막 마이페이지·로그아웃 보완에서 개인 공간/사용성 28개를 재검사해 28/28 통과했다. 전체 저장소의 모든 테스트를 한 번에 실행한 결과와는 구분한다.
+- `verify-guest-service.mjs`에서 게스트 간 격리·hash 저장/만료·위조·same-origin·개인 설정·댓글·반응·사진·계정 우선·세션 폐기 검사가 통과했다.
+- Sites 버전 11(소스 `b8cd3701d43d9212e48e7b936eddf26c2dd25383`) 공개 배포 성공. 실제 공개 브라우저에서 계정 없이 로그인 → ‘게스트 여행자의 기억 보관함’/설정 로딩 → 게스트 로그아웃 → 공개 지도와 로그인 링크 복귀를 확인했다. 운영 DB에 검사 기억·사진·댓글을 새로 작성하지 않았다. 실제 ChatGPT 계정의 로그인 완료는 이번에 반복 검증하지 않았다.
+- Pages는 소스 `efa5c11cfe6e1564c99a3f5e0a6c7a0d91775569`, [Actions 40458615909](https://github.com/adammyun/yeoun_2/actions/runs/40458615909) 성공. 실제 공개 로그인 화면에서도 ‘게스트로 시작’과 브라우저 저장 안내를 확인했다. 기존 사용자 브라우저 기록은 변경하지 않았다.
+- 캡처는 `docs/design/guest-login/`에 보존한다. `live-login.png`, `live-guest-space.png`, `live-signed-out.png`는 실제 공개 서비스이며 다른 캡처는 로컬 서버 테스트다. 후속 문서/캡처 커밋은 앱 코드 변경이 아니다.
+- 모바일 검사는 브라우저 viewport/터치 기준이며 실물 iPhone/Android 검사는 포함하지 않았다.
