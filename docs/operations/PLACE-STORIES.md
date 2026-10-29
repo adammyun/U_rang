@@ -57,3 +57,5 @@ pnpm exec playwright test tests/e2e/place-stories.spec.ts tests/e2e/personal-spa
 API 스크립트는 localhost에서만 동작한다. 검사 중 만든 게스트 세션은 로그아웃으로 폐기한다. 발견 기록은 로컬 테스트 DB에 남을 수 있다. 운영 사용자 데이터는 변경하지 않는다.
 
 스크린샷은 `test-results/screenshots/place-story-*`와 `test-results-server/screenshots/place-story-*`에 생성한다. Chromium/WebKit의 데스크톱·모바일 viewport로 검증하며 실제 iOS/Android 기기나 실제 현장 방문을 검증하는 것은 아니다.
+
+최종 검사·화면·배포 결과는 [검증 기록](../design/place-stories/QA.md)에 정리했다.

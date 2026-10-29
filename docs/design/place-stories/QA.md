@@ -2,6 +2,13 @@
 
 2026-10-29 · `redesign/yeoun-2`
 
+## 배포와 빌드
+
+- 최종 `pnpm check`: lint, typecheck, 단위 27건, Worker build, Pages build 모두 성공.
+- GitHub Pages [배포 #40806181274](https://github.com/adammyun/yeoun_2/actions/runs/40806181274) 성공. 앱 소스 `0fb6aeb5c1d44d6e746ed0926b25da6472f0d35e`. 실제 공개 Pages에서 대왕암공원 검색 → 확대 → 울기등대 흔적 표시를 확인했다.
+- 실서비스 Sites v12, 소스 `46e658e16e027e767098693d36e5a896e4714a8e`, 공개 배포 성공.
+- 실제 공개 URL에서 로그인 전 읽기, 게스트 로그인 후 자동 보관, 확대된 지도 흔적, 새로고침 뒤 마이페이지 보관 유지까지 직접 확인했다.
+
 ## 결과
 
 - Pages UI: `place-stories.spec.ts` 8건 + 기존 `personal-space.spec.ts` 12건 = **20/20 통과**.
@@ -36,7 +43,7 @@
 
 ## 캡처
 
-[데스크톱 지도 흔적](desktop-trace.png) · [데스크톱 읽기](desktop-story.png) · [모바일 읽기](mobile-story.png) · [모바일 보관함](mobile-collection.png)
+[실서비스 읽기](live-story.png) · [데스크톱 지도 흔적](desktop-trace.png) · [데스크톱 읽기](desktop-story.png) · [모바일 읽기](mobile-story.png) · [모바일 보관함](mobile-collection.png)
 
 ## 범위와 제한
 
