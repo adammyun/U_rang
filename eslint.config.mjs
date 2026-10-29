@@ -14,7 +14,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Generated browser reports contain Playwright's bundled viewer code.
     "playwright-report/**",
+    "playwright-report-server/**",
     "test-results/**",
+    "test-results-server/**",
     "blob-report/**",
   ]),
   {

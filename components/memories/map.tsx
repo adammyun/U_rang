@@ -19,6 +19,8 @@ import {
 import { isPagesRuntime } from '@/src/lib/runtime';
 import MemoryStamp from './memory-stamp';
 import { groupMapMarkers } from '@/src/features/map/marker-groups';
+import {PLACE_STORIES,isStoryZoom} from '@/src/features/stories/catalog';
+import StoryGlyph from '@/components/stories/story-glyph';
 import type { MapMode } from '@/src/features/map/appearance';
 import UlsanLineMap, { type UlsanLineData } from './ulsan-line-map';
 
@@ -79,6 +81,9 @@ export default function MemoryMap({
   presentation = 'trace',
   reserveIntroSpace = false,
   hideMemories = false,
+  hideStories = false,
+  discoveredStoryIds = [],
+  onStory,
 }: {
   memories: Memory[];
   mode: MapMode;
@@ -93,6 +98,9 @@ export default function MemoryMap({
   presentation?: 'trace' | 'stamp';
   reserveIntroSpace?: boolean;
   hideMemories?: boolean;
+  hideStories?:boolean;
+  discoveredStoryIds?:string[];
+  onStory?:(id:string)=>void;
 }) {
   const container = useRef<HTMLElement>(null);
   const rasterContainer = useRef<HTMLDivElement>(null);
@@ -374,6 +382,11 @@ export default function MemoryMap({
   }, [draftPoint, view]);
 
   const visibleMarkerGroups = hideMemories ? [] : markerGroups;
+  const storyMarkers=useMemo(()=>{
+    if(hideStories||hideMemories||!onStory||!isStoryZoom(view.zoom)||!view.width||!view.height)return [];
+    const center=project(view.center,view.zoom);
+    return PLACE_STORIES.map(story=>{const point=project(story,view.zoom);return {story,x:view.width/2+point.x-center.x,y:view.height/2+point.y-center.y};}).filter(point=>point.x>=24&&point.y>=24&&point.x<=view.width-24&&point.y<=view.height-24);
+  },[hideStories,hideMemories,onStory,view]);
 
   return (
     <>
@@ -446,6 +459,7 @@ export default function MemoryMap({
             </button>
           );
         })}
+        {storyMarkers.map(({story,x,y})=><button type="button" key={'story:'+story.id} className={`map-story-mark${discoveredStoryIds.includes(story.id)?' is-discovered':''}`} style={{left:x,top:y,'--story-opacity':Math.min(.65,.4+(view.zoom-14.6)*.1)} as React.CSSProperties} aria-label={`${story.place}의 숨은 이야기`} title={`${story.place} · 숨은 이야기`} onClick={event=>{event.stopPropagation();onStory?.(story.id);}}><StoryGlyph/></button>)}
         {draftLocationPosition && (
           <span
             className="raster-draft-location"

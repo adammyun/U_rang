@@ -149,6 +149,7 @@ function PagesApp() {
       liveServiceUrl={import.meta.env.VITE_LIVE_SERVICE_URL}
       initialExplore={route.search.get('explore') === '1'}
       initialPersonal={route.search.get('personal') === '1'}
+      initialStory={route.search.get('story')??undefined}
       isAuthenticated={authenticated}
       guestSession={authenticated}
       initialFilters={

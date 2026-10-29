@@ -568,6 +568,57 @@ body:has(.atlas-place-board,.spatial-detail,.story-sheet,.discovery.expanded,.on
 .personal-tabs { display:flex; gap:5px; margin:0 0 15px; border-bottom:1px solid var(--atlas-border); }
 .personal-tabs button { flex:1; min-height:44px; padding:10px 5px; font-size:13px; color:var(--atlas-muted); background:transparent; border:0; border-bottom:2px solid transparent; }
 .personal-tabs button[aria-selected=true] { color:var(--atlas-coral); border-bottom-color:var(--atlas-coral); }
+.personal-tabs { overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin; }
+.personal-tabs button { flex:1 0 auto; white-space:nowrap; }
+
+/* Small cartographic traces, never a second map or a popularity layer. */
+.map-story-mark { position:absolute; z-index:6; width:44px; height:44px; display:grid; place-items:center; padding:8px; border:0; border-radius:50%; background:#11171924; color:var(--atlas-text); opacity:var(--story-opacity,.4); transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer; transition:opacity 180ms,background 180ms; animation:story-trace-in 240ms ease-out; }
+.map-story-mark svg { width:28px; height:28px; filter:drop-shadow(0 1px 3px #000b); }
+.map-story-mark.is-discovered { color:var(--atlas-coral); }
+.map-story-mark:is(:hover,:focus-visible) { opacity:1; background:var(--atlas-cutout); color:var(--atlas-coral); outline:1px solid var(--atlas-coral); outline-offset:3px; }
+.map-story-mark:active { background:var(--atlas-raised); }
+@keyframes story-trace-in { from {opacity:0;} }
+.place-story-dialog { display:flex; flex-direction:column; gap:0; width:min(560px,calc(100vw - 32px)); max-width:560px; max-height:calc(100dvh - 64px); padding:0; border:1px solid var(--atlas-border); border-radius:2px; background:var(--atlas-surface); color:var(--atlas-text); font-family:var(--atlas-font); box-shadow:var(--atlas-paper-shadow); }
+.place-story-dialog::after { content:''; position:absolute; top:-12px; left:44%; width:74px; height:24px; background:var(--atlas-tape); rotate:-4deg; pointer-events:none; }
+.place-story-dialog>header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:26px 24px 20px; flex-shrink:0; }
+.place-story-dialog [data-slot='dialog-title'] { font-size:24px; line-height:1.7; font-weight:600; word-break:keep-all; overflow-wrap:anywhere; }
+.place-story-dialog [data-slot='dialog-description'] { color:var(--atlas-muted); font-size:12px; margin-top:12px; }
+.place-story-dialog .close-button { flex:0 0 44px; width:44px; height:44px; background:var(--atlas-cutout); border-radius:0; }
+.place-story-scroll { min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:0 24px 22px; touch-action:pan-y; }
+.place-story-art { display:flex; align-items:center; gap:18px; padding:16px 0 20px; margin-bottom:16px; border-block:1px solid var(--atlas-rule); color:var(--atlas-coral); font-size:12px; }
+.place-story-art svg { width:48px; height:48px; flex-shrink:0; }
+.place-story-scroll>p { font-size:14px; line-height:2; margin:0 0 18px; word-break:keep-all; overflow-wrap:anywhere; }
+.place-story-scroll blockquote { margin:22px 0; border-left:2px solid var(--atlas-coral); padding:4px 0 4px 16px; font-size:13px; line-height:1.9; color:var(--atlas-muted); }
+.place-story-sources { display:flex; flex-direction:column; align-items:flex-start; gap:7px; padding-top:14px; border-top:1px solid var(--atlas-rule); font-size:11px; color:var(--atlas-muted); }
+.place-story-sources a { display:inline-flex; align-items:center; gap:5px; min-height:32px; text-decoration:underline; text-underline-offset:4px; }
+.place-story-dialog footer { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 24px; border-top:1px solid var(--atlas-border); background:var(--atlas-cutout); }
+.place-story-dialog footer>div { font-size:11px; line-height:1.8; color:var(--atlas-muted); }
+.place-story-dialog footer :is(button,a),.place-story-dialog footer>div { display:flex; align-items:center; gap:7px; }
+.place-story-dialog footer :is(button,a) { min-height:44px; font-size:12px; color:var(--atlas-coral); }
+.place-story-dialog footer>button { flex-shrink:0; }
+.story-collection>p { font-size:12px; line-height:1.8; color:var(--atlas-muted); margin:0 0 16px; }
+.story-collection-list { display:flex; flex-direction:column; gap:12px; }
+.story-collection-list>button { display:flex; align-items:flex-start; gap:12px; width:100%; padding:18px 14px; text-align:left; background:var(--atlas-raised); border:1px solid var(--atlas-border); }
+.story-collection-list>button>svg { flex:0 0 25px; width:25px; height:30px; color:var(--atlas-coral); }
+.story-collection-list h3 { font-size:15px; line-height:1.8; margin:8px 0; word-break:keep-all; }
+.story-collection-list span { color:var(--atlas-muted); font-size:10px; }
+.story-collection-list p { font-size:12px; line-height:1.9; color:var(--atlas-muted); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.story-collection-list>button:hover { border-color:var(--atlas-coral); }
+.story-collection-list>button:focus-visible,.story-collection-empty button:focus-visible,.place-story-dialog :is(a,button):focus-visible { outline:2px solid var(--atlas-coral); outline-offset:3px; }
+.story-collection-empty { padding:26px 12px; text-align:center; border:1px dashed var(--atlas-border); }
+.story-collection-empty>svg { width:42px; height:42px; margin:0 auto 18px; color:var(--atlas-coral); }
+.story-collection-empty h3 { font-size:15px; margin-bottom:12px; }
+.story-collection-empty p { font-size:12px; line-height:1.9; color:var(--atlas-muted); }
+.story-collection-empty button { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:8px; color:var(--atlas-coral); font-size:12px; }
+@media(max-width:640px) {
+ .place-story-dialog { max-height:calc(100dvh - 40px); }
+ .place-story-dialog>header { padding:24px 18px 18px; }
+ .place-story-dialog [data-slot='dialog-title'] { font-size:21px; }
+ .place-story-scroll { padding-inline:18px; }
+ .place-story-dialog footer { align-items:flex-start; flex-direction:column; gap:4px; padding:10px 18px; }
+ .personal-tabs button { font-size:12px; padding-inline:8px; }
+}
+@media(prefers-reduced-motion:reduce) { .map-story-mark { animation:none; transition:none; } }
 .personal-memory-cards { display:grid; gap:13px; margin-top:16px; }
 .personal-memory-card { display:flex; gap:12px; padding:16px; border:1px solid var(--atlas-border); color:var(--atlas-text); background:var(--atlas-raised); text-align:left; width:100%; min-width:0; transition:transform 180ms var(--atlas-ease),border-color 180ms; }
 .personal-memory-card > div { flex:1; min-width:0; }

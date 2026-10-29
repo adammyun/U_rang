@@ -13,13 +13,17 @@ import type {Emotion} from '@/lib/types';
 import MapAppearanceOptions from './map-appearance-options';
 import { RECENT_MEMORY_YEARS } from '@/src/features/memories/filters';
 
-const tabs=[{key:'mine',label:'내 기록'},{key:'bookmarked',label:'북마크'},{key:'liked',label:'좋아요'},{key:'recommended',label:'추천'}] as const;
-export default function PersonalSpacePanel({data,selection,onSelection,filters,onFilters,loading,error,onRetry,onClose,onSelect,onEdit,emotionMenu,emotionMenuReady,onSaveEmotionMenu,visibility,onVisibility,mapMode,onMapMode,guestSession=false,onGuestLogout}:{data:PersonalSpace|null;selection:PersonalSelection;onSelection:(value:PersonalSelection)=>void;filters:MemoryFilters;onFilters:(value:MemoryFilters)=>void;loading:boolean;error:boolean;onRetry:()=>void;onClose:()=>void;onSelect:(memory:Memory)=>void;onEdit:(memory:Memory)=>void;emotionMenu:Emotion[];emotionMenuReady:boolean;onSaveEmotionMenu:(value:Emotion[])=>Promise<void>;visibility:Memory['visibility']|'';onVisibility:(value:Memory['visibility']|'')=>void;mapMode:MapMode;onMapMode:(mode:MapMode)=>void;guestSession?:boolean;onGuestLogout?:()=>void}) {
+import StoryCollection from '@/components/stories/story-collection';
+import type {StoryDiscovery} from '@/src/features/stories/model';
+
+const tabs=[{key:'mine',label:'내 기록'},{key:'bookmarked',label:'북마크'},{key:'liked',label:'좋아요'},{key:'recommended',label:'추천'},{key:'discoveries',label:'발견한 이야기'}] as const;
+export default function PersonalSpacePanel({data,selection,onSelection,filters,onFilters,loading,error,onRetry,onClose,onSelect,onEdit,emotionMenu,emotionMenuReady,onSaveEmotionMenu,visibility,onVisibility,mapMode,onMapMode,guestSession=false,onGuestLogout,stories,onOpenStory,onExploreStories}:{stories:{items:StoryDiscovery[];loading:boolean;error:boolean;refresh:()=>void};onOpenStory:(id:string)=>void;onExploreStories:()=>void;data:PersonalSpace|null;selection:PersonalSelection;onSelection:(value:PersonalSelection)=>void;filters:MemoryFilters;onFilters:(value:MemoryFilters)=>void;loading:boolean;error:boolean;onRetry:()=>void;onClose:()=>void;onSelect:(memory:Memory)=>void;onEdit:(memory:Memory)=>void;emotionMenu:Emotion[];emotionMenuReady:boolean;onSaveEmotionMenu:(value:Emotion[])=>Promise<void>;visibility:Memory['visibility']|'';onVisibility:(value:Memory['visibility']|'')=>void;mapMode:MapMode;onMapMode:(mode:MapMode)=>void;guestSession?:boolean;onGuestLogout?:()=>void}) {
   const [tab,setTab]=useState<typeof tabs[number]['key']>('mine');
   const heading=useRef<HTMLHeadingElement>(null);
+  useEffect(()=>{if(tab==='discoveries')document.getElementById('personal-tab-discoveries')?.parentElement?.scrollIntoView({block:'start'});},[tab]);
   useLayoutEffect(()=>{const previous=document.activeElement as HTMLElement|null;heading.current?.focus({preventScroll:true});return()=>{if(previous?.isConnected)previous.focus({preventScroll:true});};},[]);
   useEffect(()=>{const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();onClose();}};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[onClose]);
-  const items=tab==='recommended'?data?.recommendations.map(item=>item.memory)??[]:data?.lists[tab]??[];
+  const items=tab==='recommended'?data?.recommendations.map(item=>item.memory)??[]:tab==='discoveries'?[]:data?.lists[tab]??[];
   const years=Array.from(new Set([...RECENT_MEMORY_YEARS,...(data?.lists.mine.flatMap(memory=>memory.memory_date?[Number(memory.memory_date.slice(0,4))]:[])??[]),...(filters.year?[filters.year]:[])])).sort((a,b)=>b-a);
   return <section id="personal-space-panel" className="personal-panel" role="dialog" aria-modal="false" aria-label="마이페이지">
     <header className="personal-panel-header"><button type="button" onClick={onClose} aria-label="마이페이지 닫고 지도 보기"><ArrowLeft size={17}/></button><h2 ref={heading} tabIndex={-1}><AtlasHeadingLabel>나의 유랑</AtlasHeadingLabel></h2><button type="button" onClick={onClose} aria-label="마이페이지 닫기"><X size={19}/></button></header>
@@ -42,12 +46,12 @@ export default function PersonalSpacePanel({data,selection,onSelection,filters,o
       }}>{tabs.map(item=><button type="button" role="tab" tabIndex={tab===item.key?0:-1} key={item.key} id={`personal-tab-${item.key}`} aria-controls="personal-memory-list" aria-selected={tab===item.key} onClick={()=>setTab(item.key)}>{item.label}</button>)}</div>
       <div role="tabpanel" id="personal-memory-list" aria-labelledby={`personal-tab-${tab}`} aria-busy={loading}>
         {tab==='recommended'&&<p className="personal-recommendation-note">내가 남긴 감정과 장소에서 이어지는 공개 이야기예요.</p>}
-        {loading&&!data?<p className="personal-message" role="status"><LoaderCircle className="spin" size={18}/>기억을 펼치는 중이에요.</p>:items.length?<div className="personal-memory-cards">{items.map(memory=><article key={memory.id} className="personal-memory-entry"><button type="button" className="personal-memory-card" onClick={()=>onSelect(memory)}>
+        {tab==='discoveries'?<StoryCollection items={stories.items} loading={stories.loading} error={stories.error} onRetry={stories.refresh} onRead={onOpenStory} onExplore={onExploreStories}/>:loading&&!data?<p className="personal-message" role="status"><LoaderCircle className="spin" size={18}/>기억을 펼치는 중이에요.</p>:items.length?<div className="personal-memory-cards">{items.map(memory=><article key={memory.id} className="personal-memory-entry"><button type="button" className="personal-memory-card" onClick={()=>onSelect(memory)}>
           {memory.media[0]&&<Image src={memory.media[0].url} alt="" width={150} height={130} unoptimized/>}<div><span>{emotions[memory.emotion].label} · {formatDate(memory.memory_date)}</span><h3>{memory.title}</h3><p>{memory.content}</p><small><MapPin size={12}/>{memory.location_name}</small>{tab==='recommended'&&<em>{data?.recommendations.find(item=>item.memory.id===memory.id)?.reason}</em>}</div><ArrowUpRight size={16}/>
         </button>{memory.owned&&<button type="button" className="personal-memory-edit" aria-label={`${memory.title} 감정 수정`} onClick={()=>onEdit(memory)}><Pencil size={14}/> 감정·기록 수정</button>}</article>)}</div>:<div className="personal-empty"><Bookmark size={23}/><p>{tab==='mine'?'아직 남긴 기억이 없어요. 지도에서 첫 순간을 기록해 보세요.':tab==='recommended'?'지금 만날 수 있는 공개 기억이 없어요.':'이곳에 모은 기억이 아직 없어요. 마음에 남는 기억을 열어 저장해 보세요.'}</p></div>}
-        {tab!=='recommended'&&(data?.totals[tab]??0)>40&&<p className="personal-message">최근 기억 40개를 보여드려요. 지도에서는 현재 화면의 기억을 조회합니다.</p>}
+        {tab!=='recommended'&&tab!=='discoveries'&&(data?.totals[tab]??0)>40&&<p className="personal-message">최근 기억 40개를 보여드려요. 지도에서는 현재 화면의 기억을 조회합니다.</p>}
       </div>
-      {tab!=='recommended'&&<button type="button" className="personal-recommendation-link" onClick={()=>setTab('recommended')}>내 기억과 닮은 다른 이야기 만나기 <ArrowUpRight size={16}/></button>}
+      {tab!=='recommended'&&tab!=='discoveries'&&<button type="button" className="personal-recommendation-link" onClick={()=>setTab('recommended')}>내 기억과 닮은 다른 이야기 만나기 <ArrowUpRight size={16}/></button>}
     </div>
   </section>;
 }

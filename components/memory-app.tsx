@@ -33,6 +33,10 @@ import PanoramaViewer from './memories/panorama-viewer';
 import { SpatialMemoryDetail, SpatialPlacePreview } from './memories/spatial-panels';
 import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
+import {getPlaceStory,type PlaceStory} from '@/src/features/stories/catalog';
+import {useStoryCollection} from '@/components/stories/use-story-collection';
+import PlaceStoryDialog from '@/components/stories/place-story-dialog';
+
 import AtlasAtmosphere from './memories/atlas-atmosphere';
 import AtlasIntro from './memories/atlas-intro';
 import AtlasNavigation from './memories/atlas-navigation';
@@ -133,6 +137,7 @@ function MemoryCard({
   );
 }
 
+
 export default function MemoryApp({
   isAuthenticated,
   guestSession=false,
@@ -142,6 +147,7 @@ export default function MemoryApp({
   liveServiceUrl,
   initialPersonal = false,
   initialVisibility = '',
+  initialStory,
 }: {
   isAuthenticated: boolean;
   guestSession?:boolean;
@@ -151,8 +157,13 @@ export default function MemoryApp({
   liveServiceUrl?: string;
   initialPersonal?: boolean;
   initialVisibility?: Memory['visibility']|'';
+  initialStory?:string;
 }) {
   const router = useAppNavigation();
+  const stories=useStoryCollection(isAuthenticated);
+  const [selectedStory,setSelectedStory]=useState<PlaceStory|null>(()=>initialStory?getPlaceStory(initialStory)??null:null);
+  useEffect(()=>{let active=true;Promise.resolve().then(()=>{if(active&&initialStory)setSelectedStory(getPlaceStory(initialStory)??null);});return()=>{active=false;};},[initialStory]);
+  const openStory=useCallback((id:string)=>{const story=getPlaceStory(id);if(story)setSelectedStory(story);},[]);
   const mapRef = useRef<MapHandle | null>(null);
   const detailRequest = useRef<AbortController | null>(null);
   const nearbyRequest = useRef<AbortController | null>(null);
@@ -570,6 +581,8 @@ export default function MemoryApp({
       </header>
 
       <MemoryMap
+        onStory={openStory} discoveredStoryIds={stories.items.map(item=>item.storyId)}
+        hideStories={Boolean(personalMode||profileOpen||pendingLocation||draftLocation||selected||placeAnchor||expanded)}
         memories={memories}
         mode={mapMode}
         presentation="stamp"
@@ -757,6 +770,7 @@ export default function MemoryApp({
       />
 
       {profileOpen && (isAuthenticated ? <PersonalSpacePanel
+        stories={stories} onOpenStory={openStory} onExploreStories={showPublicMap}
         guestSession={guestSession} onGuestLogout={()=>void signOut()}
         data={personalData} selection={personalSelection} onSelection={value=>{setPersonalSelection(value);setPublicRows([]);}}
         filters={filters} onFilters={changeFilters} loading={loading} error={loadError} onRetry={()=>setRevision(value=>value+1)}
@@ -843,7 +857,8 @@ export default function MemoryApp({
           onClose={() => setPanoramaTarget(null)}
         />
       )}
-      <OnboardingTutorial />
+      {selectedStory&&<PlaceStoryDialog key={selectedStory.id} story={selectedStory} authenticated={isAuthenticated} onDiscover={stories.discover} onClose={()=>setSelectedStory(null)} onLocate={()=>{const story=selectedStory;setSelectedStory(null);showPublicMap();mapRef.current?.flyTo(story,15.4);}}/>}
+      {!selectedStory&&<OnboardingTutorial />}
     </main>
   );
 }

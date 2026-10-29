@@ -43,6 +43,13 @@
       "when": 1793029939842,
       "tag": "0005_smiling_roughhouse",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793240017884,
+      "tag": "0006_tearful_shockwave",
+      "breakpoints": true
     }
   ]
 }

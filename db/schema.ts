@@ -80,3 +80,5 @@ export const memoryCommentAnchors = sqliteTable('memory_comment_anchors', {
 export const userPreferences = sqliteTable('user_preferences', {userId:text('user_id').primaryKey().notNull(),emotionMenu:text('emotion_menu').notNull(),updatedAt:text('updated_at').notNull()});
 
 export const guestSessions=sqliteTable('guest_sessions',{tokenHash:text('token_hash').primaryKey().notNull(),userId:text('user_id').notNull(),expiresAt:text('expires_at').notNull(),createdAt:text('created_at').notNull()},table=>[index('guest_sessions_expiry_idx').on(table.expiresAt)]);
+
+export const storyDiscoveries=sqliteTable('story_discoveries',{userId:text('user_id').notNull(),storyId:text('story_id').notNull(),discoveredAt:text('discovered_at').notNull()},table=>[primaryKey({columns:[table.userId,table.storyId]})]);
