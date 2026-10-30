@@ -65,3 +65,11 @@ DB schema, migration, 서버 API·추천 산정·사진 접근·인증은 변경
 [모바일 마이페이지](personal-destinations/mobile-home.png) · [추천](personal-destinations/mobile-recommended.png) · [발견](personal-destinations/mobile-stories.png)
 
  물리적 iOS/Android 기기는 확인 범위에 포함하지 않는다.
+
+## 배포 후 직접 확인
+
+- 실서비스 Sites **v13** 공개 배포 성공. 소스 `1c0a5aba400cc441a46b572fe671c332ab5e9189`.
+- GitHub Pages [배포 #40985668773](https://github.com/adammyun/yeoun_2/actions/runs/40985668773) 성공. 앱 소스 `0660d479b7e3b4501e28fabd2a2332c69a3bf53e`.
+- 실제 실서비스에서 새 게스트로 이야기 한 편 보관 → 마이페이지의 세 탭/상단 버튼 → 추천 8개만 지도에 표시 → 목록 키보드 초점과 지도 강조 → 뒤로가기 → 발견한 이야기 위치 한 곳 표시를 확인했다. 검증용 게스트는 로그아웃했다. 공개 기억을 새로 작성하거나 기존 사용자 기록을 수정하지 않았다.
+- 실제 Pages에서 세 탭과 추천/발견 목록 전환·뒤로가기를 확인했다. 기존 브라우저 기록과 로그인 상태를 지우거나 발견 내역을 임의 추가하지 않았다.
+- [실서비스 추천 화면](personal-destinations/live-recommended.png) · [실서비스 발견 화면](personal-destinations/live-stories.png)
