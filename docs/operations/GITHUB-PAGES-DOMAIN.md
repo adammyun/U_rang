@@ -28,3 +28,9 @@
 - `/U_rang/`에서 Chromium/WebKit × 데스크톱/모바일 총 12건 통과: 기존 브라우저 기록·사진·반응·댓글 보존, 세 목록·추천·상세·지도 연결과 카메라 복귀 확인.
 - 생성된 HTML의 JS/CSS 경로가 `/U_rang/assets/...`로 출력되는 것을 확인했다. 기존 저장소 변수 `NAVER_MAPS_CLIENT_ID`와 public 공개 범위도 유지된다.
 - 물리적 모바일 기기는 확인하지 않았다. 기존 큰 JS 번들 경고는 남아 있다.
+
+## 공개 배포 확인
+
+[Actions #40986822384](https://github.com/adammyun/U_rang/actions/runs/40986822384) 성공. 배포 소스는 `3bd6a1f9e5cec250d10a01d806511b6f409c08d5`이다. GitHub Pages API의 `html_url`은 `https://adammyun.github.io/U_rang/`, HTTPS 강제는 활성 상태다.
+
+실제 공개 주소를 새 브라우저 탭에서 열어 지도·기억 마커·OSM attribution이 표시되고, 태화강 국가정원 검색과 지도 이동이 동작함을 확인했다. [접속 확인 화면](urang-domain-live.png). 기존 브라우저 인증/저장 키를 유지했으며 사용자 기록에 쓰기·삭제 작업을 하지 않았다.

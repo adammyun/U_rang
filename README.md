@@ -242,7 +242,7 @@ tests/                    외부 key 없이 실행되는 자동화 테스트
 
 OpenStreetMap tile은 화면에 필요한 범위만 요청하며 offline download, bulk prefetch, tile scraping을 구현하지 않습니다.
 
-## yeoun_2 리디자인
+## U_rang 리디자인
 
 Memory Atlas — Spatial Paper: 어두운 전체 지도, 사진/글 스탬프, 맥락 미리보기, 감정 색조와 비대칭 읽기 장면을 사용합니다. 실제 기억 API·검색·사진 작성·내 기억 CRUD를 재사용합니다. [구현 및 검증 기록](docs/design/MEMORY-ATLAS-IMPLEMENTATION.md)을 참고하세요.
 
