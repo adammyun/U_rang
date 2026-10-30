@@ -2,11 +2,13 @@
 
 **실서비스:** [유랑 — 서버에 기억 남기기](https://yurang-memory-live.finn7132.chatgpt.site/)
 
-**GitHub Pages 시연판:** [유랑 시연판 열기](https://adammyun.github.io/yeoun_2/)
+**GitHub Pages 시연판:** [유랑 시연판 열기](https://adammyun.github.io/U_rang/)
 
 실서비스는 공개 기억을 누구나 읽고, 로그인 후 작성한 기억과 사진을 서버 DB·사진 저장소에 보관합니다. Pages 시연판의 기존 브라우저 기록은 실서비스로 자동 업로드되지 않습니다. [운영·거리뷰 설정 안내](docs/operations/LIVE-SERVICE.md)
 
-**저장소:** [adammyun/yeoun_2](https://github.com/adammyun/yeoun_2)
+**저장소:** [adammyun/U_rang](https://github.com/adammyun/U_rang)
+
+2026-10-30 저장소 이름과 공개 Pages 주소를 `U_rang`으로 변경했습니다. [주소·배포·기존 데이터 보존 안내](docs/operations/GITHUB-PAGES-DOMAIN.md)
 
 기존 여운 프로젝트의 최신 로컬 작업을 보존한 독립 복사본입니다. 새로운 UI 작업은 `redesign/yeoun-2` 브랜치에서 진행합니다. 원본 저장소와 공개 사이트는 별도로 유지됩니다. 현재 리디자인은 `redesign/yeoun-2` 브랜치에서 관리합니다. 기준 `main`과 보존 태그는 그대로 유지합니다.
 
@@ -191,7 +193,7 @@ pnpm exec playwright install chromium webkit
 pnpm test:ui --workers=1
 ```
 
-테스트가 Pages 빌드와 `http://127.0.0.1:4173/yeoun_2/` 미리보기를 실행합니다. Chromium은 기존 기능 전체를, WebKit은 지도 선 두께·위치 핀·작성 화면의 호환성을 각각 데스크톱/모바일에서 검사합니다. 캡처는 `test-results/screenshots/`, HTML 결과는 `pnpm test:ui:report`에서 확인합니다. WebKit 모바일 검증은 실제 iPhone 테스트를 대체하지 않습니다.
+테스트가 Pages 빌드와 `http://127.0.0.1:4173/U_rang/` 미리보기를 실행합니다. Chromium은 기존 기능 전체를, WebKit은 지도 선 두께·위치 핀·작성 화면의 호환성을 각각 데스크톱/모바일에서 검사합니다. 캡처는 `test-results/screenshots/`, HTML 결과는 `pnpm test:ui:report`에서 확인합니다. WebKit 모바일 검증은 실제 iPhone 테스트를 대체하지 않습니다.
 
 [Safari 지도·작성 화면 수정 및 검증 기록](docs/design/YURANG-SAFARI-FORM-FIX.md)
 

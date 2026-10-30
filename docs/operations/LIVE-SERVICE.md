@@ -5,8 +5,8 @@
 ## 주소와 저장 방식
 
 - 실서비스: https://yurang-memory-live.finn7132.chatgpt.site/
-- GitHub Pages 시연판: https://adammyun.github.io/yeoun_2/
-- 코드: https://github.com/adammyun/yeoun_2/tree/redesign/yeoun-2
+- GitHub Pages 시연판: https://adammyun.github.io/U_rang/
+- 코드: https://github.com/adammyun/U_rang/tree/redesign/yeoun-2
 
 GitHub 저장소의 About 웹사이트, README 첫 링크와 Pages의 “공유·저장 실서비스” 버튼에서 실서비스로 이동한다. Pages는 기존 IndexedDB 시연판을 유지한다. 두 환경의 데이터는 자동으로 합치지 않으며 브라우저의 기존 개인 기록을 서버에 업로드하지 않는다.
 
@@ -69,4 +69,4 @@ VITE_LIVE_SERVICE_URL=https://yurang-memory-live.finn7132.chatgpt.site pnpm test
 
 ## GitHub 공개 게시 최종 확인
 
-2026-10-25 확인: `redesign/yeoun-2`의 `be1b4ddb2f3f83fbd377d9df0a2f0b8ac5075772` 소스로 [GitHub Pages 배포](https://github.com/adammyun/yeoun_2/actions/runs/40087359906)가 성공했다. 저장소 About 웹사이트 링크는 실서비스를 가리킨다. 실제 브라우저에서 Pages의 “공유·저장 실서비스 ↗” 링크를 클릭해 실서비스 메인으로 이동하는 것을 확인했다. 원본 `main`은 보존하므로 최신 README와 소스는 `redesign/yeoun-2` 브랜치에서 확인한다. Actions의 Node 20 action 실행 환경 폐기 예정 안내는 남아 있으나 이번 배포는 성공했다.
+2026-10-25 확인: `redesign/yeoun-2`의 `be1b4ddb2f3f83fbd377d9df0a2f0b8ac5075772` 소스로 [GitHub Pages 배포](https://github.com/adammyun/U_rang/actions/runs/40087359906)가 성공했다. 저장소 About 웹사이트 링크는 실서비스를 가리킨다. 실제 브라우저에서 Pages의 “공유·저장 실서비스 ↗” 링크를 클릭해 실서비스 메인으로 이동하는 것을 확인했다. 원본 `main`은 보존하므로 최신 README와 소스는 `redesign/yeoun-2` 브랜치에서 확인한다. Actions의 Node 20 action 실행 환경 폐기 예정 안내는 남아 있으나 이번 배포는 성공했다.

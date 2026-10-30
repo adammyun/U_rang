@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, root, '');
   return {
     root: resolve(root, 'github-pages'),
-    base: '/yeoun_2/',
+    base: '/U_rang/',
     publicDir: resolve(root, 'public'),
     resolve: {
       alias: {

@@ -76,7 +76,7 @@ test('거리뷰 실패 시 같은 기억 상세로 돌아와 댓글을 읽고 �
 
 test('이전 v4 기록·반응을 보존하고 기억 삭제 시 연결 댓글도 함께 정리한다',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('yeoun_2.pages.auth.v1','signed-in'));
- await page.route('**/yeoun_2/',route=>route.fulfill({contentType:'text/html',body:'<html><body>Disposable v4 migration fixture</body></html>'}));
+ await page.route('**/U_rang/',route=>route.fulfill({contentType:'text/html',body:'<html><body>Disposable v4 migration fixture</body></html>'}));
  await page.goto('./');
  const memoryId='30000000-0000-4000-8000-000000000123';
  await page.evaluate(id=>new Promise<void>((resolve,reject)=>{
@@ -89,7 +89,7 @@ test('이전 v4 기록·반응을 보존하고 기억 삭제 시 연결 댓글�
    tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>reject(tx.error);
   };request.onerror=()=>reject(request.error);
  }),memoryId);
- await page.unroute('**/yeoun_2/');await page.reload();
+ await page.unroute('**/U_rang/');await page.reload();
  await page.getByRole('button',{name:'내 기억',exact:true}).click();
  const personal=page.getByRole('dialog',{name:'마이페이지'});
  await personal.locator('.personal-memory-card').filter({hasText:'이전 기록 보존 검사'}).click();

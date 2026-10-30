@@ -6,7 +6,7 @@
 
 ## 공개 시연 주소
 
-[서버 DB 실서비스](https://yurang-memory-live.finn7132.chatgpt.site/) · [GitHub Pages 시연판](https://adammyun.github.io/yeoun_2/)
+[서버 DB 실서비스](https://yurang-memory-live.finn7132.chatgpt.site/) · [GitHub Pages 시연판](https://adammyun.github.io/U_rang/)
 
 공개 가상 기억 23개 중 5개에 사진이 있습니다. 대왕암공원의 “바다 앞에서 약속한 다음 여행”에서 사진 2장과 상세 스크롤을 보여줄 수 있습니다. 실제 사용자 작성은 실서비스에서 로그인 후 진행합니다. Pages 데이터는 기기 안에만 저장됩니다. 하단 공개된 기억 문구를 2초 안에 5번 탭하면 개발자 보조 화면이 열립니다. [배포·검증 안내](docs/operations/LIVE-SERVICE.md)
 
@@ -38,9 +38,9 @@ pnpm build:pages
 pnpm exec vite preview --config vite.pages.config.ts --host 127.0.0.1 --port 4173
 ```
 
-[http://127.0.0.1:4173/yeoun_2/](http://127.0.0.1:4173/yeoun_2/)을 엽니다. 이 모드는 같은 실제 React UI와 MapLibre 지도를 사용하지만, 울산 공개 seed와 새 기억·사진은 **열려 있는 브라우저의 IndexedDB**에만 있습니다. `로그인`은 로컬 시연 세션이며 방문자 간 데이터 공유나 서버 인증을 시연하지 않습니다. 발표 중 별도의 브라우저 프로필에서 작성하면 기존 사용자 데이터와 섞이지 않습니다.
+[http://127.0.0.1:4173/U_rang/](http://127.0.0.1:4173/U_rang/)을 엽니다. 이 모드는 같은 실제 React UI와 MapLibre 지도를 사용하지만, 울산 공개 seed와 새 기억·사진은 **열려 있는 브라우저의 IndexedDB**에만 있습니다. `로그인`은 로컬 시연 세션이며 방문자 간 데이터 공유나 서버 인증을 시연하지 않습니다. 발표 중 별도의 브라우저 프로필에서 작성하면 기존 사용자 데이터와 섞이지 않습니다.
 
-리디자인 공개 주소는 [https://adammyun.github.io/yeoun_2/](https://adammyun.github.io/yeoun_2/)입니다. Pages 배포는 수동 실행이며 `redesign/yeoun-2` 브랜치를 사용합니다. 공개 버전에서도 기억과 사진은 해당 브라우저에만 저장됩니다. 원본 사이트와 저장 공간을 분리했습니다.
+리디자인 공개 주소는 [https://adammyun.github.io/U_rang/](https://adammyun.github.io/U_rang/)입니다. Pages 배포는 수동 실행이며 `redesign/yeoun-2` 브랜치를 사용합니다. 공개 버전에서도 기억과 사진은 해당 브라우저에만 저장됩니다. 원본 사이트와 저장 공간을 분리했습니다.
 
 ## 발표 전 3분 점검
 

@@ -45,7 +45,7 @@ test('사진이 여러 장인 가상 기억을 바로 읽고 출처와 테이프
   await expect(board).toBeVisible();
 });
 test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 추가한다',async({page})=>{
-  await page.route('**/yeoun_2/',route=>route.fulfill({contentType:'text/html',body:'<html><body>Migration fixture</body></html>'}));
+  await page.route('**/U_rang/',route=>route.fulfill({contentType:'text/html',body:'<html><body>Migration fixture</body></html>'}));
   await page.goto('./');
   await page.evaluate(()=>new Promise<void>((resolve,reject)=>{
     const request=indexedDB.open('yeoun_2',2);
@@ -59,7 +59,7 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
       tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>reject(tx.error);
     };request.onerror=()=>reject(request.error);
   }));
-  await page.unroute('**/yeoun_2/');await page.reload();
+  await page.unroute('**/U_rang/');await page.reload();
   await expect(page.locator('.atlas-stamp').first()).toBeVisible();
   const state=await page.evaluate(()=>new Promise<{version:number;records:{id:string;title:string;content:string;media:unknown[]}[]}>((resolve,reject)=>{
     const req=indexedDB.open('yeoun_2');req.onsuccess=()=>{

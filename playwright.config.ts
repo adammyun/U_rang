@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 const host = '127.0.0.1';
 const port = 4173;
-const baseURL = `http://${host}:${port}/yeoun_2/`;
+const baseURL = `http://${host}:${port}/U_rang/`;
 
 export default defineConfig({
   testDir: './tests/e2e',
