@@ -55,6 +55,7 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
       tx.objectStore('memories').put({id:'migration-owner-fixture',ownerId:'github-pages-user',title:'보존할 기존 기록',media:[{id:'existing-photo',dataUrl:'existing-private-bytes',sortOrder:0}]});
       const base={title:'기존 예시',content:'이전 예시 본문',locationName:'태화강 국가정원',memoryDate:'2019-06-21',emotion:'peaceful',visibility:'public',isAnonymous:true,locationPrecision:'exact',exactLat:35.55,exactLng:129.29,publicLat:35.55,publicLng:129.29,createdAt:'2026-09-10T00:00:00.000Z',updatedAt:'2026-09-10T00:00:00.000Z',media:[]};
       tx.objectStore('memories').put({...base,id:'20000000-0000-4000-8000-000000000001',ownerId:'demo-user-1'});
+      tx.objectStore('memories').put({...base,id:'20000000-0000-4000-8000-000000000020',ownerId:'demo-user-1',memoryDate:'2026-10-10',media:[{id:'legacy-demo-photo',dataUrl:'/yeoun_2/demo/taehwagang.png',sortOrder:0}]});
       tx.objectStore('memories').put({...base,id:'20000000-0000-4000-8000-000000000099',ownerId:'github-pages-user',content:'직접 고친 나의 이야기',visibility:'private',updatedAt:'2026-10-25T00:00:00.000Z'});
       tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>reject(tx.error);
     };request.onerror=()=>reject(request.error);
@@ -73,6 +74,12 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
   expect(state.records.find(r=>r.id==='migration-owner-fixture')).toMatchObject({title:'보존할 기존 기록',media:[{id:'existing-photo',dataUrl:'existing-private-bytes'}]});
   expect(state.records.filter(r=>r.id.startsWith('20000000')).length).toBe(24);
   expect(state.records.filter(r=>r.id.startsWith('20000000')&&r.media.length).length).toBe(5);
+  expect(state.records.find(r=>r.id.endsWith('000000000020'))?.media).toMatchObject([{dataUrl:'/yeoun_2/demo/taehwagang.png'}]);
+  const oldPhoto=page.locator('.atlas-stamp[data-memory-ids~="20000000-0000-4000-8000-000000000020"] img');
+  await oldPhoto.scrollIntoViewIfNeeded();
+  await expect(oldPhoto).toHaveAttribute('src','/U_rang/demo/taehwagang.png');
+  await expect.poll(()=>oldPhoto.evaluate(image=>(image as HTMLImageElement).complete&&(image as HTMLImageElement).naturalWidth>0)).toBe(true);
+
 });
 
 test('GitHub 시연판에서 실서비스 링크를 열 수 있고 검색 결과를 가리지 않는다',async({page},info)=>{

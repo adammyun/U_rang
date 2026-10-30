@@ -4,7 +4,7 @@ import { demoJournalContent } from '@/src/features/memories/demo-journals';
 import { isPagesAuthenticated } from '@/src/lib/runtime';
 import type { MemoryActivity, PersonalQuery, PersonalSpace } from './personal-model';
 import { emotions } from './model';
-import { additionalDemoRows, demoMemoryPhotos, demoMediaId } from './demo-catalog';
+import { additionalDemoRows, demoMemoryPhotos, demoMediaId, demoPhotoAssets } from './demo-catalog';
 import type {
   Bounds,
   Emotion,
@@ -183,10 +183,20 @@ async function putRecord(record: StoredMemory) {
   await requestResult(db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(record));
 }
 
+// Resolve only known bundled examples saved before the repository rename.
+// Never rewrite uploaded data URLs, user records or arbitrary external links.
+function mediaUrl(url:string):string {
+  const previousPrefix='/yeoun_2/demo/';
+  if(!url.startsWith(previousPrefix))return url;
+  const asset=url.slice(previousPrefix.length);
+  return Object.prototype.hasOwnProperty.call(demoPhotoAssets,asset)
+    ? `${import.meta.env.BASE_URL}demo/${asset}` : url;
+}
+
 function media(record: StoredMemory): MemoryMedia[] {
   return record.media.map((item) => ({
     id: item.id,
-    url: item.dataUrl,
+    url: mediaUrl(item.dataUrl),
     sortOrder: item.sortOrder,
   }));
 }
@@ -399,7 +409,7 @@ export async function browserPlaceMemoryGroup(
       longitude: row.publicLng,
       isAnonymous: row.isAnonymous,
       distanceMeters: Math.round(distance),
-      firstImageUrl: row.media[0]?.dataUrl ?? null,
+      firstImageUrl: row.media[0]?mediaUrl(row.media[0].dataUrl):null,
     })),
   };
 }
