@@ -1,1 +1,6 @@
-export default function StoryGlyph(){return <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="m16 3 11 12-11 14L5 17l4-5M16 8v6m0 5v5M11 16h10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>;}
+import {BookOpenText} from 'lucide-react';
+
+/** One readable book silhouette shared by map traces, story pages and collections. */
+export default function StoryGlyph() {
+  return <BookOpenText aria-hidden="true" strokeWidth={1.6}/>;
+}

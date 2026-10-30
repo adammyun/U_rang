@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowUpRight, Bookmark, Heart, LoaderCircle, MapPin, Pencil, UserRound, X } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { ArrowLeft, ArrowUpRight, Bookmark, Heart, LoaderCircle, MapPin, Pencil, Sparkles, UserRound, X } from 'lucide-react';
 import Image from 'next/image';
 import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { emotions,formatDate,type Memory } from '@/lib/types';
@@ -13,22 +13,31 @@ import type {Emotion} from '@/lib/types';
 import MapAppearanceOptions from './map-appearance-options';
 import { RECENT_MEMORY_YEARS } from '@/src/features/memories/filters';
 
+import StoryGlyph from '@/components/stories/story-glyph';
 import StoryCollection from '@/components/stories/story-collection';
 import type {StoryDiscovery} from '@/src/features/stories/model';
 
-const tabs=[{key:'mine',label:'내 기록'},{key:'bookmarked',label:'북마크'},{key:'liked',label:'좋아요'},{key:'recommended',label:'추천'},{key:'discoveries',label:'발견한 이야기'}] as const;
-export default function PersonalSpacePanel({data,selection,onSelection,filters,onFilters,loading,error,onRetry,onClose,onSelect,onEdit,emotionMenu,emotionMenuReady,onSaveEmotionMenu,visibility,onVisibility,mapMode,onMapMode,guestSession=false,onGuestLogout,stories,onOpenStory,onExploreStories}:{stories:{items:StoryDiscovery[];loading:boolean;error:boolean;refresh:()=>void};onOpenStory:(id:string)=>void;onExploreStories:()=>void;data:PersonalSpace|null;selection:PersonalSelection;onSelection:(value:PersonalSelection)=>void;filters:MemoryFilters;onFilters:(value:MemoryFilters)=>void;loading:boolean;error:boolean;onRetry:()=>void;onClose:()=>void;onSelect:(memory:Memory)=>void;onEdit:(memory:Memory)=>void;emotionMenu:Emotion[];emotionMenuReady:boolean;onSaveEmotionMenu:(value:Emotion[])=>Promise<void>;visibility:Memory['visibility']|'';onVisibility:(value:Memory['visibility']|'')=>void;mapMode:MapMode;onMapMode:(mode:MapMode)=>void;guestSession?:boolean;onGuestLogout?:()=>void}) {
-  const [tab,setTab]=useState<typeof tabs[number]['key']>('mine');
+export type PersonalView = 'profile'|'recommended'|'discoveries';
+export type PersonalTab = 'mine'|'bookmarked'|'liked';
+const tabs=[{key:'mine',label:'내 기록'},{key:'bookmarked',label:'북마크'},{key:'liked',label:'좋아요'}] as const;
+export default function PersonalSpacePanel({data,selection,onSelection,filters,onFilters,loading,error,onRetry,onClose,onSelect,onEdit,emotionMenu,emotionMenuReady,onSaveEmotionMenu,visibility,onVisibility,mapMode,onMapMode,guestSession=false,onGuestLogout,stories,onOpenStory,onExploreStories,view,onView,tab,onTab,hoveredMemoryId,onHoverMemory,hoveredStoryId,onHoverStory}:{tab:PersonalTab;onTab:(tab:PersonalTab)=>void;view:PersonalView;onView:(view:PersonalView)=>void;hoveredMemoryId:string|null;onHoverMemory:(id:string|null)=>void;hoveredStoryId:string|null;onHoverStory:(id:string|null)=>void;stories:{items:StoryDiscovery[];loading:boolean;error:boolean;refresh:()=>void};onOpenStory:(id:string)=>void;onExploreStories:()=>void;data:PersonalSpace|null;selection:PersonalSelection;onSelection:(value:PersonalSelection)=>void;filters:MemoryFilters;onFilters:(value:MemoryFilters)=>void;loading:boolean;error:boolean;onRetry:()=>void;onClose:()=>void;onSelect:(memory:Memory)=>void;onEdit:(memory:Memory)=>void;emotionMenu:Emotion[];emotionMenuReady:boolean;onSaveEmotionMenu:(value:Emotion[])=>Promise<void>;visibility:Memory['visibility']|'';onVisibility:(value:Memory['visibility']|'')=>void;mapMode:MapMode;onMapMode:(mode:MapMode)=>void;guestSession?:boolean;onGuestLogout?:()=>void}) {
   const heading=useRef<HTMLHeadingElement>(null);
-  useEffect(()=>{if(tab==='discoveries')document.getElementById('personal-tab-discoveries')?.parentElement?.scrollIntoView({block:'start'});},[tab]);
+  const previousView=useRef(view);
+  useLayoutEffect(()=>{
+    const previous=previousView.current;previousView.current=view;
+    if(previous!==view){
+      if(view==='profile')document.querySelector<HTMLButtonElement>(`[data-personal-destination='${previous}']`)?.focus({preventScroll:true});
+      else heading.current?.focus({preventScroll:true});
+    }
+  },[view]);
   useLayoutEffect(()=>{const previous=document.activeElement as HTMLElement|null;heading.current?.focus({preventScroll:true});return()=>{if(previous?.isConnected)previous.focus({preventScroll:true});};},[]);
-  useEffect(()=>{const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();onClose();}};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[onClose]);
-  const items=tab==='recommended'?data?.recommendations.map(item=>item.memory)??[]:tab==='discoveries'?[]:data?.lists[tab]??[];
+  useEffect(()=>{const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();if(view==='profile')onClose();else onView('profile');}};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[onClose,onView,view]);
+  const items=data?.lists[tab]??[];
   const years=Array.from(new Set([...RECENT_MEMORY_YEARS,...(data?.lists.mine.flatMap(memory=>memory.memory_date?[Number(memory.memory_date.slice(0,4))]:[])??[]),...(filters.year?[filters.year]:[])])).sort((a,b)=>b-a);
-  return <section id="personal-space-panel" className="personal-panel" role="dialog" aria-modal="false" aria-label="마이페이지">
-    <header className="personal-panel-header"><button type="button" onClick={onClose} aria-label="마이페이지 닫고 지도 보기"><ArrowLeft size={17}/></button><h2 ref={heading} tabIndex={-1}><AtlasHeadingLabel>나의 유랑</AtlasHeadingLabel></h2><button type="button" onClick={onClose} aria-label="마이페이지 닫기"><X size={19}/></button></header>
-    <div className="personal-panel-scroll" tabIndex={0} aria-label="마이페이지 내용">
-      <section className="personal-identity"><div className="personal-avatar"><UserRound size={28}/></div><div><h3>{data?.displayName??'나'}의 기억 보관함</h3><p>남긴 순간과 다시 찾고 싶은 이야기</p></div></section>
+  return <section id="personal-space-panel" className={`personal-panel personal-view-${view}`} role="dialog" aria-modal="false" aria-label="마이페이지">
+    <header className="personal-panel-header"><button type="button" onClick={()=>view==='profile'?onClose():onView('profile')} aria-label={view==='profile'?'마이페이지 닫고 지도 보기':'마이페이지로 돌아가기'}><ArrowLeft size={17}/></button><h2 ref={heading} tabIndex={-1}><AtlasHeadingLabel>{view==='profile'?'나의 유랑':view==='recommended'?'추천 기억':'발견한 이야기'}</AtlasHeadingLabel></h2><button type="button" onClick={onClose} aria-label="마이페이지 닫기"><X size={19}/></button></header>
+    <div className="personal-panel-scroll" tabIndex={0} aria-label="마이페이지 내용" hidden={view!=='profile'} inert={view!=='profile'}>
+      <section className="personal-identity"><div className="personal-avatar"><UserRound size={28}/></div><div className="personal-identity-copy"><h3>{data?.displayName??'나'}의 기억 보관함</h3><p>남긴 순간과 다시 찾고 싶은 이야기</p></div><div className="personal-destinations" aria-label="다른 이야기 보관함"><button type="button" data-personal-destination="recommended" aria-label="추천 기억 보기" onClick={()=>onView('recommended')}><Sparkles size={19}/><span>추천 기억</span></button><button type="button" data-personal-destination="discoveries" aria-label="발견한 이야기 보기" onClick={()=>onView('discoveries')}><StoryGlyph/><span>숨은 이야기</span></button></div></section>
       {guestSession&&<div className="personal-guest-session"><span>게스트로 이용 중이에요</span><button type="button" onClick={onGuestLogout}>게스트 로그아웃</button></div>}
       <dl className="personal-totals"><div><dt>내 기록</dt><dd>{data?.totals.mine??'—'}</dd></div><div><dt>북마크</dt><dd>{data?.totals.bookmarked??'—'}</dd></div><div><dt>좋아요</dt><dd>{data?.totals.liked??'—'}</dd></div></dl>
       <fieldset className="personal-map-selection"><legend>지도에 표시할 기억</legend>{([{key:'mine',label:'내 기억',Icon:MapPin},{key:'bookmarked',label:'북마크한 기억',Icon:Bookmark},{key:'liked',label:'좋아요한 기억',Icon:Heart}] as const).map(({key,label,Icon})=><label key={key}><input type="checkbox" aria-label={label} checked={selection[key]} onChange={event=>onSelection({...selection,[key]:event.target.checked})}/><Icon size={15}/><span className="personal-option-full">{label}</span><span className="personal-option-short" aria-hidden="true">{key==='mine'?'내 기억':key==='bookmarked'?'북마크':'좋아요'}</span></label>)}<p>패널을 닫아도 선택한 기억은 지도에 남아요.</p></fieldset>
@@ -42,16 +51,28 @@ export default function PersonalSpacePanel({data,selection,onSelection,filters,o
         if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
         event.preventDefault();const index=tabs.findIndex(item=>item.key===tab);
         const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:tabs.length-1))%tabs.length;
-        setTab(tabs[next].key);document.getElementById(`personal-tab-${tabs[next].key}`)?.focus();
-      }}>{tabs.map(item=><button type="button" role="tab" tabIndex={tab===item.key?0:-1} key={item.key} id={`personal-tab-${item.key}`} aria-controls="personal-memory-list" aria-selected={tab===item.key} onClick={()=>setTab(item.key)}>{item.label}</button>)}</div>
+        onTab(tabs[next].key);document.getElementById(`personal-tab-${tabs[next].key}`)?.focus();
+      }}>{tabs.map(item=><button type="button" role="tab" tabIndex={tab===item.key?0:-1} key={item.key} id={`personal-tab-${item.key}`} aria-controls="personal-memory-list" aria-selected={tab===item.key} onClick={()=>onTab(item.key)}>{item.label}</button>)}</div>
       <div role="tabpanel" id="personal-memory-list" aria-labelledby={`personal-tab-${tab}`} aria-busy={loading}>
-        {tab==='recommended'&&<p className="personal-recommendation-note">내가 남긴 감정과 장소에서 이어지는 공개 이야기예요.</p>}
-        {tab==='discoveries'?<StoryCollection items={stories.items} loading={stories.loading} error={stories.error} onRetry={stories.refresh} onRead={onOpenStory} onExplore={onExploreStories}/>:loading&&!data?<p className="personal-message" role="status"><LoaderCircle className="spin" size={18}/>기억을 펼치는 중이에요.</p>:items.length?<div className="personal-memory-cards">{items.map(memory=><article key={memory.id} className="personal-memory-entry"><button type="button" className="personal-memory-card" onClick={()=>onSelect(memory)}>
-          {memory.media[0]&&<Image src={memory.media[0].url} alt="" width={150} height={130} unoptimized/>}<div><span>{emotions[memory.emotion].label} · {formatDate(memory.memory_date)}</span><h3>{memory.title}</h3><p>{memory.content}</p><small><MapPin size={12}/>{memory.location_name}</small>{tab==='recommended'&&<em>{data?.recommendations.find(item=>item.memory.id===memory.id)?.reason}</em>}</div><ArrowUpRight size={16}/>
-        </button>{memory.owned&&<button type="button" className="personal-memory-edit" aria-label={`${memory.title} 감정 수정`} onClick={()=>onEdit(memory)}><Pencil size={14}/> 감정·기록 수정</button>}</article>)}</div>:<div className="personal-empty"><Bookmark size={23}/><p>{tab==='mine'?'아직 남긴 기억이 없어요. 지도에서 첫 순간을 기록해 보세요.':tab==='recommended'?'지금 만날 수 있는 공개 기억이 없어요.':'이곳에 모은 기억이 아직 없어요. 마음에 남는 기억을 열어 저장해 보세요.'}</p></div>}
-        {tab!=='recommended'&&tab!=='discoveries'&&(data?.totals[tab]??0)>40&&<p className="personal-message">최근 기억 40개를 보여드려요. 지도에서는 현재 화면의 기억을 조회합니다.</p>}
+        <PersonalMemoryCards items={items} loading={loading&&!data} onSelect={onSelect} onEdit={onEdit} empty={tab==='mine'?'아직 남긴 기억이 없어요. 지도에서 첫 순간을 기록해 보세요.':'이곳에 모은 기억이 아직 없어요. 마음에 남는 기억을 열어 저장해 보세요.'}/>
+        {(data?.totals[tab]??0)>40&&<p className="personal-message">최근 기억 40개를 보여드려요. 지도에서는 현재 화면의 기억을 조회합니다.</p>}
       </div>
-      {tab!=='recommended'&&tab!=='discoveries'&&<button type="button" className="personal-recommendation-link" onClick={()=>setTab('recommended')}>내 기억과 닮은 다른 이야기 만나기 <ArrowUpRight size={16}/></button>}
     </div>
+    {view!=='profile'&&<div className="personal-panel-scroll personal-destination-content" key={view} tabIndex={0} role="region" aria-label={view==='recommended'?'추천 기억 목록':'발견한 이야기 목록'}>
+      {view==='recommended'?<>
+        <p className="personal-destination-intro">내가 남긴 감정과 장소에서 이어지는 공개 이야기예요. 목록의 기억을 가리키면 지도에서도 함께 빛나요.</p>
+        {error&&<p className="personal-message" role="alert">추천 기억을 불러오지 못했어요. <button type="button" onClick={onRetry}>다시 시도</button></p>}
+        <PersonalMemoryCards items={data?.recommendations.map(item=>item.memory)??[]} loading={loading&&!data} onSelect={onSelect} reasons={data?.recommendations} hoveredId={hoveredMemoryId} onHover={onHoverMemory} empty="지금 만날 수 있는 공개 기억이 없어요."/>
+      </>:<StoryCollection items={stories.items} loading={stories.loading} error={stories.error} onRetry={stories.refresh} onRead={onOpenStory} onExplore={onExploreStories} hoveredId={hoveredStoryId} onHover={onHoverStory}/>}
+    </div>}
   </section>;
+}
+
+
+function PersonalMemoryCards({items,loading,onSelect,onEdit,reasons,hoveredId,onHover,empty}:{items:Memory[];loading:boolean;onSelect:(memory:Memory)=>void;onEdit?:(memory:Memory)=>void;reasons?:PersonalSpace['recommendations'];hoveredId?:string|null;onHover?:(id:string|null)=>void;empty:string}){
+  if(loading)return <p className="personal-message" role="status"><LoaderCircle className="spin" size={18}/>기억을 펼치는 중이에요.</p>;
+  if(!items.length)return <div className="personal-empty"><Bookmark size={23}/><p>{empty}</p></div>;
+  return <div className="personal-memory-cards">{items.map(memory=><article key={memory.id} className="personal-memory-entry"><button type="button" data-memory-id={memory.id} className={`personal-memory-card${hoveredId===memory.id?' is-map-hovered':''}`} onClick={()=>onSelect(memory)} onMouseEnter={()=>onHover?.(memory.id)} onMouseLeave={()=>onHover?.(null)} onFocus={()=>onHover?.(memory.id)} onBlur={()=>onHover?.(null)}>
+    {memory.media[0]&&<Image src={memory.media[0].url} alt="" width={150} height={130} unoptimized/>}<div><span>{emotions[memory.emotion].label} · {formatDate(memory.memory_date)}</span><h3>{memory.title}</h3><p>{memory.content}</p><small><MapPin size={12}/>{memory.location_name}</small>{reasons&&<em>{reasons.find(item=>item.memory.id===memory.id)?.reason}</em>}</div><ArrowUpRight size={16}/>
+  </button>{memory.owned&&onEdit&&<button type="button" className="personal-memory-edit" aria-label={`${memory.title} 감정 수정`} onClick={()=>onEdit(memory)}><Pencil size={14}/> 감정·기록 수정</button>}</article>)}</div>;
 }

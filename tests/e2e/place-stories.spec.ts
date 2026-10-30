@@ -29,7 +29,7 @@ test('확대해서 발견한 장소 이야기를 읽고 마이페이지에 보�
  await story.getByRole('button',{name:'장소 이야기 닫기'}).click();
  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
  const personal=page.getByRole('dialog',{name:'마이페이지'});
- await personal.getByRole('tab',{name:'발견한 이야기',exact:true}).click();
+ await personal.getByRole('button',{name:'발견한 이야기 보기',exact:true}).click();
  const card=personal.getByRole('button',{name:/울기등대 .*소나무가 자라자/});await expect(card).toBeInViewport();
  await expect(personal.locator('.story-collection-list > button')).toHaveCount(1);
  await page.screenshot({path:`test-results/screenshots/place-story-collection-${info.project.name}.png`,animations:'disabled'});
@@ -38,7 +38,7 @@ test('확대해서 발견한 장소 이야기를 읽고 마이페이지에 보�
  expect(await page.evaluate(()=>localStorage.getItem('yurang:place-stories:v1'))).toBe(saved);
  await story.getByRole('button',{name:'장소 이야기 닫기'}).click();
  await page.reload();await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
- await personal.getByRole('tab',{name:'발견한 이야기',exact:true}).click();await expect(card).toBeInViewport();
+ await personal.getByRole('button',{name:'발견한 이야기 보기',exact:true}).click();await expect(card).toBeInViewport();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  expect(errors).toEqual([]);
 });

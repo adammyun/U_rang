@@ -32,6 +32,9 @@ const RASTER_TILE_SIZE = 256;
 export type MapHandle = {
   flyTo: (point: Point, zoom?: number) => void;
   center: () => Point;
+  camera: () => {center:Point;zoom:number};
+  fitPoints: (points:Point[]) => void;
+  revealPoint: (point:Point) => void;
   zoom: (delta: number) => void;
 };
 
@@ -84,6 +87,11 @@ export default function MemoryMap({
   hideStories = false,
   discoveredStoryIds = [],
   onStory,
+  storyScope,
+  hoveredMemoryId=null,
+  onHoverMemory,
+  hoveredStoryId=null,
+  onHoverStory,
 }: {
   memories: Memory[];
   mode: MapMode;
@@ -99,6 +107,11 @@ export default function MemoryMap({
   reserveIntroSpace?: boolean;
   hideMemories?: boolean;
   hideStories?:boolean;
+  storyScope?:string[];
+  hoveredMemoryId?:string|null;
+  onHoverMemory?:(id:string|null)=>void;
+  hoveredStoryId?:string|null;
+  onHoverStory?:(id:string|null)=>void;
   discoveredStoryIds?:string[];
   onStory?:(id:string)=>void;
 }) {
@@ -192,6 +205,21 @@ export default function MemoryMap({
     }
     map.current = instance;
     mapRef.current = {
+      revealPoint: point => {
+        const pixel=instance.project([point.lng,point.lat]);
+        const {clientWidth:width,clientHeight:height}=instance.getContainer();
+        if(pixel.x<(width>=768?490:24)||pixel.x>width-70||pixel.y<110||pixel.y>height-150){
+          instance.flyTo({center:[point.lng,point.lat],zoom:Math.max(instance.getZoom(),14.2),offset:[width>=768?200:0,0],duration:450});
+        }
+      },
+      camera: () => ({center:{lng:instance.getCenter().lng,lat:instance.getCenter().lat},zoom:instance.getZoom()}),
+      fitPoints: points => {
+        if(!points.length)return;
+        const west=Math.min(...points.map(point=>point.lng)),east=Math.max(...points.map(point=>point.lng));
+        const south=Math.min(...points.map(point=>point.lat)),north=Math.max(...points.map(point=>point.lat));
+        const width=instance.getContainer().clientWidth;
+        instance.fitBounds([[west,south],[east,north]],{padding:{top:135,bottom:155,left:width>=768?500:45,right:width>=768?100:45},maxZoom:15.4,duration:750});
+      },
       flyTo: (p, zoom = 15) =>
         instance.flyTo({ center: [p.lng, p.lat], zoom: Math.max(instance.getMinZoom(), Math.min(MAX_MAP_ZOOM, zoom)), duration: 1000 }),
       center: () => ({
@@ -383,10 +411,10 @@ export default function MemoryMap({
 
   const visibleMarkerGroups = hideMemories ? [] : markerGroups;
   const storyMarkers=useMemo(()=>{
-    if(hideStories||hideMemories||!onStory||!isStoryZoom(view.zoom)||!view.width||!view.height)return [];
+    if(hideStories||hideMemories||!onStory||(!storyScope&&!isStoryZoom(view.zoom))||!view.width||!view.height)return [];
     const center=project(view.center,view.zoom);
-    return PLACE_STORIES.map(story=>{const point=project(story,view.zoom);return {story,x:view.width/2+point.x-center.x,y:view.height/2+point.y-center.y};}).filter(point=>point.x>=24&&point.y>=24&&point.x<=view.width-24&&point.y<=view.height-24);
-  },[hideStories,hideMemories,onStory,view]);
+    return PLACE_STORIES.filter(story=>!storyScope||storyScope.includes(story.id)).map(story=>{const point=project(story,view.zoom);return {story,x:view.width/2+point.x-center.x,y:view.height/2+point.y-center.y};}).filter(point=>point.x>=24&&point.y>=24&&point.x<=view.width-24&&point.y<=view.height-24);
+  },[hideStories,hideMemories,onStory,storyScope,view]);
 
   return (
     <>
@@ -439,6 +467,9 @@ export default function MemoryMap({
             <MemoryStamp
               key={group.key}
               memory={memory}
+              memberIds={group.memories.map(item=>item.id)}
+              hovered={group.memories.some(item=>item.id===hoveredMemoryId)}
+              onHover={onHoverMemory}
               count={group.memories.length}
               selected={selected}
               grouped={grouped}
@@ -450,16 +481,17 @@ export default function MemoryMap({
           return (
             <button
               key={group.key}
-              className={`raster-memory-marker${selected ? ' selected' : grouped ? ' grouped' : ''}`}
+              className={`raster-memory-marker${group.memories.some(item=>item.id===hoveredMemoryId)?' is-linked-hover':''}${selected ? ' selected' : grouped ? ' grouped' : ''}`}
               style={{ left: group.x, top: group.y, '--marker-color': color } as React.CSSProperties}
               aria-label={group.memories.length > 1 ? `${memory.location_name}의 기억 ${group.memories.length}개` : memory.title}
+              onMouseEnter={()=>onHoverMemory?.(memory.id)} onMouseLeave={()=>onHoverMemory?.(null)} onFocus={()=>onHoverMemory?.(memory.id)} onBlur={()=>onHoverMemory?.(null)}
               onClick={() => onSelect(memory)}
             >
               {group.memories.length > 1 ? group.memories.length : ''}
             </button>
           );
         })}
-        {storyMarkers.map(({story,x,y})=><button type="button" key={'story:'+story.id} className={`map-story-mark${discoveredStoryIds.includes(story.id)?' is-discovered':''}`} style={{left:x,top:y,'--story-opacity':Math.min(.65,.4+(view.zoom-14.6)*.1)} as React.CSSProperties} aria-label={`${story.place}의 숨은 이야기`} title={`${story.place} · 숨은 이야기`} onClick={event=>{event.stopPropagation();onStory?.(story.id);}}><StoryGlyph/></button>)}
+        {storyMarkers.map(({story,x,y})=><button type="button" key={'story:'+story.id} className={`map-story-mark${discoveredStoryIds.includes(story.id)?' is-discovered':''}${hoveredStoryId===story.id?' is-linked-hover':''}${storyScope?' is-collection-trace':''}`} style={{left:x,top:y,'--story-opacity':storyScope?.length ? .8 : Math.min(.65,.4+(view.zoom-14.6)*.1)} as React.CSSProperties} data-story-id={story.id} onMouseEnter={()=>onHoverStory?.(story.id)} onMouseLeave={()=>onHoverStory?.(null)} onFocus={()=>onHoverStory?.(story.id)} onBlur={()=>onHoverStory?.(null)} aria-label={`${story.place}의 숨은 이야기`} title={`${story.place} · 숨은 이야기`} onClick={event=>{event.stopPropagation();onStory?.(story.id);}}><StoryGlyph/></button>)}
         {draftLocationPosition && (
           <span
             className="raster-draft-location"

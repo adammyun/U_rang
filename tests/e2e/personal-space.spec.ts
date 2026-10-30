@@ -49,10 +49,11 @@ test('같은 지도에서 내 정보·저장한 기억·추천을 열고 표시 
  await expect(page.getByRole('button',{name:'골목의 작은 불빛',exact:true})).toBeVisible();
  await panel.getByRole('tab',{name:'좋아요',exact:true}).click();
  await expect(panel.getByRole('button',{name:/골목의 작은 불빛/})).toBeVisible();
- await panel.getByRole('tab',{name:'추천',exact:true}).click();
+ await panel.getByRole('button',{name:'추천 기억 보기',exact:true}).click();
  await expect(panel.getByRole('button',{name:/내가 남긴/})).toHaveCount(0);
- await expect(panel.locator('.personal-memory-card').first()).toBeVisible();
+ await expect(panel.getByRole('region',{name:'추천 기억 목록'}).locator('.personal-memory-card').first()).toBeVisible();
  await page.screenshot({path:`test-results/screenshots/personal-recommendations-${info.project.name}.png`,animations:'disabled'});
+ await panel.getByRole('button',{name:'마이페이지로 돌아가기',exact:true}).click();
  await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
  await expect(page.getByRole('button',{name:'골목의 작은 불빛',exact:true})).toBeVisible();
  await page.getByLabel('지도 메뉴').getByRole('button',{name:'지도',exact:true}).click();

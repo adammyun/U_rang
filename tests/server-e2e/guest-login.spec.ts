@@ -33,7 +33,10 @@ test('계정 없이 게스트로 로그인하고 기록·사진·개인 설정�
  await page.reload();await expect(page.locator('.guest-session-label')).toHaveText('게스트');
  await expect(personal.getByRole('heading',{name:'게스트 여행자의 기억 보관함'})).toBeVisible();
  await page.screenshot({path:`test-results-server/screenshots/guest-space-${info.project.name}.png`,animations:'disabled'});
+ const signedOut=page.waitForNavigation({waitUntil:'load'});
  await page.getByRole('button',{name:'게스트 로그아웃',exact:true}).click();
+ await signedOut;await expect(page.locator('.app-nav a[href="/login"]')).toBeAttached();
+ await expect(page.locator('.raster-memory-marker').first()).toBeVisible();
  await expect(page.locator('.guest-session-label')).toHaveCount(0);await expect(personal).toHaveCount(0);
  await page.getByRole('button',{name:'내 기억',exact:true}).click();
  await expect(page.getByRole('link',{name:'로그인하고 기억 모으기'})).toBeVisible();

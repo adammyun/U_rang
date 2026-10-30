@@ -1,0 +1,76 @@
+import {mkdir} from 'node:fs/promises';
+import {expect,test,type Page} from '@playwright/test';
+import {focusSeongnam} from './helpers/place';
+const camera=(page:Page)=>page.locator('.ulsan-line-map').getAttribute('viewBox');
+test.beforeEach(async({page})=>{
+ await mkdir('test-results/screenshots',{recursive:true});
+ await page.addInitScript(()=>{
+  localStorage.setItem('yeoun_2:onboarding:v1',JSON.stringify({version:1,completed:true}));
+  localStorage.setItem('yeoun_2.pages.auth.v1','signed-in');
+ });
+});
+
+test('세 목록과 별도 추천 화면을 왕복하며 추천만 지도에 표시하고 호버를 연결한다',async({page},info)=>{
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('./');await focusSeongnam(page);
+ const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});
+ await map.evaluate(el=>el.setAttribute('data-instance-kept','yes'));
+ await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ const panel=page.getByRole('dialog',{name:'마이페이지'});
+ await expect(panel.getByRole('tab')).toHaveText(['내 기록','북마크','좋아요']);
+ await expect(panel.getByRole('button',{name:'내 기억과 닮은 다른 이야기 만나기'})).toHaveCount(0);
+ const box=await panel.boundingBox();expect(box!.width).toBeCloseTo(info.project.use.viewport!.width<768?info.project.use.viewport!.width*.8:432,0);
+ await expect(panel.locator('.personal-totals dd').first()).not.toHaveText('—');
+ await page.screenshot({path:`test-results/screenshots/personal-home-${info.project.name}.png`,animations:'disabled'});
+ await panel.getByRole('checkbox',{name:'내 기억',exact:true}).uncheck();
+ await panel.getByRole('tab',{name:'좋아요',exact:true}).click();
+ const before=await camera(page);
+ await panel.getByRole('button',{name:'추천 기억 보기',exact:true}).click();
+ await expect(panel.getByRole('heading',{name:'추천 기억',exact:true})).toBeVisible();
+ await expect(panel.getByRole('tab')).toHaveCount(0);
+ await expect(panel.getByRole('checkbox')).toHaveCount(0);
+ const list=panel.getByRole('region',{name:'추천 기억 목록'}),cards=list.locator('.personal-memory-card');
+ await expect(cards.first()).toBeVisible();
+ const ids=await cards.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-memory-id')!));expect(ids.length).toBeGreaterThan(0);
+ const firstId=ids[0],marker=page.locator(`.atlas-stamp[data-memory-ids~="${firstId}"]`);
+ await expect(marker).toBeVisible();
+ const mapIds=await page.locator('.atlas-stamp').evaluateAll(nodes=>nodes.flatMap(node=>node.getAttribute('data-memory-ids')!.split(' ')));
+ expect(mapIds.length).toBeGreaterThan(0);expect(mapIds.every(id=>ids.includes(id))).toBe(true);
+ if(info.project.name.startsWith('desktop'))await cards.first().hover();else await cards.first().focus();
+ await expect(marker).toHaveClass(/is-linked-hover/);
+ await page.screenshot({path:`test-results/screenshots/personal-recommended-${info.project.name}.png`,animations:'disabled'});
+ await cards.first().click();const detail=page.getByRole('dialog',{name:'기억 상세'});await expect(detail).toBeVisible();
+ await detail.getByRole('button',{name:'뒤로가기',exact:true}).click();
+ await expect(panel.getByRole('heading',{name:'추천 기억',exact:true})).toBeVisible();
+ await panel.getByRole('button',{name:'마이페이지로 돌아가기',exact:true}).click();
+ await expect(panel.getByRole('tab',{name:'좋아요',exact:true})).toHaveAttribute('aria-selected','true');
+ await expect(panel.getByRole('checkbox',{name:'내 기억',exact:true})).not.toBeChecked();
+ await expect(map).toHaveAttribute('data-instance-kept','yes');
+ const original=before!.split(' ').map(Number);
+ await expect.poll(async()=>{const current=(await camera(page))!.split(' ').map(Number);return Math.max(...current.map((value,index)=>Math.abs(value-original[index])));}).toBeLessThan(.01);
+ await expect(page.locator('.is-linked-hover')).toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ expect(errors).toEqual([]);
+});
+
+test('별도 이야기 화면에는 발견한 위치만 표시하고 이야기 읽기·뒤로가기를 유지한다',async({page},info)=>{
+ await page.addInitScript(()=>localStorage.setItem('yurang:place-stories:v1',JSON.stringify([{storyId:'taehwaru',discoveredAt:'2026-10-29T00:00:00.000Z'},{storyId:'ulgi-lighthouse',discoveredAt:'2026-10-29T01:00:00.000Z'}])));
+ await page.goto('./');await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ const panel=page.getByRole('dialog',{name:'마이페이지'});
+ await panel.getByRole('button',{name:'발견한 이야기 보기',exact:true}).click();
+ await expect(panel.getByRole('heading',{name:'발견한 이야기',exact:true})).toBeVisible();
+ await expect(panel.getByRole('tab')).toHaveCount(0);
+ await expect(page.locator('.atlas-stamp')).toHaveCount(0);
+ if(info.project.name.startsWith('desktop'))await expect(page.locator('.map-story-mark')).toHaveCount(2);
+ const card=panel.locator('.story-collection-list > button[data-story-id="taehwaru"]');
+ if(info.project.name.startsWith('desktop'))await card.hover();else await card.focus();
+ await expect(page.locator('.map-story-mark[data-story-id="taehwaru"]')).toHaveClass(/is-linked-hover/);
+ expect(await page.locator('.map-story-mark').evaluateAll(nodes=>nodes.every(node=>['taehwaru','ulgi-lighthouse'].includes(node.getAttribute('data-story-id')!)))).toBe(true);
+ await page.screenshot({path:`test-results/screenshots/personal-stories-${info.project.name}.png`,animations:'disabled'});
+ await card.click();const story=page.getByRole('dialog',{name:'누각 아래, 예식장이 있던 자리'});await expect(story).toBeVisible();
+ await story.getByRole('button',{name:'장소 이야기 닫기'}).click();
+ await expect(panel.getByRole('heading',{name:'발견한 이야기',exact:true})).toBeVisible();
+ await panel.getByRole('button',{name:'마이페이지로 돌아가기',exact:true}).click();
+ await expect(panel.getByRole('tab')).toHaveText(['내 기록','북마크','좋아요']);
+ await expect(page.locator('.map-story-mark')).toHaveCount(0);
+});

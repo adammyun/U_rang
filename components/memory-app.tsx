@@ -7,7 +7,7 @@ import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import Link from '@/components/ui/app-link';
 import Image from 'next/image';
 import { useAppNavigation } from '@/src/lib/navigation';
-import PersonalSpacePanel from './memories/personal-space';
+import PersonalSpacePanel, {type PersonalView,type PersonalTab} from './memories/personal-space';
 import { ACTIVITY_CHANGED_EVENT, fetchPersonalSpace } from '@/src/features/memories/personal-api';
 import { DEFAULT_PERSONAL_SELECTION, type PersonalSpace, type PersonalSelection } from '@/src/features/memories/personal-model';
 import { deleteMemory } from '@/src/features/memories/api';
@@ -190,6 +190,12 @@ export default function MemoryApp({
   const [area, setArea] = useState('울산광역시');
   const [currentLocation, setCurrentLocation] = useState<Point | null>(null);
   const [expanded, setExpanded] = useState(initialExplore);
+  const [personalTab,setPersonalTab]=useState<PersonalTab>('mine');
+  const [personalView,setPersonalView]=useState<PersonalView>('profile');
+  const [hoveredMemoryId,setHoveredMemoryId]=useState<string|null>(null);
+  const [hoveredStoryId,setHoveredStoryId]=useState<string|null>(null);
+  const personalCamera=useRef<{center:Point;zoom:number}|null>(null);
+  const fittedCollection=useRef('');
   const [personalMode,setPersonalMode]=useState(initialPersonal && isAuthenticated);
   const [emotionMenuReady,setEmotionMenuReady]=useState(!isAuthenticated);
   const [emotionMenu,setEmotionMenu]=useState<Emotion[]>([...DEFAULT_EMOTION_MENU]);
@@ -219,6 +225,7 @@ export default function MemoryApp({
     // A legacy Pages hash link can reuse this mounted component. Open its
     // personal state without replacing the map when that route is entered.
     if(initialPersonal&&!previousPersonalRoute.current){
+      personalCamera.current=null;setPersonalView('profile');setPersonalTab('mine');setHoveredMemoryId(null);setHoveredStoryId(null);
       setProfileOpen(true);setPersonalMode(isAuthenticated);setPersonalVisibility(initialVisibility);setFilters(initialFilters);setPersonalSelection(DEFAULT_PERSONAL_SELECTION);setPublicRows([]);setPersonalData(null);setSelected(null);setPlaceAnchor(null);setPlaceGroup(null);setSelectedPlace(null);setPendingLocation(null);setDraftLocation(null);setExpanded(false);
     }
     previousPersonalRoute.current=initialPersonal;
@@ -295,7 +302,32 @@ export default function MemoryApp({
     return()=>window.removeEventListener(ACTIVITY_CHANGED_EVENT,changed);
   },[]);
 
-  const memories = personalMode&&!isAuthenticated?[]:rows;
+  const discoveredIds=useMemo(()=>stories.items.map(item=>item.storyId),[stories.items]);
+  const discoveryPoints=useMemo(()=>stories.items.flatMap(item=>{const story=getPlaceStory(item.storyId);return story?[story]:[];}),[stories.items]);
+  const recommendedMemories=useMemo(()=>personalData?.recommendations.map(item=>item.memory)??[],[personalData]);
+  const memories = personalMode&&!isAuthenticated?[]:personalMode&&personalView==='recommended'?recommendedMemories:personalMode&&personalView==='discoveries'?[]:rows;
+  useEffect(()=>{
+    if(!personalMode||personalView==='profile'){fittedCollection.current='';return;}
+    const points=personalView==='recommended'?recommendedMemories:discoveryPoints;
+    const key=personalView+':'+points.map(point=>point.id).join(',');
+    if(points.length&&key!==fittedCollection.current){fittedCollection.current=key;mapRef.current?.fitPoints(points);}
+  },[personalMode,personalView,recommendedMemories,discoveryPoints]);
+  function changePersonalView(next:PersonalView){
+    setHoveredMemoryId(null);setHoveredStoryId(null);
+    if(personalView==='profile'&&next!=='profile')personalCamera.current=mapRef.current?.camera()??null;
+    if(next==='profile'&&personalView!=='profile'&&personalCamera.current){mapRef.current?.flyTo(personalCamera.current.center,personalCamera.current.zoom);personalCamera.current=null;}
+    setPersonalView(next);
+  }
+  function hoverRecommendedMemory(id:string|null){
+    setHoveredMemoryId(id);
+    const memory=recommendedMemories.find(item=>item.id===id);
+    if(memory)mapRef.current?.revealPoint(memory);
+  }
+  function hoverDiscoveredStory(id:string|null){
+    setHoveredStoryId(id);
+    const story=id?getPlaceStory(id):undefined;
+    if(story)mapRef.current?.revealPoint(story);
+  }
   const hasActiveFilters = Boolean(filters.year || filters.emotions.length);
   const selectedPlaceIndex = placeGroup?.memories.findIndex((item) => item.id === selected?.id) ?? -1;
 
@@ -420,16 +452,16 @@ export default function MemoryApp({
         return;
       }
       if(personalMode) {
-        setProfileOpen(false);setDetailFromProfile(false);setPlaceAnchor(null);setPlaceGroup(null);
+        setHoveredMemoryId(null);setProfileOpen(false);setDetailFromProfile(personalView!=='profile');setPlaceAnchor(null);setPlaceGroup(null);
         void openMemoryFromPlace(memory.id);
       } else openPlace(memory);
     },
-    [openPlace, pendingLocation, personalMode, openMemoryFromPlace],
+    [openPlace, pendingLocation, personalMode, personalView, openMemoryFromPlace],
   );
 
   async function signOut() {
     try {
-      setPersonalMode(false);setProfileOpen(false);setPersonalData(null);setPublicRows([]);
+      personalCamera.current=null;setHoveredMemoryId(null);setHoveredStoryId(null);setPersonalView('profile');setPersonalMode(false);setProfileOpen(false);setPersonalData(null);setPublicRows([]);
       const destination=await logout();
       setCreatedRows([]);
       // A full server sign-out must not race a refresh of the old personal URL.
@@ -511,7 +543,7 @@ export default function MemoryApp({
   }
 
   function showExplore() {
-    setPersonalMode(false);setProfileOpen(false);setPublicRows([]);
+    personalCamera.current=null;setHoveredMemoryId(null);setHoveredStoryId(null);setPersonalView('profile');setPersonalMode(false);setProfileOpen(false);setPublicRows([]);
     setRevision(value=>value+1);
     setPendingLocation(null);
     setExpanded(true);
@@ -524,15 +556,15 @@ export default function MemoryApp({
     detailRequest.current?.abort();nearbyRequest.current?.abort();
     setSelected(null);setPlaceAnchor(null);setPlaceGroup(null);setSelectedPlace(null);setPendingLocation(null);setExpanded(false);
     if(!personalMode&&isAuthenticated){setPublicRows([]);setPersonalSelection(DEFAULT_PERSONAL_SELECTION);}
-    setPersonalMode(isAuthenticated);setProfileOpen(true);
+    changePersonalView('profile');setPersonalMode(isAuthenticated);setProfileOpen(true);
   }
 
   function showPublicMap() {
-    setPersonalMode(false);setProfileOpen(false);setPublicRows([]);setRevision(value=>value+1);setPendingLocation(null);setExpanded(false);setSelected(null);setSelectedPlace(null);setPlaceAnchor(null);setPlaceGroup(null);
+    personalCamera.current=null;setHoveredMemoryId(null);setHoveredStoryId(null);setPersonalView('profile');setPersonalMode(false);setProfileOpen(false);setPublicRows([]);setRevision(value=>value+1);setPendingLocation(null);setExpanded(false);setSelected(null);setSelectedPlace(null);setPlaceAnchor(null);setPlaceGroup(null);
   }
 
   function closePersonal() {
-    setProfileOpen(false);
+    setHoveredMemoryId(null);setHoveredStoryId(null);setProfileOpen(false);
     requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.spatial-nav [data-tour="my-memories"]')?.focus());
   }
 
@@ -581,8 +613,11 @@ export default function MemoryApp({
       </header>
 
       <MemoryMap
-        onStory={openStory} discoveredStoryIds={stories.items.map(item=>item.storyId)}
-        hideStories={Boolean(personalMode||profileOpen||pendingLocation||draftLocation||selected||placeAnchor||expanded)}
+        onStory={openStory} discoveredStoryIds={discoveredIds}
+        storyScope={personalMode&&personalView==='discoveries'?discoveredIds:undefined}
+        hoveredMemoryId={hoveredMemoryId} onHoverMemory={setHoveredMemoryId}
+        hoveredStoryId={hoveredStoryId} onHoverStory={setHoveredStoryId}
+        hideStories={Boolean(((personalMode||profileOpen)&&personalView!=='discoveries')||pendingLocation||draftLocation||selected||placeAnchor||expanded)}
         memories={memories}
         mode={mapMode}
         presentation="stamp"
@@ -742,7 +777,7 @@ export default function MemoryApp({
       </aside>
 
       <DeveloperHotspot className={`map-caption ${selectedPlace ? 'is-hidden' : ''}`}>
-        <span className="live-dot" /> {personalMode ? '나의 지도 · 선택한 기억' : `${area} · 공개된 기억`} <strong>{loading ? '…' : memories.length}</strong>
+        <span className="live-dot" /> {personalMode ? personalView==='recommended'?'추천 기억':personalView==='discoveries'?'발견한 이야기':'나의 지도 · 선택한 기억' : `${area} · 공개된 기억`} <strong>{personalMode&&personalView==='discoveries'?stories.items.length:loading ? '…' : memories.length}</strong>
       </DeveloperHotspot>
       {!pendingLocation && (
         <div className="map-guide">
@@ -770,6 +805,7 @@ export default function MemoryApp({
       />
 
       {profileOpen && (isAuthenticated ? <PersonalSpacePanel
+        tab={personalTab} onTab={setPersonalTab} view={personalView} onView={changePersonalView} hoveredMemoryId={hoveredMemoryId} onHoverMemory={hoverRecommendedMemory} hoveredStoryId={hoveredStoryId} onHoverStory={hoverDiscoveredStory}
         stories={stories} onOpenStory={openStory} onExploreStories={showPublicMap}
         guestSession={guestSession} onGuestLogout={()=>void signOut()}
         data={personalData} selection={personalSelection} onSelection={value=>{setPersonalSelection(value);setPublicRows([]);}}
@@ -777,7 +813,7 @@ export default function MemoryApp({
         visibility={personalVisibility} onVisibility={setPersonalVisibility} mapMode={mapMode} onMapMode={setMapMode}
         emotionMenu={emotionMenu} emotionMenuReady={emotionMenuReady} onSaveEmotionMenu={saveEmotionMenu}
         onEdit={memory=>{setEditingFromProfile(true);setProfileOpen(false);setSelected(null);setEditing(memory);}}
-        onClose={closePersonal} onSelect={memory=>{setDetailFromProfile(true);setProfileOpen(false);setPlaceAnchor(null);setPlaceGroup(null);void openMemoryFromPlace(memory.id);}}
+        onClose={closePersonal} onSelect={memory=>{setHoveredMemoryId(null);setDetailFromProfile(true);setProfileOpen(false);setPlaceAnchor(null);setPlaceGroup(null);void openMemoryFromPlace(memory.id);}}
       /> : <section id="personal-space-panel" className="personal-panel personal-guest" role="dialog" aria-label="마이페이지"><button type="button" aria-label="마이페이지 닫기" onClick={()=>setProfileOpen(false)}><X size={18}/></button><h2><AtlasHeadingLabel>나의 유랑</AtlasHeadingLabel></h2><p>로그인하고 내 기록과 마음에 남은 이야기를 한곳에 모아 보세요.</p><Link href="/login?next=%2F%3Fpersonal%3D1">로그인하고 기억 모으기</Link></section>)}
 
       {editing && isAuthenticated && <MemoryForm key={`edit:${editing.id}`} memory={editing} point={editing} onClose={()=>{setEditing(null);if(editingFromProfile){setEditingFromProfile(false);setProfileOpen(true);}}} onSaved={memorySaved}/>}
@@ -857,7 +893,7 @@ export default function MemoryApp({
           onClose={() => setPanoramaTarget(null)}
         />
       )}
-      {selectedStory&&<PlaceStoryDialog key={selectedStory.id} story={selectedStory} authenticated={isAuthenticated} onDiscover={stories.discover} onClose={()=>setSelectedStory(null)} onLocate={()=>{const story=selectedStory;setSelectedStory(null);showPublicMap();mapRef.current?.flyTo(story,15.4);}}/>}
+      {selectedStory&&<PlaceStoryDialog key={selectedStory.id} story={selectedStory} authenticated={isAuthenticated} onDiscover={stories.discover} onClose={()=>setSelectedStory(null)} onLocate={()=>{const story=selectedStory;setSelectedStory(null);if(personalMode&&personalView==='discoveries')setProfileOpen(false);else showPublicMap();mapRef.current?.flyTo(story,15.4);}}/>}
       {!selectedStory&&<OnboardingTutorial />}
     </main>
   );

@@ -5,8 +5,11 @@ import type { CSSProperties } from 'react';
 import { emotions, type Memory } from '@/lib/types';
 
 /** Presentation only: coordinates, grouping and access policy stay in MemoryMap. */
-export default function MemoryStamp({ memory, count, selected, grouped, x, y, onSelect }: {
+export default function MemoryStamp({ memory, count, selected, grouped, x, y, onSelect, memberIds, hovered=false, onHover }: {
   memory: Memory;
+  memberIds:string[];
+  hovered?:boolean;
+  onHover?:(id:string|null)=>void;
   count: number;
   selected: boolean;
   grouped: boolean;
@@ -19,11 +22,13 @@ export default function MemoryStamp({ memory, count, selected, grouped, x, y, on
   return (
     <button
       type="button"
-      className={`raster-memory-marker atlas-stamp ${photo ? 'has-photo' : 'is-note'}${count>1?' is-stack':''}${selected ? ' selected' : grouped ? ' grouped' : ''}`}
+      className={`raster-memory-marker atlas-stamp ${photo ? 'has-photo' : 'is-note'}${count>1?' is-stack':''}${hovered?' is-linked-hover':''}${selected ? ' selected' : grouped ? ' grouped' : ''}`}
       style={{ left: x, top: y, '--stamp-tilt': `${count>1?(hash%5)-2:(hash%11)-5}deg`, '--stamp-color': emotions[memory.emotion].color } as CSSProperties}
       aria-label={count > 1 ? `${memory.location_name}의 기억 ${count}개` : memory.title}
       aria-pressed={selected || grouped}
       data-memory-count={count}
+      data-memory-ids={memberIds.join(' ')}
+      onMouseEnter={()=>onHover?.(memory.id)} onMouseLeave={()=>onHover?.(null)} onFocus={()=>onHover?.(memory.id)} onBlur={()=>onHover?.(null)}
       onClick={onSelect}
     >
       {count > 1 && <span className="atlas-stamp-stack" aria-hidden="true" />}
