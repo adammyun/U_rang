@@ -19,7 +19,7 @@ import {
 import { isPagesRuntime } from '@/src/lib/runtime';
 import MemoryStamp from './memory-stamp';
 import { groupMapMarkers } from '@/src/features/map/marker-groups';
-import {PLACE_STORIES,isStoryZoom} from '@/src/features/stories/catalog';
+import {PLACE_STORIES,getPlaceStory,isStoryZoom,STORY_REVEAL_ZOOM,STORY_LOCATION_ZOOM} from '@/src/features/stories/catalog';
 import StoryGlyph from '@/components/stories/story-glyph';
 import type { MapMode } from '@/src/features/map/appearance';
 import UlsanLineMap, { type UlsanLineData } from './ulsan-line-map';
@@ -92,6 +92,7 @@ export default function MemoryMap({
   onHoverMemory,
   hoveredStoryId=null,
   onHoverStory,
+  initialStoryLocation,
 }: {
   memories: Memory[];
   mode: MapMode;
@@ -114,6 +115,7 @@ export default function MemoryMap({
   onHoverStory?:(id:string|null)=>void;
   discoveredStoryIds?:string[];
   onStory?:(id:string)=>void;
+  initialStoryLocation?:string;
 }) {
   const container = useRef<HTMLElement>(null);
   const rasterContainer = useRef<HTMLDivElement>(null);
@@ -138,9 +140,14 @@ export default function MemoryMap({
     });
     return () => controller.abort();
   }, []);
+  // Only a known public catalog entry can override the initial camera.
+  // Capture it once so updates and style changes never recreate the map.
+  const [initialCamera] = useState(() => {
+    const story=initialStoryLocation?getPlaceStory(initialStoryLocation):undefined;
+    return {center:story??DEFAULT_MAP_CENTER,zoom:story?STORY_LOCATION_ZOOM:DEFAULT_MAP_ZOOM};
+  });
   const [view, setView] = useState<ViewState>({
-    center: DEFAULT_MAP_CENTER,
-    zoom: DEFAULT_MAP_ZOOM,
+    ...initialCamera,
     width: 0,
     height: 0,
   });
@@ -189,8 +196,8 @@ export default function MemoryMap({
         // The local OSM line drawing below shares this camera/projection and
         // works without WebGL painting. Detailed OSM raster remains intact.
         style: { version: 8, sources: {}, layers: [{ id: 'canvas', type: 'background', paint: { 'background-color': '#171c1b' } }] },
-        center: [DEFAULT_MAP_CENTER.lng, DEFAULT_MAP_CENTER.lat],
-        zoom: DEFAULT_MAP_ZOOM,
+        center: [initialCamera.center.lng, initialCamera.center.lat],
+        zoom: initialCamera.zoom,
         minZoom: MIN_MAP_ZOOM,
         maxZoom: MAX_MAP_ZOOM,
         maxBounds: ULSAN_MAP_BOUNDS,
@@ -334,7 +341,7 @@ export default function MemoryMap({
       map.current = null;
       instance.remove();
     };
-  }, [mapRef]);
+  }, [mapRef,initialCamera]);
   const rasterTiles = useMemo(() => {
     if (!view.width || !view.height) return [];
     // MapLibre measures the world using 512px tiles, while OSM Standard uses
@@ -491,7 +498,7 @@ export default function MemoryMap({
             </button>
           );
         })}
-        {storyMarkers.map(({story,x,y})=><button type="button" key={'story:'+story.id} className={`map-story-mark${discoveredStoryIds.includes(story.id)?' is-discovered':''}${hoveredStoryId===story.id?' is-linked-hover':''}${storyScope?' is-collection-trace':''}`} style={{left:x,top:y,'--story-opacity':storyScope?.length ? .8 : Math.min(.65,.4+(view.zoom-14.6)*.1)} as React.CSSProperties} data-story-id={story.id} onMouseEnter={()=>onHoverStory?.(story.id)} onMouseLeave={()=>onHoverStory?.(null)} onFocus={()=>onHoverStory?.(story.id)} onBlur={()=>onHoverStory?.(null)} aria-label={`${story.place}의 숨은 이야기`} title={`${story.place} · 숨은 이야기`} onClick={event=>{event.stopPropagation();onStory?.(story.id);}}><StoryGlyph/></button>)}
+        {storyMarkers.map(({story,x,y})=><button type="button" key={'story:'+story.id} className={`map-story-mark${discoveredStoryIds.includes(story.id)?' is-discovered':''}${hoveredStoryId===story.id?' is-linked-hover':''}${storyScope?' is-collection-trace':''}`} style={{left:x,top:y,'--story-opacity':storyScope?.length ? .8 : Math.min(.65,.26+(view.zoom-STORY_REVEAL_ZOOM)*.16)} as React.CSSProperties} data-story-id={story.id} onMouseEnter={()=>onHoverStory?.(story.id)} onMouseLeave={()=>onHoverStory?.(null)} onFocus={()=>onHoverStory?.(story.id)} onBlur={()=>onHoverStory?.(null)} aria-label={`${story.place}의 숨은 이야기`} title={`${story.place} · 숨은 이야기`} onClick={event=>{event.stopPropagation();onStory?.(story.id);}}><StoryGlyph/></button>)}
         {draftLocationPosition && (
           <span
             className="raster-draft-location"

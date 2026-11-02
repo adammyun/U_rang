@@ -33,7 +33,7 @@ import PanoramaViewer from './memories/panorama-viewer';
 import { SpatialMemoryDetail, SpatialPlacePreview } from './memories/spatial-panels';
 import PlaceSearch from './map/place-search';
 import OnboardingTutorial from './onboarding/tutorial';
-import {getPlaceStory,type PlaceStory} from '@/src/features/stories/catalog';
+import {getPlaceStory,STORY_LOCATION_ZOOM,type PlaceStory} from '@/src/features/stories/catalog';
 import {useStoryCollection} from '@/components/stories/use-story-collection';
 import PlaceStoryDialog from '@/components/stories/place-story-dialog';
 
@@ -147,6 +147,7 @@ export default function MemoryApp({
   initialPersonal = false,
   initialVisibility = '',
   initialStory,
+  initialStoryLocation,
 }: {
   isAuthenticated: boolean;
   guestSession?:boolean;
@@ -156,6 +157,7 @@ export default function MemoryApp({
   initialPersonal?: boolean;
   initialVisibility?: Memory['visibility']|'';
   initialStory?:string;
+  initialStoryLocation?:string;
 }) {
   const router = useAppNavigation();
   const stories=useStoryCollection(isAuthenticated);
@@ -610,6 +612,7 @@ export default function MemoryApp({
       </header>
 
       <MemoryMap
+        initialStoryLocation={initialStoryLocation}
         onStory={openStory} discoveredStoryIds={discoveredIds}
         storyScope={personalMode&&personalView==='discoveries'?discoveredIds:undefined}
         hoveredMemoryId={hoveredMemoryId} onHoverMemory={setHoveredMemoryId}
@@ -890,7 +893,7 @@ export default function MemoryApp({
           onClose={() => setPanoramaTarget(null)}
         />
       )}
-      {selectedStory&&<PlaceStoryDialog key={selectedStory.id} story={selectedStory} authenticated={isAuthenticated} onDiscover={stories.discover} onClose={()=>setSelectedStory(null)} onLocate={()=>{const story=selectedStory;setSelectedStory(null);if(personalMode&&personalView==='discoveries')setProfileOpen(false);else showPublicMap();mapRef.current?.flyTo(story,15.4);}}/>}
+      {selectedStory&&<PlaceStoryDialog key={selectedStory.id} story={selectedStory} authenticated={isAuthenticated} onDiscover={stories.discover} onClose={()=>setSelectedStory(null)} onLocate={()=>{const story=selectedStory;setSelectedStory(null);if(personalMode&&personalView==='discoveries')setProfileOpen(false);else showPublicMap();mapRef.current?.flyTo(story,STORY_LOCATION_ZOOM);}}/>}
       {!selectedStory&&<OnboardingTutorial />}
     </main>
   );

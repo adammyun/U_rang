@@ -12,6 +12,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
       initialExplore={parameters.explore === '1'}
       initialPersonal={parameters.personal === '1'}
       initialStory={typeof parameters.story==='string'?parameters.story:undefined}
+      initialStoryLocation={typeof parameters.storyLocation==='string'?parameters.storyLocation:undefined}
       isAuthenticated={Boolean(user)} guestSession={user?.provider==='guest'}
       initialFilters={parseMemoryFilters(parameters)}
       naverMapsClientId={process.env.NEXT_PUBLIC_NAVER_MAPS_CLIENT_ID ?? ''}

@@ -149,6 +149,7 @@ function PagesApp() {
       initialExplore={route.search.get('explore') === '1'}
       initialPersonal={route.search.get('personal') === '1'}
       initialStory={route.search.get('story')??undefined}
+      initialStoryLocation={route.search.get('storyLocation')??undefined}
       isAuthenticated={authenticated}
       guestSession={authenticated}
       initialFilters={

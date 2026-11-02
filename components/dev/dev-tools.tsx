@@ -19,6 +19,8 @@ import {
   isOnboardingCompleted,
   resetOnboarding,
 } from '@/src/features/onboarding/storage';
+import {PLACE_STORIES,STORY_REVEAL_ZOOM,STORY_LOCATION_ZOOM} from '@/src/features/stories/catalog';
+import StoryGlyph from '@/components/stories/story-glyph';
 
 type DevToolsProps = {
   databaseConfigured: boolean;
@@ -155,6 +157,22 @@ export default function DevTools({
             </dl>
           </section>
         </div>
+
+        <section className="dev-card dev-story-card" aria-labelledby="dev-story-heading">
+          <div className="dev-card-heading">
+            <StoryGlyph />
+            <div>
+              <h2 id="dev-story-heading">숨은 이야기 위치</h2>
+              <p>전체 {PLACE_STORIES.length}곳 · 확대 {STORY_REVEAL_ZOOM}부터 표시됩니다. 위치 확인은 확대 {STORY_LOCATION_ZOOM}의 지도로 이동하며, 이야기를 열거나 발견 목록에 추가하지 않습니다.</p>
+            </div>
+          </div>
+          <ul className="dev-story-list">
+            {PLACE_STORIES.map(story=><li key={story.id} data-story-id={story.id}>
+              <div className="dev-story-copy"><strong>{story.place}</strong><p>{story.title}</p><small>{story.kind} · 위도 {story.lat.toFixed(5)} · 경도 {story.lng.toFixed(5)}</small></div>
+              <Link className="dev-secondary" href={`/?storyLocation=${encodeURIComponent(story.id)}`} aria-label={`${story.place} 위치 확인`}><MapPin size={16}/> 위치 확인</Link>
+            </li>)}
+          </ul>
+        </section>
 
         <section className="dev-card">
           <div className="dev-card-heading">
