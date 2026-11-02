@@ -57,3 +57,15 @@ http://127.0.0.1:4173/U_rang/ 을 연다. 거리뷰에는 기존 공개 NAVER Cl
 실제 계정 로그인·서버 공유는 이번 구현 범위가 아니다. 실물 모바일 기기의 검증은 수행하지 않았다. 기존 JS chunk 크기 경고는 남아 있다.
 
 [데스크톱 로그인](../design/pages-main/login-desktop-chromium.png) · [모바일 로그인](../design/pages-main/login-mobile-webkit.png) · [데스크톱 지도](../design/pages-main/map-desktop-chromium.png) · [모바일 지도](../design/pages-main/map-mobile-webkit.png)
+
+## 공개 배포 확인
+
+- 배포 소스: `1359358605cfa25befa556093b66b88b39329e67`, `redesign/yeoun-2`
+- [GitHub Pages 배포 실행](https://github.com/adammyun/U_rang/actions/runs/41375018917): 성공
+- 실제 공개 주소의 새 로그인 제목과 시연 안내 확인
+- 게스트로 시작 클릭 후 `https://adammyun.github.io/U_rang/#/` 복귀, 게스트 표시·울산 라인 지도·기억 마커 렌더링 확인
+- 별도 서비스 링크 0개 확인
+- 기존 사용자 기록의 삭제·서버 업로드 없이 확인
+- [실제 공개 사이트 로그인 화면](../design/pages-main/live-login.png)
+
+배포 workflow의 기존 Node 20 action deprecation 안내는 남아 있으며 배포는 성공했다. 이번 작업에서 관련 없는 action 버전이나 서버 인프라를 변경하지 않았다.
