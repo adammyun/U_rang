@@ -42,14 +42,14 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
           <YurangMark /><b>유랑</b>
         </a>
 
-        <h1><AtlasHeadingLabel>이 브라우저에 기억을 이어서 기록하세요</AtlasHeadingLabel></h1>
+        <h1><AtlasHeadingLabel>가볍게 시작하는 나의 유랑</AtlasHeadingLabel></h1>
         <p>
-          GitHub Pages 버전은 계정 정보를 전송하지 않습니다. 기억과 사진은 이
-          브라우저의 IndexedDB에만 저장됩니다.
+          별도 계정 없이 게스트로 기억을 남기고 모아 보세요.
         </p>
-        <button className="auth-submit" type="button" onClick={onLogin}>
+        <button className="auth-submit auth-guest" type="button" onClick={onLogin}>
           <LogIn size={18} /> 게스트로 시작
         </button>
+        <p className="auth-session-note">시연용 로그인입니다. 기억과 사진은 이 브라우저에만 저장되며 다른 사람이나 기기와 공유되지 않아요. 로그아웃 후에도 기록은 남아요. 브라우저 데이터를 삭제하면 복구할 수 없어요.</p>
         <a className="auth-back" href="#/">
           <ArrowLeft size={16} /> 지도로 돌아가기
         </a>
@@ -146,7 +146,6 @@ function PagesApp() {
 
   return (
     <MemoryApp
-      liveServiceUrl={import.meta.env.VITE_LIVE_SERVICE_URL}
       initialExplore={route.search.get('explore') === '1'}
       initialPersonal={route.search.get('personal') === '1'}
       initialStory={route.search.get('story')??undefined}

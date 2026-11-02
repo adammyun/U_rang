@@ -276,6 +276,7 @@ body:has(.memory-atlas) .place-emotions span { border-radius: 0; background: var
 .auth-page .auth-card .auth-guest { width:100%; background:var(--atlas-action); color:var(--atlas-action-ink); font-weight:600; }
 .auth-page .auth-card .auth-account { background:var(--atlas-raised); color:var(--atlas-text); border:1px solid var(--atlas-border); }
 .auth-page .auth-card .auth-session-note { font-size:12px; line-height:1.9; color:var(--atlas-muted); }
+.auth-page .auth-card .auth-submit + .auth-session-note { margin-top:14px; }
 .auth-divider { display:flex; align-items:center; gap:12px; color:var(--atlas-muted); font-size:12px; margin:4px 0; }
 .auth-divider::before,.auth-divider::after { content:''; flex:1; height:1px; background:var(--atlas-border); }
 .guest-session-label { align-self:center; padding:4px 8px; border:1px solid var(--atlas-border); color:var(--atlas-coral); font-size:11px; white-space:nowrap; }
@@ -536,11 +537,6 @@ body:has(.memory-atlas) .memory-image-previews figure > button { width: 44px; he
 .dev-page :is(a,button):focus-visible { outline: 2px solid var(--atlas-coral); outline-offset: 3px; }
 .dev-photo-credits { margin-top: 22px; color: var(--atlas-muted); font-size: 11px; line-height: 1.8; }
 .dev-photo-credits a { color: var(--atlas-coral); text-decoration: underline; }
-.pages-service-link { position: absolute; top: 2px; left: 50%; translate: -50% 0; display: inline-flex; align-items: center; min-height: 44px; padding: 9px 13px; color: var(--atlas-action-ink); background: var(--atlas-action); border: 1px solid var(--atlas-border); box-shadow: var(--atlas-paper-shadow); font-size: 12px; white-space: nowrap; }
-.pages-service-link:hover { background: var(--atlas-action-hover); }
-.pages-service-link:focus-visible { outline: 2px solid var(--atlas-text); outline-offset: 3px; }
-@media (max-width:767px) { .pages-service-link { position: fixed; top: calc(73px + env(safe-area-inset-top)); left: auto; right: 20px; translate: none; min-height: 44px; padding: 7px 10px; font-size: 11px; } }
-body:has(.atlas-place-board,.spatial-detail,.story-sheet,.discovery.expanded,.onboarding-tour,.place-search-results) .pages-service-link { display: none; }
 
 /* Personal space sits above the same map; map/navigation remain operable. */
 .atlas.memory-atlas .personal-panel { position:absolute; z-index:19; left:26px; top:100px; bottom:112px; width:min(540px,calc(100vw - 52px)); display:flex; flex-direction:column; color:var(--atlas-text); background:var(--atlas-surface); border:1px solid var(--atlas-border); box-shadow:var(--atlas-paper-shadow); animation:atlas-paper-enter 280ms var(--atlas-ease) both; }
@@ -651,7 +647,6 @@ body:has(.atlas-place-board,.spatial-detail,.story-sheet,.discovery.expanded,.on
 .memory-view-count { display:flex; align-items:center; gap:6px; color:var(--atlas-muted); padding:8px 0; }
 .memory-activity p { flex-basis:100%; line-height:1.8; color:var(--atlas-muted); font-size:12px; margin:0; }
 .memory-activity p :is(a,button) { color:var(--atlas-coral); border:0; background:none; text-decoration:underline; padding:6px; }
-body:has(.personal-panel) .pages-service-link { display:none; }
 .atlas.has-personal-panel .map-filter-button { visibility:hidden; }
 @media (max-width:767px) {
  .atlas.memory-atlas .personal-panel { inset:calc(82px + env(safe-area-inset-top)) 10px calc(102px + env(safe-area-inset-bottom)); width:auto; }

@@ -69,6 +69,8 @@ Playwright 캡처는 `test-results/screenshots/`에서 직접 확인한다. 최�
 
 ## 복사본 배포 경계
 
+2026-11-02 사용자 변경: 기본 이용 주소는 `https://adammyun.github.io/U_rang/`이다. 별도 서비스 이동 CTA나 ChatGPT 로그인은 기본 사이트에 두지 않는다. 기존 브라우저 시연용 게스트 로그인과 저장 키를 유지하며 다중 사용자 인증·공유 DB라고 표현하지 않는다. Worker 구현은 개발용으로 보존한다. [현재 운영 방식](../operations/GITHUB-PAGES-MAIN.md)
+
 GitHub Pages 배포는 `redesign/yeoun-2`를 선택해 수동 실행합니다. 원본 사이트의 Site project ID를 이 저장소에 다시 넣거나 원본에 배포하지 않습니다. 새 Sites 호스팅이 필요하면 새로운 Site로 등록해야 합니다.
 
 현재 표현은 graphite 바탕·공통 Noto Sans KR 고딕·산호색 행동 강조를 사용합니다. 사진의 비대칭은 유지하지만 텍스트 전용 감정 표지는 수평으로 읽습니다. 세부 토큰은 `DESIGN-DNA.md`와 `app/memory-atlas.css`를 따릅니다.

@@ -144,7 +144,6 @@ export default function MemoryApp({
   initialFilters,
   naverMapsClientId,
   initialExplore = false,
-  liveServiceUrl,
   initialPersonal = false,
   initialVisibility = '',
   initialStory,
@@ -154,7 +153,6 @@ export default function MemoryApp({
   initialFilters: MemoryFilters;
   naverMapsClientId: string;
   initialExplore?: boolean;
-  liveServiceUrl?: string;
   initialPersonal?: boolean;
   initialVisibility?: Memory['visibility']|'';
   initialStory?:string;
@@ -597,7 +595,6 @@ export default function MemoryApp({
           <YurangMark />
           <b>유랑</b>
         </button>
-        {liveServiceUrl && <a className="pages-service-link" href={liveServiceUrl}>공유·저장 실서비스 ↗</a>}
         <nav className="app-nav" aria-label="주요 메뉴" data-tour="account-navigation">
           {isAuthenticated ? (
             <>

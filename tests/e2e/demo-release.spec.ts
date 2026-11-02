@@ -82,14 +82,44 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
 
 });
 
-test('GitHub 시연판에서 실서비스 링크를 열 수 있고 검색 결과를 가리지 않는다',async({page},info)=>{
-  test.skip(!process.env.VITE_LIVE_SERVICE_URL,'Only the configured Pages build exposes this link.');
+test('기본 사이트는 외부 이동 없이 게스트로 로그인하고 기존 기록을 이어서 본다',async({page},info)=>{
+  const errors:string[]=[];
+  const authRequests:string[]=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  page.on('request',request=>{if(/\/api\/auth\/|oauth|chatgpt\.com/.test(request.url()))authRequests.push(request.url());});
   await page.goto('./');
-  const link=page.getByRole('link',{name:'공유·저장 실서비스 ↗',exact:true});
-  await expect(link).toHaveAttribute('href',process.env.VITE_LIVE_SERVICE_URL!);
-  await expect(link).toBeInViewport();
-  await page.screenshot({path:`test-results/screenshots/demo-service-link-${info.project.name}.png`,animations:'disabled'});
-  await page.getByRole('combobox',{name:'장소 이름'}).fill('태화강');
-  await expect(page.getByRole('option',{name:/^태화강 국가정원 /})).toBeVisible();
-  await expect(link).toBeHidden();
+  const siteOrigin=new URL(page.url()).origin;
+  await expect(page.getByRole('link',{name:'공유·저장 실서비스 ↗',exact:true})).toHaveCount(0);
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+  await page.getByRole('link',{name:'로그인하고 기억 모으기'}).click();
+  await expect(page.getByRole('heading',{name:'가볍게 시작하는 나의 유랑'})).toBeVisible();
+  await expect(page.getByText(/시연용 로그인입니다/)).toBeVisible();
+  await expect(page.getByText(/다른 사람이나 기기와 공유되지/)).toBeVisible();
+  await expect(page.getByRole('link',{name:/ChatGPT/})).toHaveCount(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:`test-results/screenshots/pages-main-login-${info.project.name}.png`,animations:'disabled',fullPage:true});
+  await page.getByRole('button',{name:'게스트로 시작'}).click();
+  const profile=page.getByRole('dialog',{name:'마이페이지'});
+  await expect(profile).toBeVisible();
+  await expect(profile.getByRole('button',{name:'게스트 로그아웃'})).toBeVisible();
+  await expect(profile.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toBeVisible();
+  await page.reload();
+  await expect(profile).toBeVisible();
+  await expect(profile.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toBeVisible();
+  await profile.getByRole('button',{name:'게스트 로그아웃'}).click();
+  await expect(profile).toBeHidden();
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+  await expect(profile.getByRole('link',{name:'로그인하고 기억 모으기'})).toBeVisible();
+  await page.goto('./#/login');
+  await page.getByRole('button',{name:'게스트로 시작'}).click();
+  await expect(page.getByLabel('지도 메뉴')).toBeVisible();
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+  await expect(profile.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toBeVisible();
+  await profile.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'지도',exact:true}).click();
+  await expect(page.locator('.atlas-stamp').first()).toBeVisible();
+  await page.screenshot({path:`test-results/screenshots/pages-main-map-${info.project.name}.png`,animations:'disabled'});
+  expect(new URL(page.url()).origin).toBe(siteOrigin);
+  expect(authRequests).toEqual([]);
+  expect(errors).toEqual([]);
 });

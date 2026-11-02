@@ -2,6 +2,8 @@
 
 기준일: 2026-10-24
 
+> 과거 별도 서버 운영 기록입니다. 2026-11-02부터 기본 이용 주소는 GitHub Pages이며 사이트의 서버 이동 버튼은 제거했습니다. 현재 로그인·저장 방식은 [GitHub Pages 기본 운영](GITHUB-PAGES-MAIN.md)을 따릅니다. 아래 내용은 기존 서버 환경의 이력이며 현 기본 사이트 동작을 설명하지 않습니다.
+
 ## 주소와 저장 방식
 
 - 실서비스: https://yurang-memory-live.finn7132.chatgpt.site/

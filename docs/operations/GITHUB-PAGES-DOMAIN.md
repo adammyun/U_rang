@@ -14,7 +14,7 @@
 
 ## 보존한 것
 
-기존 앱 UI, MapLibre/울산 지도, 인증·API·서버 DB와 NAVER 설정은 변경하지 않았다. Pages는 기존 정적 실행 방식이며, ‘공유·저장 실서비스’는 https://yurang-memory-live.finn7132.chatgpt.site/ 에 연결된다. 서버 DB를 GitHub Pages 안으로 옮긴 작업은 아니다.
+주소 변경 당시에는 별도 서버 이동 링크가 있었으나, 2026-11-02 사용자 요청으로 제거했다. 기본 이용 주소는 이 GitHub Pages 주소이며 외부 계정 없는 시연용 로그인을 사용한다. 기존 서버 DB를 GitHub Pages 안으로 옮기지는 않았다. [현재 운영 방식](GITHUB-PAGES-MAIN.md)
 
 브라우저 저장소 이름 `yeoun_2`와 인증·튜토리얼 storage key는 의도적으로 유지한다. 이전/새 Pages의 origin이 같은 `https://adammyun.github.io`이므로 동일 브라우저의 기존 IndexedDB/localStorage를 계속 사용한다. 데이터 삭제·초기화·복사는 수행하지 않았다. 브라우저 프로필이나 기기가 다르면 저장 데이터는 공유되지 않는다.
 
