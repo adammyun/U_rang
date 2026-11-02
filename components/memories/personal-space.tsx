@@ -7,10 +7,8 @@ import { AtlasHeadingLabel } from '@/components/ui/atlas-heading-label';
 import { emotions,formatDate,type Memory } from '@/lib/types';
 import type { PersonalSelection,PersonalSpace } from '@/src/features/memories/personal-model';
 import type { MemoryFilters } from '@/src/features/memories/schemas';
-import type { MapMode } from '@/src/features/map/appearance';
 import EmotionMenuSettings from './emotion-menu-settings';
 import type {Emotion} from '@/lib/types';
-import MapAppearanceOptions from './map-appearance-options';
 import { RECENT_MEMORY_YEARS } from '@/src/features/memories/filters';
 
 import StoryGlyph from '@/components/stories/story-glyph';
@@ -20,7 +18,7 @@ import type {StoryDiscovery} from '@/src/features/stories/model';
 export type PersonalView = 'profile'|'recommended'|'discoveries';
 export type PersonalTab = 'mine'|'bookmarked'|'liked';
 const tabs=[{key:'mine',label:'내 기록'},{key:'bookmarked',label:'북마크'},{key:'liked',label:'좋아요'}] as const;
-export default function PersonalSpacePanel({data,selection,onSelection,filters,onFilters,loading,error,onRetry,onClose,onSelect,onEdit,emotionMenu,emotionMenuReady,onSaveEmotionMenu,visibility,onVisibility,mapMode,onMapMode,guestSession=false,onGuestLogout,stories,onOpenStory,onExploreStories,view,onView,tab,onTab,hoveredMemoryId,onHoverMemory,hoveredStoryId,onHoverStory}:{tab:PersonalTab;onTab:(tab:PersonalTab)=>void;view:PersonalView;onView:(view:PersonalView)=>void;hoveredMemoryId:string|null;onHoverMemory:(id:string|null)=>void;hoveredStoryId:string|null;onHoverStory:(id:string|null)=>void;stories:{items:StoryDiscovery[];loading:boolean;error:boolean;refresh:()=>void};onOpenStory:(id:string)=>void;onExploreStories:()=>void;data:PersonalSpace|null;selection:PersonalSelection;onSelection:(value:PersonalSelection)=>void;filters:MemoryFilters;onFilters:(value:MemoryFilters)=>void;loading:boolean;error:boolean;onRetry:()=>void;onClose:()=>void;onSelect:(memory:Memory)=>void;onEdit:(memory:Memory)=>void;emotionMenu:Emotion[];emotionMenuReady:boolean;onSaveEmotionMenu:(value:Emotion[])=>Promise<void>;visibility:Memory['visibility']|'';onVisibility:(value:Memory['visibility']|'')=>void;mapMode:MapMode;onMapMode:(mode:MapMode)=>void;guestSession?:boolean;onGuestLogout?:()=>void}) {
+export default function PersonalSpacePanel({data,selection,onSelection,filters,onFilters,loading,error,onRetry,onClose,onSelect,onEdit,emotionMenu,emotionMenuReady,onSaveEmotionMenu,visibility,onVisibility,guestSession=false,onGuestLogout,stories,onOpenStory,onExploreStories,view,onView,tab,onTab,hoveredMemoryId,onHoverMemory,hoveredStoryId,onHoverStory}:{tab:PersonalTab;onTab:(tab:PersonalTab)=>void;view:PersonalView;onView:(view:PersonalView)=>void;hoveredMemoryId:string|null;onHoverMemory:(id:string|null)=>void;hoveredStoryId:string|null;onHoverStory:(id:string|null)=>void;stories:{items:StoryDiscovery[];loading:boolean;error:boolean;refresh:()=>void};onOpenStory:(id:string)=>void;onExploreStories:()=>void;data:PersonalSpace|null;selection:PersonalSelection;onSelection:(value:PersonalSelection)=>void;filters:MemoryFilters;onFilters:(value:MemoryFilters)=>void;loading:boolean;error:boolean;onRetry:()=>void;onClose:()=>void;onSelect:(memory:Memory)=>void;onEdit:(memory:Memory)=>void;emotionMenu:Emotion[];emotionMenuReady:boolean;onSaveEmotionMenu:(value:Emotion[])=>Promise<void>;visibility:Memory['visibility']|'';onVisibility:(value:Memory['visibility']|'')=>void;guestSession?:boolean;onGuestLogout?:()=>void}) {
   const heading=useRef<HTMLHeadingElement>(null);
   const previousView=useRef(view);
   useLayoutEffect(()=>{
@@ -45,7 +43,7 @@ export default function PersonalSpacePanel({data,selection,onSelection,filters,o
       <EmotionMenuSettings ready={emotionMenuReady} saved={emotionMenu} onSave={onSaveEmotionMenu}/>
       <div className="personal-secondary-options"><details className="personal-filter-details"><summary>연도·감정·공개 범위</summary><div className="personal-record-filters"><label>연도<select aria-label="내 공간 연도" value={filters.year??''} onChange={event=>onFilters({...filters,year:event.target.value?Number(event.target.value):undefined})}><option value="">모든 연도</option>{years.map(year=><option key={year} value={year}>{year}년</option>)}</select></label><label>감정<select aria-label="내 공간 감정" value={filters.emotions[0]??''} onChange={event=>onFilters({...filters,emotions:event.target.value?[event.target.value as keyof typeof emotions]:[]})}><option value="">모든 감정</option>{Object.entries(emotions).map(([key,value])=><option key={key} value={key}>{value.label}</option>)}</select></label></div>
       <label className="personal-visibility">공개 범위<select aria-label="내 공간 공개 범위" value={visibility} onChange={event=>onVisibility(event.target.value as Memory['visibility']|'')}><option value="">모든 공개 범위</option><option value="private">나만 보기</option><option value="public">공개</option><option value="unlisted">링크로 공유</option></select></label>
-      </details><details className="personal-map-mode"><summary>지도 표현</summary><MapAppearanceOptions mode={mapMode} onChange={onMapMode}/></details></div>
+      </details></div>
       {error&&<p className="personal-message" role="alert">기억 보관함을 불러오지 못했어요. <button type="button" onClick={onRetry}>다시 시도</button></p>}
       <div className="personal-tabs" role="tablist" aria-label="기억 보관함 목록" onKeyDown={event=>{
         if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;

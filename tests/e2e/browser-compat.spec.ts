@@ -111,9 +111,12 @@ test('날짜·한글 감정·사진·공개 설정이 정렬되고 선택한 값
   await expect(detail.locator('.spatial-detail-hero img')).toBeVisible();
   await expect(detail.locator('.spatial-emotion')).toHaveText('사랑');
   await detail.getByRole('button', { name: '기억 닫기' }).click();
-  await page.getByLabel('지도 메뉴').getByRole('button', { name: '내 기억' }).click();
-  await page.locator('.personal-map-mode summary').click();
-  const myModes = page.locator('.personal-map-mode');
+  await page.getByLabel('지도 메뉴').getByRole('button', { name: '마이페이지' }).click();
+  const profile = page.getByRole('dialog', { name: '마이페이지' });
+  await expect(profile.getByText('지도 표현', { exact: true })).toHaveCount(0);
+  await profile.getByRole('button', { name: '마이페이지 닫기', exact: true }).click();
+  await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
+  const myModes = page.getByRole('dialog').locator('.map-appearance-field');
   for (const label of ['다크', '자세히', '기본']) {
     const option = myModes.getByRole('button', { name: new RegExp(`^${label}`) });
     await option.click();

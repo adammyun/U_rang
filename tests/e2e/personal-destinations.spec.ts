@@ -15,7 +15,7 @@ test('세 목록과 별도 추천 화면을 왕복하며 추천만 지도에 표
  await page.goto('./');await focusSeongnam(page);
  const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});
  await map.evaluate(el=>el.setAttribute('data-instance-kept','yes'));
- await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
  const panel=page.getByRole('dialog',{name:'마이페이지'});
  await expect(panel.getByRole('tab')).toHaveText(['내 기록','북마크','좋아요']);
  await expect(panel.getByRole('button',{name:'내 기억과 닮은 다른 이야기 만나기'})).toHaveCount(0);
@@ -55,7 +55,7 @@ test('세 목록과 별도 추천 화면을 왕복하며 추천만 지도에 표
 
 test('별도 이야기 화면에는 발견한 위치만 표시하고 이야기 읽기·뒤로가기를 유지한다',async({page},info)=>{
  await page.addInitScript(()=>localStorage.setItem('yurang:place-stories:v1',JSON.stringify([{storyId:'taehwaru',discoveredAt:'2026-10-29T00:00:00.000Z'},{storyId:'ulgi-lighthouse',discoveredAt:'2026-10-29T01:00:00.000Z'}])));
- await page.goto('./');await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.goto('./');await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
  const panel=page.getByRole('dialog',{name:'마이페이지'});
  await panel.getByRole('button',{name:'발견한 이야기 보기',exact:true}).click();
  await expect(panel.getByRole('heading',{name:'발견한 이야기',exact:true})).toBeVisible();

@@ -90,7 +90,7 @@ test('기본 사이트는 외부 이동 없이 게스트로 로그인하고 기�
   await page.goto('./');
   const siteOrigin=new URL(page.url()).origin;
   await expect(page.getByRole('link',{name:'공유·저장 실서비스 ↗',exact:true})).toHaveCount(0);
-  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
   await page.getByRole('link',{name:'로그인하고 기억 모으기'}).click();
   await expect(page.getByRole('heading',{name:'가볍게 시작하는 나의 유랑'})).toBeVisible();
   await expect(page.getByText(/시연용 로그인입니다/)).toBeVisible();
@@ -108,12 +108,12 @@ test('기본 사이트는 외부 이동 없이 게스트로 로그인하고 기�
   await expect(profile.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toBeVisible();
   await profile.getByRole('button',{name:'게스트 로그아웃'}).click();
   await expect(profile).toBeHidden();
-  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
   await expect(profile.getByRole('link',{name:'로그인하고 기억 모으기'})).toBeVisible();
   await page.goto('./#/login');
   await page.getByRole('button',{name:'게스트로 시작'}).click();
   await expect(page.getByLabel('지도 메뉴')).toBeVisible();
-  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
   await expect(profile.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toBeVisible();
   await profile.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
   await page.getByLabel('지도 메뉴').getByRole('button',{name:'지도',exact:true}).click();

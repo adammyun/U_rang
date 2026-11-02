@@ -807,7 +807,7 @@ export default function MemoryApp({
         guestSession={guestSession} onGuestLogout={()=>void signOut()}
         data={personalData} selection={personalSelection} onSelection={value=>{setPersonalSelection(value);setPublicRows([]);}}
         filters={filters} onFilters={changeFilters} loading={loading} error={loadError} onRetry={()=>setRevision(value=>value+1)}
-        visibility={personalVisibility} onVisibility={setPersonalVisibility} mapMode={mapMode} onMapMode={setMapMode}
+        visibility={personalVisibility} onVisibility={setPersonalVisibility}
         emotionMenu={emotionMenu} emotionMenuReady={emotionMenuReady} onSaveEmotionMenu={saveEmotionMenu}
         onEdit={memory=>{setEditingFromProfile(true);setProfileOpen(false);setSelected(null);setEditing(memory);}}
         onClose={closePersonal} onSelect={memory=>{setHoveredMemoryId(null);setDetailFromProfile(true);setProfileOpen(false);setPlaceAnchor(null);setPlaceGroup(null);void openMemoryFromPlace(memory.id);}}

@@ -64,7 +64,7 @@ test('비공개 글 기록은 공개 스탬프에 나타나지 않고 내 기억
   await page.getByRole('button', { name: '탐색', exact: true }).click();
   await expect(page.getByLabel('주변의 공개 기억').getByText(title)).toHaveCount(0);
   await page.getByRole('button', { name: '탐색 닫기' }).click();
-  await page.getByLabel('지도 메뉴').getByRole('button', { name: '내 기억' }).click();
+  await page.getByLabel('지도 메뉴').getByRole('button', { name: '마이페이지' }).click();
   await expect(page.getByRole('dialog', { name: '마이페이지' }).getByText(title)).toBeVisible();
 });
 

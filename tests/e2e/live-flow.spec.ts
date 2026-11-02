@@ -89,8 +89,8 @@ test('격리된 브라우저에서 사진 첨부·공개 기록 작성·수정·
   await expect(page.getByRole('heading', { name: title })).toBeVisible();
   await expect(page.locator('.spatial-detail-hero img')).toBeVisible();
   await page.getByRole('button', { name: '기억 닫기' }).click();
-  await expect(page.getByLabel('지도 메뉴').getByRole('button', { name: '내 기억' })).toBeVisible();
-  await page.getByLabel('지도 메뉴').getByRole('button', { name: '내 기억' }).click();
+  await expect(page.getByLabel('지도 메뉴').getByRole('button', { name: '마이페이지' })).toBeVisible();
+  await page.getByLabel('지도 메뉴').getByRole('button', { name: '마이페이지' }).click();
   await expect(page.getByRole('dialog', { name: '마이페이지' }).getByText(title)).toBeVisible();
   await page.getByRole('dialog', { name: '마이페이지' }).getByText(title).click();
   await page.getByRole('button', { name: '수정' }).click();

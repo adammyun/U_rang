@@ -15,7 +15,7 @@ test('서버 게스트의 발견 기록은 재접속해도 본인 보관함에�
  await story.getByRole('button',{name:'장소 이야기 닫기'}).click();
  await expect(page.locator('.raster-memory-marker').first()).toBeVisible();
  // Leave the deep link so reloading doesn't reopen its reading panel.
- await page.goto('/');await expect(page.locator('.raster-memory-marker').first()).toBeVisible();await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.goto('/');await expect(page.locator('.raster-memory-marker').first()).toBeVisible();await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
  const personal=page.getByRole('dialog',{name:'마이페이지'});
  await expect(personal.locator('.personal-totals dd').first()).not.toHaveText('—');
  await personal.getByRole('button',{name:'발견한 이야기 보기',exact:true}).click();

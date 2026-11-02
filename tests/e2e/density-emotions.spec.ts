@@ -28,7 +28,7 @@ test('마이페이지에서 내 기억의 감정을 바로 수정하고 원래 �
  await page.addInitScript(()=>localStorage.setItem('yeoun_2.pages.auth.v1','signed-in'));
  await page.goto('./');const map=page.getByLabel('울산 기억 지도. 기억 남기기 버튼으로 장소 선택을 시작하세요.',{exact:true});
  await map.evaluate(el=>el.setAttribute('data-density-map','retained'));
- await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.getByRole('button',{name:'마이페이지',exact:true}).click();
  const personal=page.getByRole('dialog',{name:'마이페이지'});
  await personal.getByRole('button',{name:'나만 간직한 골목의 저녁 감정 수정',exact:true}).click();
  const form=page.locator('.create-sheet');await expect(form).toBeVisible();
@@ -66,7 +66,7 @@ test('예시 댓글은 두 개씩 나타나고 표식·팝업이 회전과 줌�
 
 test('마이페이지의 감정 메뉴 설정이 저장되고 새로고침 뒤에도 유지된다',async({page},info)=>{
  await page.addInitScript(()=>localStorage.setItem('yeoun_2.pages.auth.v1','signed-in'));
- await page.goto('./');await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.goto('./');await page.getByRole('button',{name:'마이페이지',exact:true}).click();
  const personal=page.getByRole('dialog',{name:'마이페이지'});
  await personal.getByText('감정 메뉴 설정',{exact:true}).click();
  const settings=personal.locator('.emotion-menu-settings');
@@ -85,7 +85,7 @@ test('마이페이지의 감정 메뉴 설정이 저장되고 새로고침 뒤�
  await expect(tags.getByRole('button',{name:'슬픔',exact:true})).toBeVisible();
  await page.reload();await page.getByRole('button',{name:/감정 태그 펼치기/}).click();
  tags=page.getByRole('group',{name:'감정 선택'});await expect(tags.getByRole('button')).toHaveCount(2);
- await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.getByRole('button',{name:'마이페이지',exact:true}).click();
  await personal.getByText('감정 메뉴 설정',{exact:true}).click();
  await expect(settings.getByRole('checkbox',{name:'슬픔',exact:true})).toBeChecked();
  await expect(settings.getByRole('checkbox',{name:'행복',exact:true})).not.toBeChecked();

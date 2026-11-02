@@ -663,18 +663,13 @@ body:has(.memory-atlas) .memory-image-previews figure > button { width: 44px; he
 @media (prefers-reduced-motion:reduce) { .atlas.memory-atlas .personal-panel { animation:none; } .personal-memory-card { transition:none; } }
 .personal-visibility { display:flex; align-items:center; gap:15px; color:var(--atlas-muted); font-size:12px; margin-bottom:17px; }
 .personal-visibility select { flex:1; min-width:0; min-height:44px; padding:8px; color:var(--atlas-text); background:var(--atlas-charcoal); color-scheme:dark; border:1px solid var(--atlas-border); border-radius:0; }
-.personal-map-mode { margin-bottom:20px; color:var(--atlas-muted); font-size:12px; }
-.personal-map-mode summary { cursor:pointer; padding:12px 0; }
-.personal-map-mode .map-appearance-options { margin-top:10px; }
 .atlas-scope-options > button { display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; padding:15px; border:1px solid var(--atlas-border); color:var(--atlas-text); background:var(--atlas-raised); min-height:48px; font:inherit; }
 .atlas-scope-options > button.selected { border-color:var(--atlas-coral); color:var(--atlas-coral); }
 .personal-filter-details { margin:3px 0 7px; font-size:12px; color:var(--atlas-muted); }
 .personal-filter-details > summary { cursor:pointer; min-height:44px; padding:12px 0; }
 .personal-filter-details[open] { border-bottom:1px solid var(--atlas-border); }
-.personal-map-mode { margin-bottom:10px; }
-.personal-map-mode > summary { min-height:40px; }
 .personal-option-short { display:none; }
-.personal-secondary-options { display:grid; grid-template-columns:1.2fr 1fr; gap:12px; margin:4px 0 14px; }
+.personal-secondary-options { display:grid; grid-template-columns:1fr; gap:12px; margin:4px 0 14px; }
 .personal-secondary-options > details { margin:0; }
 .personal-secondary-options > details[open] { grid-column:1/-1; }
 @media (max-width:767px) {

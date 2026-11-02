@@ -25,7 +25,7 @@ test('지도·탐색·내 기억의 하단 메뉴가 같은 위치에 남고 일
   const nav = page.getByLabel('지도 메뉴', { exact: true });
   const labels = async () => nav.locator(':scope > :not(.memory-cta)').allTextContents();
   const initialLabels = (await labels()).map(t => t.trim());
-  expect(initialLabels).toEqual(['지도', '탐색', '내 기억']);
+  expect(initialLabels).toEqual(['지도', '탐색', '마이페이지']);
   const initial = (await nav.boundingBox())!;
   for (const selector of ['.brand', '.spatial-intro']) {
     expect(await page.locator(selector).evaluate(el => getComputedStyle(el).textShadow)).not.toBe('none');
@@ -43,7 +43,7 @@ test('지도·탐색·내 기억의 하단 메뉴가 같은 위치에 남고 일
   await capture(page, 'explore', info.project.name);
   const originalUrl=page.url();
   await map.evaluate(el=>el.setAttribute('data-retained','yes'));
-  await nav.getByRole('button',{name:'내 기억',exact:true}).click();
+  await nav.getByRole('button',{name:'마이페이지',exact:true}).click();
   const personal=page.getByRole('dialog',{name:'마이페이지'});
   await expect(personal).toBeVisible();await expect(page).toHaveURL(originalUrl);
   await expect(map).toHaveAttribute('data-retained','yes');

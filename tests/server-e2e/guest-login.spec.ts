@@ -38,7 +38,7 @@ test('계정 없이 게스트로 로그인하고 기록·사진·개인 설정�
  await signedOut;await expect(page.locator('.app-nav a[href="/login"]')).toBeAttached();
  await expect(page.locator('.raster-memory-marker').first()).toBeVisible();
  await expect(page.locator('.guest-session-label')).toHaveCount(0);await expect(personal).toHaveCount(0);
- await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.getByRole('button',{name:'마이페이지',exact:true}).click();
  await expect(page.getByRole('link',{name:'로그인하고 기억 모으기'})).toBeVisible();
  expect(errors).toEqual([]);
 });

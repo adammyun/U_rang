@@ -90,7 +90,7 @@ test('이전 v4 기록·반응을 보존하고 기억 삭제 시 연결 댓글�
   };request.onerror=()=>reject(request.error);
  }),memoryId);
  await page.unroute('**/U_rang/');await page.reload();
- await page.getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.getByRole('button',{name:'마이페이지',exact:true}).click();
  const personal=page.getByRole('dialog',{name:'마이페이지'});
  await personal.locator('.personal-memory-card').filter({hasText:'이전 기록 보존 검사'}).click();
  const reading=page.getByRole('dialog',{name:'기억 상세'});

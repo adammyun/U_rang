@@ -119,7 +119,7 @@ export default function DevTools({
             </div>
             <nav className="dev-links" aria-label="시연 화면 바로가기">
               <Link href="/"><Map size={17} /> 공개 지도</Link>
-              <Link href="/my-map"><UserRound size={17} /> 내 기억 지도</Link>
+              <Link href="/my-map"><UserRound size={17} /> 마이페이지</Link>
               <Link href="/login"><ExternalLink size={17} /> 로그인</Link>
               <Link href="/signup"><ExternalLink size={17} /> 회원가입 안내</Link>
             </nav>

@@ -93,7 +93,7 @@ const steps: TourStep[] = [
     eyebrow: 'MY MEMORY MAP',
     title: '내가 남긴 장소만 다시 모아볼 수 있어요',
     description:
-      '로그인하면 내 기억 지도에서 공개한 이야기와 나만 간직한 이야기를 함께 관리할 수 있어요.',
+      '로그인하면 마이페이지에서 공개한 이야기와 나만 간직한 이야기를 함께 관리할 수 있어요.',
     selectors: [
       '[data-tour="my-memories"]',
       '[data-tour="account-navigation"]',

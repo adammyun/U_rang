@@ -117,7 +117,7 @@ test('마이페이지 목록·필터·상세에서 같은 지도의 공개 탐�
   await form.getByRole('button',{name:'기억 남기기',exact:true}).click();
   await page.getByRole('button',{name:'기억 닫기'}).click();
   const url=page.url();
-  await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+  await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
   const panel=page.getByRole('dialog',{name:'마이페이지'});
   await expect(panel).toBeVisible();await expect(page).toHaveURL(url);
   await panel.locator('.personal-filter-details summary').click();
@@ -133,7 +133,7 @@ test('마이페이지 목록·필터·상세에서 같은 지도의 공개 탐�
   await expect(detail.getByRole('heading',{level:2})).toHaveText('돌아오는 길의 가상 기억');
   await detail.getByRole('button',{name:'뒤로가기',exact:true}).click();
   await expect(panel).toBeVisible();await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();
-  await expect(panel).toBeHidden();await expect(page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true})).toBeFocused();
+  await expect(panel).toBeHidden();await expect(page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true})).toBeFocused();
   await page.getByLabel('지도 메뉴').getByRole('button',{name:'지도',exact:true}).click();
   await page.getByRole('button',{name:'탐색',exact:true}).click();
   await expect(page.getByLabel('주변의 공개 기억').getByText('돌아오는 길의 가상 기억')).toHaveCount(0);

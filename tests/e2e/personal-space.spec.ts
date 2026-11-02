@@ -30,8 +30,12 @@ test('같은 지도에서 내 정보·저장한 기억·추천을 열고 표시 
  await expect(activity.getByRole('button',{name:'북마크',exact:true})).toHaveAttribute('aria-pressed','true');
  await expect(activity.getByLabel('조회수 1',{exact:true})).toBeVisible();
  await detail.getByRole('button',{name:'기억 닫기'}).click();
- await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
  const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel).toBeVisible();
+ await expect(panel.getByText('지도 표현',{exact:true})).toHaveCount(0);
+ await expect(panel.locator('.personal-map-mode')).toHaveCount(0);
+ await expect(panel.locator('.personal-memory-card').filter({hasText:'나만 간직한 골목의 저녁'})).toBeVisible();
+ await page.screenshot({path:`test-results/screenshots/mypage-profile-${info.project.name}.png`,animations:'disabled'});
  await expect(page).toHaveURL(url);await expect(map).toHaveAttribute('data-retained-map','yes');
  await expect(page.locator('.ulsan-line-map')).toHaveAttribute('viewBox',camera!);
  await expect(panel.getByRole('checkbox',{name:'내 기억',exact:true})).toBeChecked();
@@ -70,7 +74,7 @@ test('같은 지도에서 내 정보·저장한 기억·추천을 열고 표시 
 
 test('로그인 전 내 기억은 이동 없는 안내이며 반응과 비공개 기록은 로그인 경계를 지킨다',async({page})=>{
  await page.goto('./');const url=page.url();
- await page.getByLabel('지도 메뉴').getByRole('button',{name:'내 기억',exact:true}).click();
+ await page.getByLabel('지도 메뉴').getByRole('button',{name:'마이페이지',exact:true}).click();
  const panel=page.getByRole('dialog',{name:'마이페이지'});await expect(panel.getByRole('link',{name:'로그인하고 기억 모으기'})).toBeVisible();
  await expect(page).toHaveURL(url);
  await panel.getByRole('button',{name:'마이페이지 닫기',exact:true}).click();

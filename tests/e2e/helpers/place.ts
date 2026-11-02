@@ -14,5 +14,11 @@ export async function focusSeongnam(page: Page) {
   await expect.poll(() => page.locator('.ulsan-line-map').evaluate(el => {
     const width = Number(el.getAttribute('viewBox')!.split(' ')[2]);
     return Math.log2(el.clientWidth / width) + 12;
-  })).toBeCloseTo(14.2, 3);
+  })).toBeCloseTo(14.2, 10);
+  // Camera assertions need the final frame, rather than a nearly finished flyTo.
+  await expect.poll(() => page.locator('.ulsan-line-map').evaluate(el => {
+    const viewBox = el.getAttribute('viewBox');
+    return new Promise<boolean>(resolve => requestAnimationFrame(() =>
+      requestAnimationFrame(() => resolve(el.getAttribute('viewBox') === viewBox))));
+  })).toBe(true);
 }
