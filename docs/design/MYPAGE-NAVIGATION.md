@@ -28,3 +28,6 @@ Playwright는 Chromium/WebKit, 데스크톱 1440×900·모바일 390×844에서 
 최종 결과: 공통 내비게이션/작성·사진·공개 설정/조정의 지도 모드 8건과 개인 공간 4건, 총 12개 브라우저·화면 조합 검사 통과. 테스트 보완 후 lint·typecheck도 다시 통과했다.
 
 [데스크톱](mypage-navigation/desktop-chromium.png) · [모바일](mypage-navigation/mobile-webkit.png)
+
+
+공개 배포: 소스 `9f970a40c31bac609d058fff8cb6daa26d9a806a`, [Pages 배포 성공](https://github.com/adammyun/U_rang/actions/runs/41375836291). 실제 https://adammyun.github.io/U_rang/#/?personal=1 에서 새로고침 후 하단 마이페이지 버튼 표시 및 개인 패널의 지도 표현 요소 0개를 확인했다. 첫 접속은 이전 캐시 화면을 보였으나 일반 새로고침으로 최신 버전이 표시되었다. 저장소를 비우거나 사용자 기록을 변경하지 않았다.
