@@ -33,3 +33,15 @@
 기존 JS chunk 크기 경고는 남아 있다. 실제 모바일 기기·현장 방문·별도 Sites 서버 재배포/운영 API는 이번 작업에서 확인하지 않았다. 서버 빌드는 통과했다.
 
 [데스크톱 개발 도구](story-locations/dev-desktop-chromium.png) · [모바일 개발 도구](story-locations/dev-mobile-webkit.png)
+
+
+## 공개 배포 확인
+
+- 배포 소스: `48d2cc74a060d233fb20dc43cc3c636c68cf13bf`
+- [GitHub Pages 배포 성공](https://github.com/adammyun/U_rang/actions/runs/41404023266)
+- 실제 [개발 도구](https://adammyun.github.io/U_rang/#/dev)에서 전체 9곳·표시 기준 15.8·위치 링크 확인
+- 울산 동헌 및 내아 위치 링크 → `#/?storyLocation=ulsan-dongheon` 이동, 해당 이야기 표식 표시, 자동 열린 대화상자 0개 확인
+- 실제 사용자 기억·발견 기록을 추가/삭제하지 않고 검사
+- [실제 공개 개발 도구 전체 화면](story-locations/live-dev.png) · [추가된 네 이야기 구간](story-locations/live-new-stories.png)
+
+기존 GitHub Actions Node 20 action deprecation 안내는 남아 있으며 배포는 성공했다. 관련 없는 배포 설정이나 기존 사이트를 수정하지 않았다.
