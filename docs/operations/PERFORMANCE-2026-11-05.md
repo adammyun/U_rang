@@ -68,3 +68,16 @@ node scripts/measure-runtime.mjs http://127.0.0.1:4181/U_rang/ /path/to/after-re
 ```
 
 화면 측정은 로컬 주소와 분리된 임시 브라우저 프로필만 사용한다. 스크린샷과 결과 JSON은 전달한 출력 디렉터리에 생성된다.
+
+## 공개 배포 확인 · 2026-11-06
+
+- 배포 소스: `c9ac0bc5cff84fc0c2c6231d4d52affb391197da`, `redesign/yeoun-2`
+- [GitHub Pages 배포 성공](https://github.com/adammyun/U_rang/actions/runs/42144802192)
+- 실제 https://adammyun.github.io/U_rang/ 에서 `overview-v2` 요청과 원본 크기 5,365,473 bytes 확인. 해당 요청의 관측 압축 크기는 1,070,626 bytes였다.
+- 공개 파일의 도형 해시가 변경 전 기준과 같고 27,534개 도형이 유지됨을 확인했다.
+- 실제 공개 브라우저에서 개요 건물 6,597개, 기억 마커·예시 사진, 성남동 확대 후 상세 건물 표시, JS 오류 0개 확인.
+- 새 임시 브라우저 프로필로 검사해 실제 사용자의 로그인/기록/사진을 변경하지 않았다.
+
+[공개 검증 결과](performance-2026-11-05/live-verification.json) · [공개 화면 캡처](performance-2026-11-05/live-main.png)
+
+기존 번들 크기 및 GitHub Actions의 Node 20 action deprecation 경고는 남아 있다. 배포는 성공했으며 관련 없는 배포 설정·서버 인프라는 변경하지 않았다.

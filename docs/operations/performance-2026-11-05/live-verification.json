@@ -1,0 +1,17 @@
+{
+  "url": "https://adammyun.github.io/U_rang/",
+  "overviewBytes": 5365473,
+  "features": 27534,
+  "geometrySha256": "e26f8182354bc7f1e0bd4ba2fd957d03626fec0bda6cddb7bfd1184a79663a95",
+  "resource": [
+    {
+      "url": "https://adammyun.github.io/U_rang/maps/ulsan-urban/overview.json?v=overview-v2",
+      "decodedBytes": 5365473,
+      "encodedBytes": 1070626
+    }
+  ],
+  "detailedBuildingsReady": true,
+  "existingMarkerVisible": true,
+  "pageErrors": [],
+  "examplePhotosReady": true
+}
