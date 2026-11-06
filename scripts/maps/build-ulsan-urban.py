@@ -104,6 +104,9 @@ for (x,y),items in sorted(grid.items()):
     filename=f'{x}-{y}.json'
     (out/filename).write_text(json.dumps(items,separators=(',',':'),ensure_ascii=False))
     manifest.append({'file':filename,'bounds':[round(BBOX[0]+x*STEP,6),round(BBOX[1]+y*STEP,6),round(BBOX[0]+(x+1)*STEP,6),round(BBOX[1]+(y+1)*STEP,6)],'count':len(items)})
+# The overview renderer needs no per-feature ID or bounds. Detailed cells keep
+# their IDs for cross-cell deduplication; every coordinate and its order survives.
+overview=[{k:v for k,v in feature.items() if k not in ('id','bounds')} for feature in overview]
 result={'version':1,'bbox':BBOX,'osmTimestamp':raw.get('osm3s',{}).get('timestamp_osm_base'),'retrievedAt':'2026-10-19','copyright':'© OpenStreetMap contributors','license':'ODbL-1.0','counts':dict(counts),'overview':overview,'tiles':manifest}
 (out/'overview.json').write_text(json.dumps(result,separators=(',',':'),ensure_ascii=False))
 print(json.dumps({'counts':counts,'overview':len(overview),'tiles':len(manifest),'bytes':sum(p.stat().st_size for p in out.glob('*.json')),'timestamp':result['osmTimestamp']}))

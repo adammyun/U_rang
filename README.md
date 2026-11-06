@@ -259,3 +259,7 @@ Memory Atlas — Spatial Paper: 어두운 전체 지도, 사진/글 스탬프, �
 가까운 지도 기억은 화면상 종이 크기를 기준으로 묶고 확대하면 분리합니다. 감정 메뉴는 8가지를 제공하며 마이페이지에서 자주 사용할 항목을 저장하고 내 기록의 감정도 수정할 수 있습니다. Sites의 설정은 계정별 DB, Pages 시연판은 해당 브라우저에 저장됩니다. 추가 migration은 `0004_emotion_menu_preferences.sql`이며 기존 `pnpm db:migrate`에 포함됩니다. 공개 예시 기억 23개에는 익명 댓글이 2개씩 준비되어 있고 처음 읽을 때 중복 없이 추가됩니다.
 
 [변경 범위·거리뷰 예시 위치의 한계·검증 기록](docs/design/memory-density/README.md)을 참고하세요. 로컬 계정 설정 검사는 개발 서버 실행 후 `node scripts/verify-emotion-preferences.mjs http://localhost:5197`로 실행합니다. 이 검사는 localhost만 허용하며 검사 후 원래 설정을 복원합니다.
+
+## UX/UI를 유지한 성능 최적화
+
+2026-11-05 초기 건물 데이터에서 표시와 무관한 정보만 제거해 원본 용량을 약 27% 줄이고, 상세 도형 계산을 재사용하도록 보완했습니다. 지도 디테일·사진·배치·모션·표시 시점은 유지합니다. [변경 파일·측정값·화면 비교·검증](docs/operations/PERFORMANCE-2026-11-05.md)

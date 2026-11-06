@@ -69,3 +69,10 @@ python3 scripts/maps/build-ulsan-urban.py /path/to/cached-overpass-response.json
 ```
 
 [Overpass 문서](https://wiki.openstreetmap.org/wiki/Overpass_API) · [OSM 저작권·ODbL](https://www.openstreetmap.org/copyright). 모든 추가 데이터와 파생 도로 블록에도 기존 ODbL 조건을 적용합니다.
+
+
+## 2026-11-05 데이터/계산 최적화
+
+초기 `overview.json`에서 렌더러가 사용하지 않는 각 도형의 `id`·`bounds`만 제거했습니다. 27,534개 도형(건물 6,597개 포함)의 종류·좌표·순서·use·major 값은 이전과 완전히 같습니다. 전체 bbox·셀 manifest·counts·원본 시각·저작권·ODbL 표기도 유지합니다. 상세 셀의 ID와 좌표는 바꾸지 않아 셀 경계의 중복 제거가 유지됩니다.
+
+원본 파일은 7,337,789 → 5,365,473 bytes입니다. 개요 파일만 `?v=overview-v2`로 요청하며, 기존 셀 URL·화면 내 셀 선택·180ms 대기·4개 동시 요청·캐시 정리 기준은 그대로입니다. 상세 셀의 캐시는 원시 좌표 배열 대신 동일한 SVG 결과를 보관합니다. 좌표 소수점이나 도로·건물 개수, 표시 확대 수준은 바꾸지 않았습니다. 변환기도 같은 축약 형식을 출력합니다. [측정·검증 기록](../../docs/operations/PERFORMANCE-2026-11-05.md)

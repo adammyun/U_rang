@@ -1,0 +1,52 @@
+[
+  {
+    "a": "before/desktop-chromium-main.png",
+    "b": "after/desktop-chromium-main.png",
+    "captionPixels": 404
+  },
+  {
+    "a": "before/desktop-chromium-main.png",
+    "b": "unchanged-0.png",
+    "captionPixels": 404
+  },
+  {
+    "a": "before/desktop-chromium-main.png",
+    "b": "unchanged-1.png",
+    "captionPixels": 404
+  },
+  {
+    "a": "before/desktop-chromium-main.png",
+    "b": "unchanged-2.png",
+    "captionPixels": 404
+  },
+  {
+    "a": "after/desktop-chromium-main.png",
+    "b": "unchanged-0.png",
+    "captionPixels": 0
+  },
+  {
+    "a": "after/desktop-chromium-main.png",
+    "b": "unchanged-1.png",
+    "captionPixels": 0
+  },
+  {
+    "a": "after/desktop-chromium-main.png",
+    "b": "unchanged-2.png",
+    "captionPixels": 0
+  },
+  {
+    "a": "unchanged-0.png",
+    "b": "unchanged-1.png",
+    "captionPixels": 0
+  },
+  {
+    "a": "unchanged-0.png",
+    "b": "unchanged-2.png",
+    "captionPixels": 0
+  },
+  {
+    "a": "unchanged-1.png",
+    "b": "unchanged-2.png",
+    "captionPixels": 0
+  }
+]

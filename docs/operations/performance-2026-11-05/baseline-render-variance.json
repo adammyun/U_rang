@@ -1,0 +1,10 @@
+{
+  "source": "unchanged published baseline",
+  "pixelsDiffering": 1200,
+  "bounds": {
+    "minX": 514,
+    "minY": 323,
+    "maxX": 752,
+    "maxY": 508
+  }
+}

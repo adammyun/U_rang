@@ -452,8 +452,10 @@ export async function browserPersonalSpace(query:PersonalQuery, signal?:AbortSig
     const lng=row.ownerId===LOCAL_USER_ID?row.exactLng:row.publicLng;
     return selected.has(row.id)&&matchesFilters(row,query)&&(!query.visibility||row.visibility===query.visibility)&&lat>=query.south&&lat<=query.north&&lng>=query.west&&lng<=query.east;
   });
-  const score=(row:StoredMemory)=>Number(mine.some(own=>own.locationName===row.locationName))*2+Number(mine.some(own=>own.emotion===row.emotion));
-  const recommendations=rows.filter(row=>row.visibility==='public'&&row.ownerId!==LOCAL_USER_ID).sort((a,b)=>score(b)-score(a)).slice(0,8).map(row=>({memory:toMemory(row),reason:mine.some(own=>own.locationName===row.locationName)?'내가 기록한 장소의 다른 이야기':mine.some(own=>own.emotion===row.emotion)?`내 기록과 닮은 ${emotions[row.emotion].label}의 순간`:'울산에서 만나는 다른 이야기'}));
+  const ownPlaces=new Set(mine.map(own=>own.locationName));
+  const ownEmotions=new Set(mine.map(own=>own.emotion));
+  const score=(row:StoredMemory)=>Number(ownPlaces.has(row.locationName))*2+Number(ownEmotions.has(row.emotion));
+  const recommendations=rows.filter(row=>row.visibility==='public'&&row.ownerId!==LOCAL_USER_ID).sort((a,b)=>score(b)-score(a)).slice(0,8).map(row=>({memory:toMemory(row),reason:ownPlaces.has(row.locationName)?'내가 기록한 장소의 다른 이야기':ownEmotions.has(row.emotion)?`내 기록과 닮은 ${emotions[row.emotion].label}의 순간`:'울산에서 만나는 다른 이야기'}));
   checkAbort(signal);
   const list=(records:StoredMemory[])=>records.filter(row=>matchesFilters(row,query)&&(!query.visibility||row.visibility===query.visibility)).slice(0,40).map(row=>toMemory(row,true));
   return {displayName:'나',totals:{mine:mine.length,bookmarked:bookmarked.length,liked:liked.length},lists:{mine:list(mine),bookmarked:list(bookmarked),liked:list(liked)},mapMemories:mapped.slice(0,200).map(row=>toMemory(row,true)),hasMore:mapped.length>200,recommendations};

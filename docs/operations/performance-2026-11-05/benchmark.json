@@ -1,0 +1,21 @@
+{
+  "before": {
+    "overviewBytes": 7337789,
+    "overviewGzipBytes": 1416028,
+    "appJsBytes": 1735906
+  },
+  "after": {
+    "overviewBytes": 5365473,
+    "overviewGzipBytes": 1051978,
+    "appJsBytes": 1736120
+  },
+  "geometry": {
+    "identical": true,
+    "rounds": 5,
+    "viewsPerRound": 3,
+    "beforeMedianMs": 8.065583000000004,
+    "afterMedianMs": 4.030292000000003,
+    "beforeProjectionCalls": 228130,
+    "afterProjectionCalls": 57005
+  }
+}

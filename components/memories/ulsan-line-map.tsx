@@ -31,11 +31,12 @@ export default function UlsanLineMap({ data, view, project, obstacles = [], rese
   // Use city-local coordinates with a sensible viewBox size. WebKit stops
   // painting paths when a global zoom-0 viewBox becomes a tiny fraction of 1.
   // Only drawing units change: MapLibre and memory geographic anchors do not.
+  const drawingOrigin=useMemo(()=>project(DEFAULT_MAP_CENTER,0),[project]);
   const drawingProject = useCallback((point: Point, zoom: number) => {
     const absolute = project(point, zoom);
-    const origin = project(DEFAULT_MAP_CENTER, zoom);
+    const origin = zoom===0?drawingOrigin:project(DEFAULT_MAP_CENTER,zoom);
     return { x: (absolute.x - origin.x) * DRAWING_SCALE, y: (absolute.y - origin.y) * DRAWING_SCALE };
-  }, [project]);
+  }, [project,drawingOrigin]);
   const paths = useMemo(() => {
     const result = { road: '', river: '', coast: '', park: '', boundary: '', cityBoundary: '' };
     for (const feature of data.features) {

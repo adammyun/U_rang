@@ -1,0 +1,130 @@
+[
+  {
+    "name": "desktop-chromium",
+    "readyMsBefore": 900,
+    "readyMsAfter": 742,
+    "states": [
+      {
+        "state": "main",
+        "geometrySame": true,
+        "screenshotSame": false
+      },
+      {
+        "state": "dark",
+        "geometrySame": true,
+        "screenshotSame": false
+      },
+      {
+        "state": "buildings",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "detail",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "personal",
+        "geometrySame": true,
+        "screenshotSame": true
+      }
+    ]
+  },
+  {
+    "name": "mobile-chromium",
+    "readyMsBefore": 622,
+    "readyMsAfter": 602,
+    "states": [
+      {
+        "state": "main",
+        "geometrySame": true,
+        "screenshotSame": false
+      },
+      {
+        "state": "dark",
+        "geometrySame": true,
+        "screenshotSame": false
+      },
+      {
+        "state": "buildings",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "detail",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "personal",
+        "geometrySame": true,
+        "screenshotSame": true
+      }
+    ]
+  },
+  {
+    "name": "desktop-webkit",
+    "readyMsBefore": 2384,
+    "readyMsAfter": 694,
+    "states": [
+      {
+        "state": "main",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "dark",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "buildings",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "detail",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "personal",
+        "geometrySame": true,
+        "screenshotSame": true
+      }
+    ]
+  },
+  {
+    "name": "mobile-webkit",
+    "readyMsBefore": 683,
+    "readyMsAfter": 599,
+    "states": [
+      {
+        "state": "main",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "dark",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "buildings",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "detail",
+        "geometrySame": true,
+        "screenshotSame": true
+      },
+      {
+        "state": "personal",
+        "geometrySame": true,
+        "screenshotSame": true
+      }
+    ]
+  }
+]

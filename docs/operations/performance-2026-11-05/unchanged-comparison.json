@@ -1,0 +1,20 @@
+{
+  "sameSource": "1d9bb77",
+  "pairs": [
+    {
+      "a": 0,
+      "b": 1,
+      "identical": false
+    },
+    {
+      "a": 0,
+      "b": 2,
+      "identical": true
+    },
+    {
+      "a": 1,
+      "b": 2,
+      "identical": false
+    }
+  ]
+}
