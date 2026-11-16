@@ -1,6 +1,7 @@
 import { mkdir } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { demoJournalContent } from '../../src/features/memories/demo-journals';
+import { waitForMapZoom } from './helpers/place';
 
 test.beforeEach(async ({page})=>{
   await page.addInitScript(()=>localStorage.setItem('yeoun_2:onboarding:v1',JSON.stringify({version:1,completed:true})));
@@ -75,7 +76,16 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
   expect(state.records.filter(r=>r.id.startsWith('20000000')).length).toBe(24);
   expect(state.records.filter(r=>r.id.startsWith('20000000')&&r.media.length).length).toBe(5);
   expect(state.records.find(r=>r.id.endsWith('000000000020'))?.media).toMatchObject([{dataUrl:'/yeoun_2/demo/taehwagang.png'}]);
-  const oldPhoto=page.locator('.atlas-stamp[data-memory-ids~="20000000-0000-4000-8000-000000000020"] img');
+  await page.getByRole('combobox', { name: '장소 이름' }).fill('태화강 산책로');
+  await page.getByRole('option', { name: /^태화강 산책로 / }).click();
+  const legacyMarker = page.locator('.atlas-stamp[data-memory-ids~="20000000-0000-4000-8000-000000000020"]');
+  await waitForMapZoom(page, 14.2);
+  await expect(legacyMarker).toHaveAttribute('data-marker-detail', 'note');
+  for (const zoom of [15.2, 16.2]) {
+    await page.getByRole('button', { name: '지도 확대', exact: true }).click();
+    await waitForMapZoom(page, zoom);
+  }
+  const oldPhoto=legacyMarker.locator('img');
   await oldPhoto.scrollIntoViewIfNeeded();
   await expect(oldPhoto).toHaveAttribute('src','/U_rang/demo/taehwagang.png');
   await expect.poll(()=>oldPhoto.evaluate(image=>(image as HTMLImageElement).complete&&(image as HTMLImageElement).naturalWidth>0)).toBe(true);

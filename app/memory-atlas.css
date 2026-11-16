@@ -60,7 +60,6 @@
 .atlas.memory-atlas .atlas-stamp-face { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; padding: 5px; background: var(--atlas-surface); box-shadow: 1px 6px 13px #0007; transform: rotate(var(--stamp-tilt)); transform-origin: 50% 70%; transition: transform 220ms var(--atlas-ease),box-shadow 220ms; }
 .atlas-stamp-stack { position: absolute; inset: 3px -3px -3px 3px; background: var(--atlas-raised); transform: rotate(calc(var(--stamp-tilt) + 7deg)); box-shadow: 0 5px 10px #0005; pointer-events: none; }
 .atlas.memory-atlas .atlas-stamp-face > img { width: 100%; height: 60px; object-fit: cover; pointer-events: none; }
-.atlas-stamp-caption { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 7px; line-height: 14px; font-weight: 500; }
 .atlas.memory-atlas .atlas-stamp-note { display: flex; flex-direction: column; height: 100%; padding: 4px 3px; text-align: left; background: color-mix(in srgb,var(--stamp-color) 22%,var(--atlas-raised)); }
 .atlas-stamp-date { font: 8px/1 var(--atlas-mono); color: var(--atlas-muted); }
 .atlas-stamp-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 6px; font: 500 10px/1.55 var(--atlas-font); letter-spacing: -.04em; overflow-wrap: anywhere; }
@@ -71,6 +70,48 @@
 .atlas.memory-atlas .atlas-stamp:is(:hover,:focus-visible,.selected) .atlas-stamp-face { transform: rotate(0deg) translateY(-5px) scale(1.1); box-shadow: 0 11px 22px #0008,0 0 0 2px var(--atlas-coral); }
 .atlas.memory-atlas .atlas-stamp.grouped .atlas-stamp-face { box-shadow: 0 7px 16px #0007,0 0 0 2px var(--atlas-sage); }
 .atlas.memory-atlas .atlas-stamp:focus-visible .atlas-stamp-face { outline: 2px solid white; outline-offset: 5px; }
+
+.atlas.memory-atlas .raster-memory-marker.atlas-stamp[data-marker-detail='dot'] {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.atlas.memory-atlas .atlas-stamp[data-marker-detail='dot']::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: var(--stamp-color);
+  border: 1px solid var(--atlas-charcoal);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--atlas-charcoal);
+  pointer-events: none;
+}
+.atlas.memory-atlas .atlas-stamp[data-marker-detail='dot'].is-stack::after {
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 0 0 1px var(--stamp-color), 0 0 0 3px var(--atlas-charcoal);
+}
+.atlas.memory-atlas .atlas-stamp[data-marker-detail='dot']:is(:hover,:focus-visible,.selected,.grouped,.is-linked-hover)::after {
+  outline: 2px solid var(--atlas-text);
+  outline-offset: 3px;
+}
+/* The search pin stays at its coordinate without covering nearby memory text. */
+.atlas.memory-atlas .raster-draft-location.is-search-result { z-index: 2; }
+.atlas.memory-atlas .atlas-stamp.has-photo { height: 100px; }
+.atlas.memory-atlas .atlas-stamp.has-photo .atlas-stamp-note { flex: 0 0 auto; height: auto; }
+.atlas.memory-atlas .atlas-stamp.has-photo .atlas-stamp-face > img { flex: 1; min-height: 0; }
+.atlas-stamp-photo-icon {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 13px;
+  height: 13px;
+  color: var(--atlas-text);
+}
+.atlas-stamp-note:has(.atlas-stamp-photo-icon) .atlas-stamp-feeling { padding-right: 15px; }
 
 /* Small edge controls instead of a permanent dashboard or glass dock. */
 .atlas.memory-atlas .topbar { position: absolute; inset: calc(28px + env(safe-area-inset-top)) 32px auto; z-index: 10; height: 50px; padding: 0; background: none; border: 0; box-shadow: none; pointer-events: none; }
@@ -230,10 +271,10 @@ body:has(.memory-atlas) .tour-back,body:has(.memory-atlas) .tour-panel-heading >
   .atlas.memory-atlas .map-caption { right: 71px; bottom: calc(99px + env(safe-area-inset-bottom)); left: auto; top: auto; max-width: 160px; font-size: 9px; gap: 4px; }
   .atlas-edge-note { display: none; }
   .atlas.memory-atlas .raster-memory-marker.atlas-stamp { width: 62px; height: 73px; }
+  .atlas.memory-atlas .raster-memory-marker.atlas-stamp.has-photo { height: 88px; }
   .atlas.memory-atlas .atlas-stamp-face { padding: 4px; }
   .atlas-stamp-title { font-size: 9px; -webkit-line-clamp: 2; }
   .atlas.memory-atlas .atlas-stamp-face > img { height: 51px; }
-  .atlas-stamp-caption { font-size: 6px; line-height: 12px; }
   .atlas.memory-atlas .selected-place-card,.atlas.memory-atlas .location-picker-card { top: calc(84px + env(safe-area-inset-top)); left: 16px; right: 16px; width: auto; }
   .atlas.memory-atlas .spatial-context { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); width: auto; max-height: min(58dvh,460px); border-radius: 8px 8px 2px 2px; padding: 12px 20px 16px; }
   .atlas.memory-atlas .spatial-context-handle { background: #a7aa96; }
@@ -447,9 +488,9 @@ button,input,select,textarea { font-family: var(--atlas-font); }
 .atlas.memory-atlas .atlas-stamp-note { background: color-mix(in srgb,var(--stamp-color) 12%,var(--atlas-surface)); color: var(--atlas-text); }
 .atlas-stamp-stack { background: #434c50; }
 .atlas-stamp-title { font-size: 10px; font-weight: 600; letter-spacing: -.015em; word-break: keep-all; }
-.atlas-stamp-date,.atlas-stamp-feeling,.atlas-stamp-caption { color: #c5cdd0; }
+.atlas-stamp-date,.atlas-stamp-feeling { color: #c5cdd0; }
 .atlas-stamp-count { color: #1f2527; background: var(--atlas-coral); border-color: var(--atlas-coral); }
-.atlas-stamp-pin { background: var(--atlas-coral); }
+.atlas-stamp-pin { background: var(--stamp-color); }
 .atlas.memory-atlas .map-zoom { display: grid; grid-template-columns: 44px; grid-auto-rows: 44px; align-items: stretch; justify-items: stretch; gap: 0; padding: 0; width: 46px; height: auto; background: #252c2ff5; border: 1px solid var(--atlas-border); }
 .atlas.memory-atlas .map-zoom button { display: grid; place-items: center; box-sizing: border-box; width: 44px; min-width: 44px; height: 44px; min-height: 44px; margin: 0; padding: 0; line-height: 0; border: 0; color: var(--atlas-text); }
 .atlas.memory-atlas .map-zoom button + button { box-shadow: inset 0 1px var(--atlas-rule); border: 0; }

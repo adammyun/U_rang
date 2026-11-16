@@ -1,5 +1,12 @@
 import { expect, type Page } from '@playwright/test';
 
+export function waitForMapZoom(page: Page, zoom: number) {
+  return expect.poll(() => page.locator('.ulsan-line-map').evaluate(el => {
+    const width = Number(el.getAttribute('viewBox')!.split(' ')[2]);
+    return Math.log2(el.clientWidth / width) + 12;
+  })).toBeCloseTo(zoom, 10);
+}
+
 /** Select a real search result so tests do not depend on overview cluster density. */
 export async function focusTaehwagang(page: Page) {
   await page.getByRole('combobox', { name: '장소 이름' }).fill('태화강');
@@ -11,10 +18,7 @@ export async function focusSeongnam(page: Page) {
   await page.getByRole('combobox', { name: '장소 이름' }).fill('성남동');
   await page.getByRole('option', { name: /성남동 문화의거리/ }).click();
   await expect(page.getByRole('button', { name: '골목의 작은 불빛', exact: true })).toBeVisible();
-  await expect.poll(() => page.locator('.ulsan-line-map').evaluate(el => {
-    const width = Number(el.getAttribute('viewBox')!.split(' ')[2]);
-    return Math.log2(el.clientWidth / width) + 12;
-  })).toBeCloseTo(14.2, 10);
+  await waitForMapZoom(page, 14.2);
   // Camera assertions need the final frame, rather than a nearly finished flyTo.
   await expect.poll(() => page.locator('.ulsan-line-map').evaluate(el => {
     const viewBox = el.getAttribute('viewBox');

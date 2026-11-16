@@ -1,11 +1,52 @@
 import {mkdir} from 'node:fs/promises';
 import {expect,test} from '@playwright/test';
-import {focusSeongnam} from './helpers/place';
+import {focusSeongnam, waitForMapZoom} from './helpers/place';
 import {fakePanorama} from './helpers/panorama';
+import { emotions } from '../../src/features/memories/model';
 
 test.beforeEach(async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('yeoun_2:onboarding:v1',JSON.stringify({version:1,completed:true})));
  await mkdir('test-results/screenshots',{recursive:true});
+});
+
+test('지도 확대에 따라 색 점, 사진 아이콘이 있는 글, 사진이 있는 글을 표시한다', async ({ page }, info) => {
+ await page.goto('./');
+ const stamps = page.locator('.atlas-stamp');
+ const dots = page.locator('.atlas-stamp[data-marker-detail="dot"]');
+ await expect(dots.first()).toBeVisible();
+ await expect(stamps.locator('img,.atlas-stamp-face')).toHaveCount(0);
+ expect(await dots.first().evaluate(el => getComputedStyle(el, '::after').backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+ await page.screenshot({path:`test-results/screenshots/marker-overview-${info.project.name}.png`,animations:'disabled'});
+
+ await page.getByRole('combobox', { name: '장소 이름' }).fill('대왕암');
+ await page.getByRole('option', { name: /^대왕암공원 / }).click();
+ const stamp = page.locator('.atlas-stamp[data-memory-ids~="20000000-0000-4000-8000-000000000021"]');
+ const zoom = (amount: '확대' | '축소') => page.getByRole('button', { name: `지도 ${amount}`, exact: true }).click();
+ await waitForMapZoom(page, 14.2);
+ await expect(stamp).toHaveAttribute('data-marker-detail', 'note');
+ await expect(stamp.locator('.atlas-stamp-title')).toHaveText('바다 앞에서 약속한 다음 여행');
+ await expect(stamp.locator('.atlas-stamp-photo-icon')).toBeVisible();
+ await expect(stamps.locator('img')).toHaveCount(0);
+ await page.screenshot({path:`test-results/screenshots/marker-note-${info.project.name}.png`,animations:'disabled'});
+
+ await zoom('확대'); await waitForMapZoom(page, 15.2);
+ await zoom('확대'); await waitForMapZoom(page, 16.2);
+ await expect(stamp).toHaveAttribute('data-marker-detail', 'photo');
+ await expect(stamp.locator('.atlas-stamp-title')).toHaveText('바다 앞에서 약속한 다음 여행');
+ expect(await stamp.evaluate(el => getComputedStyle(el).getPropertyValue('--stamp-color'))).toBe(emotions.excited.color);
+ const image = stamp.locator('img');
+ await expect(image).toBeInViewport();
+ await expect.poll(() => image.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+ await page.screenshot({path:`test-results/screenshots/marker-photo-${info.project.name}.png`,animations:'disabled'});
+
+ await zoom('축소'); await waitForMapZoom(page, 15.2);
+ await expect(stamp).toHaveAttribute('data-marker-detail', 'note');
+ await expect(stamps.locator('img')).toHaveCount(0);
+ await stamp.click();
+ const board = page.getByLabel('장소의 기억 미리보기');
+ await expect(board).toBeVisible();
+ await board.getByRole('button', { name: '선택한 기억 자세히 읽기' }).click();
+ await expect(page.getByRole('dialog', { name: '기억 상세' })).toBeVisible();
 });
 test('8가지 감정으로 탐색하고 지도 조작 시 태그가 접혀도 선택은 유지된다',async({page},info)=>{
  await page.goto('./');

@@ -28,6 +28,8 @@ setWorkerUrl(mapLibreWorkerUrl);
 const MAP_TILE_SOURCE_REVISION = 'osm-standard-v1';
 const MAPLIBRE_WORLD_TILE_SIZE = 512;
 const RASTER_TILE_SIZE = 256;
+const STAMP_NOTE_ZOOM = 13;
+const STAMP_PHOTO_ZOOM = 15.5;
 
 export type MapHandle = {
   flyTo: (point: Point, zoom?: number) => void;
@@ -381,11 +383,15 @@ export default function MemoryMap({
     view.center.lat >= lineData.bbox[1] && view.center.lat <= lineData.bbox[3];
   const showRasterTiles = !showLineArt && (mode === 'detail' || mode === 'calm' || mode === 'dark' || error || !ready || !tilesReady || rasterCompatibilityActive);
 
+  const stampDetail = view.zoom >= STAMP_PHOTO_ZOOM ? 'photo' : view.zoom >= STAMP_NOTE_ZOOM ? 'note' : 'dot';
   const worldMarkerGroups = useMemo(() => {
-    const width=presentation==='stamp'?120:40,height=presentation==='stamp'?140:40;
+    const [width, height] = presentation !== 'stamp' ? [40, 40]
+      : stampDetail === 'dot' ? [56, 56]
+      : stampDetail === 'note' ? [104, 118]
+      : [120, 140];
     return groupMapMarkers(memories.map(memory=>({...project(memory,view.zoom),value:memory})),width,height)
       .map(group=>({x:group.x,y:group.y,memories:group.items,key:group.items.map(memory=>memory.id).join(':')}));
-  },[memories,view.zoom,presentation]);
+  },[memories,view.zoom,presentation,stampDetail]);
   const markerGroups = useMemo(() => {
     const center=project(view.center,view.zoom),edgePadding=presentation==='stamp'?160:50;
     return worldMarkerGroups.map(group=>({...group,x:view.width/2+group.x-center.x,y:view.height/2+group.y-center.y}))
@@ -474,6 +480,7 @@ export default function MemoryMap({
             <MemoryStamp
               key={group.key}
               memory={memory}
+              detail={stampDetail}
               memberIds={group.memories.map(item=>item.id)}
               hovered={group.memories.some(item=>item.id===hoveredMemoryId)}
               onHover={onHoverMemory}
@@ -501,7 +508,7 @@ export default function MemoryMap({
         {storyMarkers.map(({story,x,y})=><button type="button" key={'story:'+story.id} className={`map-story-mark${discoveredStoryIds.includes(story.id)?' is-discovered':''}${hoveredStoryId===story.id?' is-linked-hover':''}${storyScope?' is-collection-trace':''}`} style={{left:x,top:y,'--story-opacity':storyScope?.length ? .8 : Math.min(.65,.26+(view.zoom-STORY_REVEAL_ZOOM)*.16)} as React.CSSProperties} data-story-id={story.id} onMouseEnter={()=>onHoverStory?.(story.id)} onMouseLeave={()=>onHoverStory?.(null)} onFocus={()=>onHoverStory?.(story.id)} onBlur={()=>onHoverStory?.(null)} aria-label={`${story.place}의 숨은 이야기`} title={`${story.place} · 숨은 이야기`} onClick={event=>{event.stopPropagation();onStory?.(story.id);}}><StoryGlyph/></button>)}
         {draftLocationPosition && (
           <span
-            className="raster-draft-location"
+            className={hideMemories ? 'raster-draft-location' : 'raster-draft-location is-search-result'}
             role="img"
             aria-label="선택한 기억 위치"
             style={{
