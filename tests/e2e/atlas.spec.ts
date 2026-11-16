@@ -134,7 +134,7 @@ test('울산 라인 지도와 상세 지도는 같은 기억 앵커를 사용한
   await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
   const sheet = page.getByRole('dialog');
   await expect(sheet.getByRole('navigation', { name: '기억 보기 전환' })).toBeVisible();
-  await expect(sheet.getByRole('link', { name: '모두의 기억 보기' })).toHaveAttribute('aria-current', 'page');
+  await expect(sheet.getByRole('button', { name: '모두의 기억 보기' })).toHaveAttribute('aria-current', 'page');
   await page.screenshot({ path: `test-results/screenshots/yurang-adjust-${info.project.name}.png`, animations: 'disabled' });
   await sheet.getByRole('button', { name: '의미 있는 순간', exact: true }).scrollIntoViewIfNeeded();
   await expect(sheet.getByRole('button', { name: '의미 있는 순간', exact: true })).toBeInViewport();

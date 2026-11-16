@@ -23,3 +23,32 @@ export function groupMapMarkers<T>(points:ProjectedItem<T>[],width:number,height
   }
   return groups;
 }
+
+/** Pixel spacing grows slower than the map scale at every zoom, so changing
+ * from a dot to a note or a photo cannot make a separated pair rejoin. */
+export function stampSpacing(zoom: number) {
+  const far = Math.max(0, Math.min(1, (zoom - 11) / 2));
+  const near = Math.max(0, Math.min(1, (zoom - 13) / 2.5));
+  return {
+    width: 56 * (104 / 56) ** far * (140 / 104) ** near,
+    height: 54 * (60 / 54) ** far * (140 / 60) ** near,
+  };
+}
+
+/** Find the first useful zoom for a pair with these pixel offsets.
+ * Groups take the highest result over places outside the 100m reading radius. */
+export function stampSplitZoom(zoom: number, maxZoom: number, dx: number, dy: number) {
+  const fits = (at: number) => {
+    const scale = 2 ** (at - zoom);
+    const { width, height } = stampSpacing(at);
+    return dx * scale < width && dy * scale < height;
+  };
+  if (fits(maxZoom)) return maxZoom;
+  let lower = zoom, upper = maxZoom;
+  for (let i = 0; i < 12; i++) {
+    const mid = (lower + upper) / 2;
+    if (fits(mid)) lower = mid;
+    else upper = mid;
+  }
+  return Math.min(maxZoom, Math.max(zoom + .65, upper + .15));
+}

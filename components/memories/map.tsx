@@ -18,7 +18,7 @@ import {
 } from '@/src/features/map/constants';
 import { isPagesRuntime } from '@/src/lib/runtime';
 import MemoryStamp from './memory-stamp';
-import { groupMapMarkers } from '@/src/features/map/marker-groups';
+import { groupMapMarkers, stampSpacing, stampSplitZoom } from '@/src/features/map/marker-groups';
 import {PLACE_STORIES,getPlaceStory,isStoryZoom,STORY_REVEAL_ZOOM,STORY_LOCATION_ZOOM} from '@/src/features/stories/catalog';
 import StoryGlyph from '@/components/stories/story-glyph';
 import type { MapMode } from '@/src/features/map/appearance';
@@ -385,13 +385,10 @@ export default function MemoryMap({
 
   const stampDetail = view.zoom >= STAMP_PHOTO_ZOOM ? 'photo' : view.zoom >= STAMP_NOTE_ZOOM ? 'note' : 'dot';
   const worldMarkerGroups = useMemo(() => {
-    const [width, height] = presentation !== 'stamp' ? [40, 40]
-      : stampDetail === 'dot' ? [56, 56]
-      : stampDetail === 'note' ? [124, 64]
-      : [145, 145];
+    const { width, height } = presentation === 'stamp' ? stampSpacing(view.zoom) : { width: 40, height: 40 };
     return groupMapMarkers(memories.map(memory=>({...project(memory,view.zoom),value:memory})),width,height)
       .map(group=>({x:group.x,y:group.y,memories:group.items,key:group.items.map(memory=>memory.id).join(':')}));
-  },[memories,view.zoom,presentation,stampDetail]);
+  },[memories,view.zoom,presentation]);
   const markerGroups = useMemo(() => {
     const center=project(view.center,view.zoom),edgePadding=presentation==='stamp'?160:50;
     return worldMarkerGroups.map(group=>({...group,x:view.width/2+group.x-center.x,y:view.height/2+group.y-center.y}))
@@ -465,16 +462,25 @@ export default function MemoryMap({
           const selectStamp = () => {
             // A visual cluster can span distinct places at low zoom. Reveal
             // those anchors before asking the existing 100m place repository.
-            const spread = group.memories.some((item) => Math.hypot(
-              (item.lng - memory.lng) * 111_320 * Math.cos(memory.lat * Math.PI / 180),
-              (item.lat - memory.lat) * 111_320,
-            ) > 100);
-            if (spread && !draftPoint && mapRef.current && view.zoom < MAX_MAP_ZOOM) {
-              mapRef.current.flyTo({
-                lng: group.memories.reduce((sum, item) => sum + item.lng, 0) / group.memories.length,
-                lat: group.memories.reduce((sum, item) => sum + item.lat, 0) / group.memories.length,
-              }, Math.min(MAX_MAP_ZOOM, view.zoom + 1.8));
-            } else onSelect(memory);
+            if (!draftPoint && mapRef.current && view.zoom < MAX_MAP_ZOOM && group.memories.length > 1) {
+              const anchor = project(memory, view.zoom);
+              const metersPerLongitude = 111_320 * Math.cos(memory.lat * Math.PI / 180);
+              let target = view.zoom;
+              for (const item of group.memories) {
+                if (Math.hypot((item.lng - memory.lng) * metersPerLongitude, (item.lat - memory.lat) * 111_320) <= 100) continue;
+                const point = project(item, view.zoom);
+                target = Math.max(target, stampSplitZoom(view.zoom, MAX_MAP_ZOOM, Math.abs(point.x - anchor.x), Math.abs(point.y - anchor.y)));
+                if (target >= MAX_MAP_ZOOM) break;
+              }
+              if (target > view.zoom) {
+                mapRef.current.flyTo({
+                  lng: group.memories.reduce((sum, item) => sum + item.lng, 0) / group.memories.length,
+                  lat: group.memories.reduce((sum, item) => sum + item.lat, 0) / group.memories.length,
+                }, target);
+                return;
+              }
+            }
+            onSelect(memory);
           };
           if (presentation === 'stamp') return (
             <MemoryStamp
