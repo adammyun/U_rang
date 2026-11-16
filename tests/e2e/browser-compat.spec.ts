@@ -23,12 +23,12 @@ test('지도 선은 확대해도 화면 두께를 유지하고 작성 핀은 아
   const strokePixels = () => road.evaluate(el => parseFloat(getComputedStyle(el).strokeWidth) * (el as SVGGraphicsElement).getScreenCTM()!.a);
   await expect(road).toHaveCSS('vector-effect', 'none');
   expect(await strokePixels()).toBeCloseTo(1.35, 2);
-  expect(await map.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(96, 118, 120)');
+  expect(await map.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(101, 123, 125)');
   await page.screenshot({ path: `test-results/screenshots/compat-map-${info.project.name}.png`, animations: 'disabled' });
   const marker = page.getByRole('button', { name: '골목의 작은 불빛', exact: true });
   const anchor = await marker.boundingBox();
   const geometry = await road.getAttribute('d');
-  for (const [label, background] of [['다크', 'rgb(27, 35, 38)'], ['자세히', null], ['기본', 'rgb(96, 118, 120)']] as const) {
+  for (const [label, background] of [['다크', 'rgb(27, 35, 38)'], ['자세히', null], ['기본', 'rgb(101, 123, 125)']] as const) {
     await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
     const option = page.getByRole('dialog').getByRole('button', { name: new RegExp(`^${label}`) });
     await option.click();

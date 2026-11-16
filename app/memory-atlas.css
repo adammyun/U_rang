@@ -607,15 +607,20 @@ body:has(.memory-atlas) .panorama-state { background: #252c2fed; color: var(--at
 .ulsan-line-map .ulsan-line-roads { stroke: #b7c4c8; stroke-width: calc(var(--ulsan-stroke-unit, 1) * 1.35px); stroke-opacity: .65; }
 .ulsan-line-map .ulsan-line-boundary { stroke-opacity: .35; }
 
-/* Explicit slate palette preserves the softer public appearance in every
-   browser; dark uses the charcoal tokens above, with identical map geometry. */
+/* The original blue-green haze is part of the default palette. Paint it
+   behind the linework so Safari stroke fixes and marker contrast stay intact. */
 .raster-map.calm-mode {
-  --atlas-map-block: #758b8e;
-  --atlas-map-industry: #708487;
-  --atlas-map-building: #a2b5b8;
-  --atlas-map-street: #607678;
+  --atlas-map-canvas: #657b7d;
+  --atlas-map-mist: #a6bfc047;
+  --atlas-map-block: #788e90;
+  --atlas-map-industry: #72878a;
+  --atlas-map-building: #a9bcbf;
+  --atlas-map-street: var(--atlas-map-canvas);
 }
-.raster-map.calm-mode .ulsan-line-map { background: #607678; }
+.raster-map.calm-mode .ulsan-line-map {
+  background-color: var(--atlas-map-canvas);
+  background-image: radial-gradient(ellipse at 55% 46%, var(--atlas-map-mist), transparent 74%);
+}
 .raster-map.calm-mode .ulsan-line-parks { fill: #72877b; stroke: #b3bda9; }
 .raster-map.calm-mode .ulsan-line-roads { stroke: #b8cbcd; stroke-opacity: .65; }
 .raster-map.calm-mode .ulsan-line-rivers { stroke: #a4c0c2; }

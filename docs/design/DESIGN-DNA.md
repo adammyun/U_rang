@@ -95,7 +95,7 @@ Safari 보완에서는 기존 42개에 데스크톱/모바일 Chromium·WebKit �
 
 ## 울산 라인 지도와 조정
 
-지도 표현은 `기본 / 다크 / 자세히`입니다. 기본은 현재 공개 화면에서 선택된 부드러운 회청색 `#607678`, 다크는 차콜 `#1b2326`을 사용합니다. 배경·블록·건물·도로 색만 분리하고 같은 `public/maps/ulsan-lines.geojson` 및 도시 도형, MapLibre 카메라와 Web Mercator 투영을 공유합니다. 기본을 최초 선택으로 두며 조정과 내 기억의 선택 UI는 `MapAppearanceOptions`를 재사용합니다. 자세히는 기존 OSM standard raster이며 범위 밖 또는 라인 파일 실패 시에도 raster fallback을 유지합니다. 데이터 범위·ODbL·기준일은 `public/maps/README.md`를 따릅니다.
+지도 표현은 `기본 / 다크 / 자세히`입니다. 기본은 회청록 바탕 `--atlas-map-canvas` (`#657b7d`) 위에 중앙의 옅은 안개빛 `--atlas-map-mist`를 더합니다. 예전 Safari 화면에서 보였던 색감을 표준 CSS로 재현한 것이며, 다크의 차콜 `#1b2326`은 유지합니다. 배경·블록·건물·도로의 표현만 분리하고 같은 `public/maps/ulsan-lines.geojson` 및 도시 도형, MapLibre 카메라와 Web Mercator 투영을 공유합니다. 기본을 최초 선택으로 두며 조정과 내 기억의 선택 UI는 `MapAppearanceOptions`를 재사용합니다. 자세히는 기존 OSM standard raster이며 범위 밖 또는 라인 파일 실패 시에도 raster fallback을 유지합니다. 데이터 범위·ODbL·기준일은 `public/maps/README.md`를 따릅니다.
 
 조정·기억 목록·폼·인증은 동일한 graphite 표면과 고딕 제목, 산호색 선택 상태를 사용합니다. “모두의 기억 보기 / 내 기억만 보기”는 기존 `/`와 `/my-map`의 인증·조회 계약을 사용하고 연도·감정 필터를 전달합니다. 공개 query에 비공개 데이터를 섞지 않습니다. 저장소 이름과 로컬 저장 key는 데이터 보존을 위해 바꾸지 않습니다.
 
@@ -107,9 +107,9 @@ Safari 보완에서는 기존 42개에 데스크톱/모바일 Chromium·WebKit �
 
 ## 건물과 도시 블록
 
-SVG 지도는 작은 지리적 viewBox에서 Safari의 `non-scaling-stroke` 과도 렌더링을 피하기 위해 `1 / 2^zoom`을 선 두께·점선·글자 외곽선에 적용합니다. 도형·캐시·좌표 투영은 그대로 두고 화면상 선 두께를 유지합니다. 브라우저별 밝기 필터나 밝은 배경으로 우회하지 않습니다.
+SVG 지도는 작은 지리적 viewBox에서 Safari의 `non-scaling-stroke` 과도 렌더링을 피하기 위해 `1 / 2^zoom`을 선 두께·점선·글자 외곽선에 적용합니다. 도형·캐시·좌표 투영은 그대로 두고 화면상 선 두께를 유지합니다. 선 두께 보정과 기본 지도의 배경색은 독립적으로 관리합니다.
 
-간결 지도는 선만 남기지 않고 짙은 회청색 도시 블록과 더 밝은 건물 외곽선을 보여 줍니다. 배경은 `#1b2326`을 유지하며 주요 조작의 산호색·본문 흰색보다 낮은 위계를 사용합니다. 신규 표현 토큰은 `--atlas-map-block`, `--atlas-map-industry`, `--atlas-map-building`, `--atlas-map-street`입니다.
+기본과 다크는 도시 블록과 그보다 밝은 건물 외곽선을 보여 줍니다. 지도 도형은 주요 조작의 산호색·본문 흰색보다 낮은 위계를 사용합니다. 신규 표현 토큰은 `--atlas-map-block`, `--atlas-map-industry`, `--atlas-map-building`, `--atlas-map-street`입니다.
 
 건물·도로·블록은 실제 OSM 도형을 사용합니다. 도로로 파생한 블록과 등록된 건물을 서로 구분하며 임의 건물은 생성하지 않습니다. 개요에서는 도시 형태, zoom 13 이상에서는 화면 내 작은 건물까지 나타납니다. 정적 데이터의 출처·누락·정확도 한계는 `public/maps/README.md`를 따릅니다. 기존 기억 마커·투영·권한·지도 fallback은 변경하지 않습니다.
 

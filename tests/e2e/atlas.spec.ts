@@ -296,7 +296,7 @@ test('기본 지도에서 시가지와 확대된 실제 건물을 구분할 수 
   await expect(urban).toHaveAttribute('data-building-level', 'footprints');
   expect(Number(await urban.getAttribute('data-building-count'))).toBeGreaterThan(20);
   expect((await urban.locator('.ulsan-urban-buildings').getAttribute('d'))!.length).toBeGreaterThan(1000);
-  expect(await page.locator('.ulsan-line-map').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(96, 118, 120)');
+  expect(await page.locator('.ulsan-line-map').evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(101, 123, 125)');
   await expect(page.getByRole('button', { name: '이곳에 기억 남기기' })).toBeVisible();
   await page.screenshot({ path: `test-results/screenshots/buildings-close-${info.project.name}.png`, animations: 'disabled' });
   await focusSeongnam(page);
