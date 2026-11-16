@@ -822,7 +822,6 @@ body:has(.memory-atlas) .memory-image-previews figure > button { width: 44px; he
 .personal-destination-intro { font-size:12px; line-height:1.9; color:var(--atlas-muted); margin:0 0 20px; word-break:keep-all; }
 .personal-memory-card.is-map-hovered { border-color:var(--atlas-coral); box-shadow:inset 3px 0 var(--atlas-coral); }
 .atlas.memory-atlas .atlas-stamp.is-linked-hover { z-index:8; }
-.atlas.memory-atlas .atlas-stamp.is-linked-hover .atlas-stamp-face { transform:rotate(0deg) translateY(-5px) scale(1.1); box-shadow:0 11px 22px #0008,0 0 0 2px var(--atlas-coral); }
 .map-story-mark.is-linked-hover { opacity:1; color:var(--atlas-coral); background:var(--atlas-cutout); outline:2px solid var(--atlas-coral); outline-offset:4px; }
 .map-story-mark.is-collection-trace { background:var(--atlas-cutout); border:1px solid var(--atlas-border); }
 .map-story-mark svg { width:24px; height:24px; }
@@ -842,7 +841,6 @@ body:has(.memory-atlas) .memory-image-previews figure > button { width: 44px; he
 }
 @media(prefers-reduced-motion:reduce) {
  .personal-destination-content { animation:none; }
- .atlas.memory-atlas .atlas-stamp.is-linked-hover .atlas-stamp-face { transform:none; }
 }
 .personal-panel-header h2:focus { outline:none; }
 .personal-panel .personal-map-selection label { flex:1; justify-content:center; min-width:0; padding-inline:6px; }

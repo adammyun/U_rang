@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 });
 async function openBoard(page: Page) {
   await focusTaehwagang(page);
-  await page.getByRole('button', {name:/태화강 국가정원.*기억/}).click();
+  await page.getByRole('button', { name: '태화강 국가정원 산책로의 기억 5개', exact: true }).click();
   const board = page.getByLabel('장소의 기억 미리보기');
   await expect(board.getByLabel('기억 반응')).toHaveCount(0);
   await expect(board.getByRole('button',{name:'좋아요',exact:true})).toHaveCount(0);

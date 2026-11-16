@@ -21,18 +21,41 @@ test('지도 확대에 따라 색 점, 사진 아이콘이 있는 글, 사진이
  await page.getByRole('combobox', { name: '장소 이름' }).fill('대왕암');
  await page.getByRole('option', { name: /^대왕암공원 / }).click();
  const stamp = page.locator('.atlas-stamp[data-memory-ids~="20000000-0000-4000-8000-000000000021"]');
+ const visiblePaper = stamp.locator('.atlas-stamp-visual:not(.is-leaving)');
  const zoom = (amount: '확대' | '축소') => page.getByRole('button', { name: `지도 ${amount}`, exact: true }).click();
  await waitForMapZoom(page, 14.2);
  await expect(stamp).toHaveAttribute('data-marker-detail', 'note');
- await expect(stamp.locator('.atlas-stamp-title')).toHaveText('바다 앞에서 약속한 다음 여행');
+ await expect(visiblePaper.locator('.atlas-stamp-title')).toHaveText('바다 앞에서 약속한 다음 여행');
  await expect(stamp.locator('.atlas-stamp-photo-icon')).toBeVisible();
  await expect(stamps.locator('img')).toHaveCount(0);
+ const compactHeight = (await stamp.boundingBox())!.height;
  await page.screenshot({path:`test-results/screenshots/marker-note-${info.project.name}.png`,animations:'disabled'});
 
+ if (!info.project.name.startsWith('mobile')) {
+   // Center the coastal memory before testing the zoom transitions.
+   const { width, height } = page.viewportSize()!;
+   await page.mouse.move(width / 2, height * .6);
+   await page.mouse.down();
+   await page.mouse.move(width / 2 - 110, height * .6, { steps: 10 });
+   await page.mouse.up();
+ }
  await zoom('확대'); await waitForMapZoom(page, 15.2);
+ await page.evaluate(() => {
+   const transitions = new Set<string>();
+   document.addEventListener('animationstart', event => {
+     const target = event.target;
+     if (!(target instanceof HTMLElement) || !target.matches('.atlas-stamp-visual')) return;
+     if (!target.closest('[data-memory-ids~="20000000-0000-4000-8000-000000000021"]')) return;
+     transitions.add(`${target.dataset.stampVisual}:${event.animationName}`);
+     document.documentElement.dataset.stampTransitions = [...transitions].join(' ');
+   });
+ });
  await zoom('확대'); await waitForMapZoom(page, 16.2);
  await expect(stamp).toHaveAttribute('data-marker-detail', 'photo');
- await expect(stamp.locator('.atlas-stamp-title')).toHaveText('바다 앞에서 약속한 다음 여행');
+ await expect(visiblePaper.locator('.atlas-stamp-title')).toHaveText('바다 앞에서 약속한 다음 여행');
+ expect((await stamp.boundingBox())!.height).toBeGreaterThan(compactHeight * 2);
+ await expect(page.locator('html')).toHaveAttribute('data-stamp-transitions', /note:atlas-stamp-disappear/);
+ await expect(page.locator('html')).toHaveAttribute('data-stamp-transitions', /photo:atlas-stamp-appear/);
  expect(await stamp.evaluate(el => getComputedStyle(el).getPropertyValue('--stamp-color'))).toBe(emotions.excited.color);
  const image = stamp.locator('img');
  await expect(image).toBeInViewport();
@@ -41,6 +64,8 @@ test('지도 확대에 따라 색 점, 사진 아이콘이 있는 글, 사진이
 
  await zoom('축소'); await waitForMapZoom(page, 15.2);
  await expect(stamp).toHaveAttribute('data-marker-detail', 'note');
+ await expect(page.locator('html')).toHaveAttribute('data-stamp-transitions', /photo:atlas-stamp-disappear/);
+ await expect(page.locator('html')).toHaveAttribute('data-stamp-transitions', /note:atlas-stamp-appear/);
  await expect(stamps.locator('img')).toHaveCount(0);
  await stamp.click();
  const board = page.getByLabel('장소의 기억 미리보기');

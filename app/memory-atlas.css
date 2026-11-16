@@ -50,68 +50,93 @@
 .atlas-pointer-ring[data-visible='true'] { opacity: 1; }
 .atlas-pointer-ring[data-interactive='true']::after { scale: 1.4; border-color: var(--atlas-coral); }
 
-/* A positioned button owns its anchor; only the paper inside it tilts. */
+/* Keep one button at each geographic anchor as its paper and halo crossfade. */
 .atlas.memory-atlas .raster-memory-marker.atlas-stamp {
-  width: 74px; height: 83px; border: 0; border-radius: 0; background: none; box-shadow: none;
-  color: var(--atlas-ink); padding: 0; scale: 1; transform: translate(-50%,-50%);
+  --stamp-note-width: 100px; --stamp-note-height: 44px;
+  --stamp-photo-width: 118px; --stamp-photo-height: 120px;
+  width: 44px; height: 44px; border: 0; border-radius: 0; background: none; box-shadow: none;
+  color: var(--atlas-ink); padding: 0; scale: 1; transform: translate(-50%, -50%);
   transition: none; z-index: 3;
 }
 .atlas.memory-atlas .atlas-stamp::before { inset: 0; border-radius: 0; }
-.atlas.memory-atlas .atlas-stamp-face { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; padding: 5px; background: var(--atlas-surface); box-shadow: 1px 6px 13px #0007; transform: rotate(var(--stamp-tilt)); transform-origin: 50% 70%; transition: transform 220ms var(--atlas-ease),box-shadow 220ms; }
-.atlas-stamp-stack { position: absolute; inset: 3px -3px -3px 3px; background: var(--atlas-raised); transform: rotate(calc(var(--stamp-tilt) + 7deg)); box-shadow: 0 5px 10px #0005; pointer-events: none; }
-.atlas.memory-atlas .atlas-stamp-face > img { width: 100%; height: 60px; object-fit: cover; pointer-events: none; }
-.atlas.memory-atlas .atlas-stamp-note { display: flex; flex-direction: column; height: 100%; padding: 4px 3px; text-align: left; background: color-mix(in srgb,var(--stamp-color) 22%,var(--atlas-raised)); }
-.atlas-stamp-date { font: 8px/1 var(--atlas-mono); color: var(--atlas-muted); }
-.atlas-stamp-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 6px; font: 500 10px/1.55 var(--atlas-font); letter-spacing: -.04em; overflow-wrap: anywhere; }
-.atlas-stamp-feeling { margin-top: auto; font-size: 7px; font-weight: 500; color: var(--atlas-muted); }
-.atlas-stamp-count { position: absolute; z-index: 2; top: -8px; right: -8px; display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid #f0dfcb; border-radius: 50%; background: #bd7059; color: #fff8e9; font: 600 11px/1 var(--atlas-mono); box-shadow: 0 3px 6px #0005; }
-.atlas-stamp-pin { display: block; position: absolute; width: 4px; height: 4px; background: var(--atlas-surface); border-radius: 50%; left: calc(50% - 2px); bottom: -9px; box-shadow: 0 0 0 3px #e7a08838; pointer-events: none; }
-.atlas.memory-atlas .atlas-stamp:is(:hover,:focus-visible,.selected,.grouped) { z-index: 8; outline: none; }
-.atlas.memory-atlas .atlas-stamp:is(:hover,:focus-visible,.selected) .atlas-stamp-face { transform: rotate(0deg) translateY(-5px) scale(1.1); box-shadow: 0 11px 22px #0008,0 0 0 2px var(--atlas-coral); }
-.atlas.memory-atlas .atlas-stamp.grouped .atlas-stamp-face { box-shadow: 0 7px 16px #0007,0 0 0 2px var(--atlas-sage); }
-.atlas.memory-atlas .atlas-stamp:focus-visible .atlas-stamp-face { outline: 2px solid white; outline-offset: 5px; }
+.atlas.memory-atlas .raster-memory-marker.atlas-stamp[data-marker-detail='note'] { width: var(--stamp-note-width); height: var(--stamp-note-height); }
+.atlas.memory-atlas .raster-memory-marker.atlas-stamp[data-marker-detail='photo'] { width: var(--stamp-photo-width); height: var(--stamp-photo-height); }
 
-.atlas.memory-atlas .raster-memory-marker.atlas-stamp[data-marker-detail='dot'] {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+.atlas.memory-atlas .atlas-stamp::after {
+  content: ''; position: absolute; top: 50%; left: 50%; translate: -50% -50%;
+  width: 10px; height: 10px; border-radius: 50%; pointer-events: none;
+  background: color-mix(in srgb, var(--stamp-color) 76%, white);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--stamp-color) 35%, transparent), 0 1px 4px #0008;
+  opacity: 0; scale: .65;
+  transition: opacity var(--stamp-motion) ease, scale var(--stamp-motion) var(--atlas-ease);
 }
-.atlas.memory-atlas .atlas-stamp[data-marker-detail='dot']::after {
-  content: '';
-  width: 12px;
-  height: 12px;
-  background: var(--stamp-color);
-  border: 1px solid var(--atlas-charcoal);
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--atlas-charcoal);
-  pointer-events: none;
+.atlas.memory-atlas .atlas-stamp.is-stack::after {
+  width: 13px; height: 13px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--stamp-color) 72%, transparent),
+    0 0 0 8px color-mix(in srgb, var(--stamp-color) 35%, transparent), 0 1px 4px #0008;
 }
-.atlas.memory-atlas .atlas-stamp[data-marker-detail='dot'].is-stack::after {
-  width: 16px;
-  height: 16px;
-  box-shadow: 0 0 0 1px var(--stamp-color), 0 0 0 3px var(--atlas-charcoal);
-}
+.atlas.memory-atlas .atlas-stamp[data-marker-detail='dot']::after { opacity: 1; scale: 1; }
 .atlas.memory-atlas .atlas-stamp[data-marker-detail='dot']:is(:hover,:focus-visible,.selected,.grouped,.is-linked-hover)::after {
-  outline: 2px solid var(--atlas-text);
-  outline-offset: 3px;
+  outline: 2px solid var(--atlas-text); outline-offset: 4px;
 }
+
+.atlas-stamp-visual {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%;
+  width: var(--stamp-photo-width); height: var(--stamp-photo-height);
+  z-index: 1; pointer-events: none;
+  animation: atlas-stamp-appear var(--stamp-motion) var(--atlas-ease) both;
+}
+.atlas-stamp-visual[data-stamp-visual='note'] { width: var(--stamp-note-width); height: var(--stamp-note-height); }
+.atlas-stamp-visual.is-leaving { z-index: 0; animation: atlas-stamp-disappear var(--stamp-motion) ease both; }
+@keyframes atlas-stamp-appear { from { opacity: 0; scale: .88; } to { opacity: 1; scale: 1; } }
+@keyframes atlas-stamp-disappear { from { opacity: 1; scale: 1; } to { opacity: 0; scale: .88; } }
+
+.atlas.memory-atlas .atlas-stamp-face {
+  position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; padding: 5px;
+  background: var(--atlas-surface); border: 1px solid var(--atlas-sage); box-shadow: 1px 5px 12px #0008;
+  transform: rotate(var(--stamp-tilt)); transform-origin: 50% 70%;
+  transition: transform 220ms var(--atlas-ease), box-shadow 220ms;
+}
+.atlas-stamp-stack { position: absolute; inset: 3px -3px -3px 3px; background: var(--atlas-raised); box-shadow: 0 5px 10px #0005; }
+.atlas.memory-atlas .atlas-stamp-face > img { width: 100%; flex: 1; min-height: 0; object-fit: cover; }
+.atlas-stamp-note {
+  display: flex; flex-direction: column; justify-content: center; flex: 1; min-width: 0;
+  gap: 5px; padding: 6px 5px; text-align: left;
+  background: color-mix(in srgb, var(--stamp-color) 15%, var(--atlas-surface)); color: var(--atlas-text);
+}
+.atlas-stamp-face > img + .atlas-stamp-note { flex: 0 0 auto; }
+.atlas-stamp-title {
+  display: -webkit-box; min-width: 0; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font: 600 12px/1.35 var(--atlas-font); letter-spacing: -.015em; word-break: keep-all; overflow-wrap: anywhere;
+}
+.atlas-stamp-meta { display: flex; justify-content: space-between; gap: 4px; font-size: 8px; color: var(--atlas-muted); }
+.atlas-stamp-meta > :last-child { white-space: nowrap; }
+.atlas-stamp-count {
+  position: absolute; z-index: 2; top: -7px; right: -7px; display: grid; place-items: center; min-width: 23px;
+  height: 23px; padding: 0 4px; border-radius: 50%; background: var(--atlas-coral); color: var(--atlas-charcoal);
+  font: 600 10px/1 var(--atlas-mono); box-shadow: 0 3px 6px #0005;
+}
+.atlas-stamp-pin { position: absolute; width: 4px; height: 4px; border-radius: 50%; left: calc(50% - 2px); bottom: -9px; background: var(--stamp-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--stamp-color) 25%, transparent); }
+
+.atlas.memory-atlas .atlas-stamp-visual[data-stamp-visual='note'] .atlas-stamp-face {
+  padding: 0; border: 1px solid var(--atlas-border); border-left: 3px solid var(--stamp-color);
+  transform: none; box-shadow: 0 2px 6px #0006;
+}
+.atlas-stamp-visual[data-stamp-visual='note'] .atlas-stamp-note {
+  flex-direction: row; justify-content: space-between; align-items: center;
+  gap: 4px; padding: 4px 5px; background: var(--atlas-surface);
+}
+.atlas-stamp-visual[data-stamp-visual='note'] .atlas-stamp-title { font-size: 11px; }
+.atlas-stamp-photo-icon { flex: none; width: 14px; height: 14px; color: var(--atlas-sage); }
+.atlas-stamp-visual[data-stamp-visual='note'] .atlas-stamp-count { min-width: 18px; height: 18px; font-size: 9px; }
+
+.atlas.memory-atlas .atlas-stamp:is(:hover,:focus-visible,.selected,.grouped) { z-index: 8; outline: none; }
+.atlas.memory-atlas .atlas-stamp:is(:hover,:focus-visible,.selected,.is-linked-hover) .atlas-stamp-visual[data-stamp-visual='photo'] .atlas-stamp-face { transform: rotate(0deg) translateY(-4px) scale(1.06); }
+.atlas.memory-atlas .atlas-stamp:is(:hover,:focus-visible,.selected,.is-linked-hover) .atlas-stamp-face { box-shadow: 0 7px 16px #0007, 0 0 0 2px var(--atlas-coral); }
+.atlas.memory-atlas .atlas-stamp.grouped .atlas-stamp-face { box-shadow: 0 7px 16px #0007, 0 0 0 2px var(--atlas-sage); }
+.atlas.memory-atlas .atlas-stamp:focus-visible .atlas-stamp-face { outline: 2px solid var(--atlas-text); outline-offset: 4px; }
 /* The search pin stays at its coordinate without covering nearby memory text. */
 .atlas.memory-atlas .raster-draft-location.is-search-result { z-index: 2; }
-.atlas.memory-atlas .atlas-stamp.has-photo { height: 100px; }
-.atlas.memory-atlas .atlas-stamp.has-photo .atlas-stamp-note { flex: 0 0 auto; height: auto; }
-.atlas.memory-atlas .atlas-stamp.has-photo .atlas-stamp-face > img { flex: 1; min-height: 0; }
-.atlas-stamp-photo-icon {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 13px;
-  height: 13px;
-  color: var(--atlas-text);
-}
-.atlas-stamp-note:has(.atlas-stamp-photo-icon) .atlas-stamp-feeling { padding-right: 15px; }
 
 /* Small edge controls instead of a permanent dashboard or glass dock. */
 .atlas.memory-atlas .topbar { position: absolute; inset: calc(28px + env(safe-area-inset-top)) 32px auto; z-index: 10; height: 50px; padding: 0; background: none; border: 0; box-shadow: none; pointer-events: none; }
@@ -270,11 +295,9 @@ body:has(.memory-atlas) .tour-back,body:has(.memory-atlas) .tour-panel-heading >
   .atlas.memory-atlas .spatial-nav .memory-cta { padding: 0 11px; margin-right: 4px; font-size: 10px; height: 46px; min-height: 46px; gap: 4px; }
   .atlas.memory-atlas .map-caption { right: 71px; bottom: calc(99px + env(safe-area-inset-bottom)); left: auto; top: auto; max-width: 160px; font-size: 9px; gap: 4px; }
   .atlas-edge-note { display: none; }
-  .atlas.memory-atlas .raster-memory-marker.atlas-stamp { width: 62px; height: 73px; }
-  .atlas.memory-atlas .raster-memory-marker.atlas-stamp.has-photo { height: 88px; }
-  .atlas.memory-atlas .atlas-stamp-face { padding: 4px; }
-  .atlas-stamp-title { font-size: 9px; -webkit-line-clamp: 2; }
-  .atlas.memory-atlas .atlas-stamp-face > img { height: 51px; }
+  .atlas.memory-atlas .raster-memory-marker.atlas-stamp {
+    --stamp-note-width: 88px; --stamp-photo-width: 104px; --stamp-photo-height: 112px;
+  }
   .atlas.memory-atlas .selected-place-card,.atlas.memory-atlas .location-picker-card { top: calc(84px + env(safe-area-inset-top)); left: 16px; right: 16px; width: auto; }
   .atlas.memory-atlas .spatial-context { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); width: auto; max-height: min(58dvh,460px); border-radius: 8px 8px 2px 2px; padding: 12px 20px 16px; }
   .atlas.memory-atlas .spatial-context-handle { background: #a7aa96; }
@@ -325,7 +348,9 @@ body:has(.memory-atlas) .tour-back,body:has(.memory-atlas) .tour-panel-heading >
 @media (prefers-reduced-motion: reduce) {
   .atlas.memory-atlas *, .atlas.memory-atlas *::before,.atlas.memory-atlas *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .atlas-pointer-ring { display: none; }
-  .atlas.memory-atlas .atlas-stamp-face,.atlas.memory-atlas .atlas-stamp:is(:hover,:focus-visible,.selected) .atlas-stamp-face { transform: none; }
+  .atlas.memory-atlas .atlas-stamp::after { transition: none; }
+  .atlas-stamp-visual.is-leaving { display: none; }
+  .atlas.memory-atlas .atlas-stamp .atlas-stamp-visual[data-stamp-visual] .atlas-stamp-face { transform: none; }
 }
 
 /* 유랑 · fewer labels, an etched city and open editorial reading. */
@@ -431,8 +456,6 @@ body:has(.memory-atlas) .tour-panel-heading > button { border-radius: 0; }
 /* Neutralize only the legacy sheet shell; field/validation behavior is shared. */
 body:has(.memory-atlas) .story-sheet { border-radius: 1px !important; }
 body:has(.memory-atlas) .story-sheet.atlas-adjust-sheet { left: 32px !important; right: auto !important; bottom: 108px !important; width: min(550px,calc(100vw - 64px)) !important; border-radius: 0 !important; }
-.atlas-stamp-title { margin-top: 0; font-weight: 400; }
-.atlas-stamp-date { margin-top: 6px; }
 .atlas.memory-atlas .memory-card,.place-memory > button { display: flex; flex-direction: column; }
 .atlas.memory-atlas .memory-card h3,.place-memory > button h3 { order: 1; }
 .atlas.memory-atlas .memory-card .card-meta,.place-memory-meta { order: 2; }
@@ -484,13 +507,6 @@ button,input,select,textarea { font-family: var(--atlas-font); }
 .atlas.memory-atlas .place-search-results { border-color: var(--atlas-border); }
 .atlas.memory-atlas .place-search-results button:hover { background: var(--atlas-raised); }
 .atlas.memory-atlas .place-search-option-name,.atlas.memory-atlas .place-search-option-detail { color: var(--atlas-text); }
-.atlas.memory-atlas .atlas-stamp-face { border: 1px solid #7b898e; box-shadow: 1px 5px 12px #0008; }
-.atlas.memory-atlas .atlas-stamp-note { background: color-mix(in srgb,var(--stamp-color) 12%,var(--atlas-surface)); color: var(--atlas-text); }
-.atlas-stamp-stack { background: #434c50; }
-.atlas-stamp-title { font-size: 10px; font-weight: 600; letter-spacing: -.015em; word-break: keep-all; }
-.atlas-stamp-date,.atlas-stamp-feeling { color: #c5cdd0; }
-.atlas-stamp-count { color: #1f2527; background: var(--atlas-coral); border-color: var(--atlas-coral); }
-.atlas-stamp-pin { background: var(--stamp-color); }
 .atlas.memory-atlas .map-zoom { display: grid; grid-template-columns: 44px; grid-auto-rows: 44px; align-items: stretch; justify-items: stretch; gap: 0; padding: 0; width: 46px; height: auto; background: #252c2ff5; border: 1px solid var(--atlas-border); }
 .atlas.memory-atlas .map-zoom button { display: grid; place-items: center; box-sizing: border-box; width: 44px; min-width: 44px; height: 44px; min-height: 44px; margin: 0; padding: 0; line-height: 0; border: 0; color: var(--atlas-text); }
 .atlas.memory-atlas .map-zoom button + button { box-shadow: inset 0 1px var(--atlas-rule); border: 0; }

@@ -387,8 +387,8 @@ export default function MemoryMap({
   const worldMarkerGroups = useMemo(() => {
     const [width, height] = presentation !== 'stamp' ? [40, 40]
       : stampDetail === 'dot' ? [56, 56]
-      : stampDetail === 'note' ? [104, 118]
-      : [120, 140];
+      : stampDetail === 'note' ? [124, 64]
+      : [145, 145];
     return groupMapMarkers(memories.map(memory=>({...project(memory,view.zoom),value:memory})),width,height)
       .map(group=>({x:group.x,y:group.y,memories:group.items,key:group.items.map(memory=>memory.id).join(':')}));
   },[memories,view.zoom,presentation,stampDetail]);
@@ -478,7 +478,7 @@ export default function MemoryMap({
           };
           if (presentation === 'stamp') return (
             <MemoryStamp
-              key={group.key}
+              key={memory.id}
               memory={memory}
               detail={stampDetail}
               memberIds={group.memories.map(item=>item.id)}

@@ -11,6 +11,7 @@ export function waitForMapZoom(page: Page, zoom: number) {
 export async function focusTaehwagang(page: Page) {
   await page.getByRole('combobox', { name: '장소 이름' }).fill('태화강');
   await page.getByRole('option', { name: /^태화강 국가정원 / }).click();
+  await waitForMapZoom(page, 14.2);
   await expect(page.getByRole('button', { name: '태화강 국가정원 산책로의 기억 5개', exact: true })).toBeVisible();
 }
 
