@@ -73,7 +73,7 @@ test('지도 확대에 따라 색 점, 사진 아이콘이 있는 글, 사진이
  await board.getByRole('button', { name: '선택한 기억 자세히 읽기' }).click();
  await expect(page.getByRole('dialog', { name: '기억 상세' })).toBeVisible();
 });
-test('테마별 점 윤곽을 유지하고 다른 장소의 기억 묶음을 한 번의 선택으로 펼친다', async ({ page }, info) => {
+test('테마별 감정색 점과 후광을 유지하고 다른 장소의 기억 묶음을 한 번의 선택으로 펼친다', async ({ page }, info) => {
  await page.goto('./');
  await expect(page.locator('.ulsan-urban-layers')).toBeVisible();
  const memoryId = (id: number) => `20000000-0000-4000-8000-${String(id).padStart(12,'0')}`;
@@ -83,7 +83,8 @@ test('테마별 점 윤곽을 유지하고 다른 장소의 기억 묶음을 한
  const groupIds = await west.getAttribute('data-memory-ids');
  await expect(garden).toHaveAttribute('data-memory-ids', groupIds!);
  const anchor = (await west.boundingBox())!;
- const rims = new Set<string>();
+ const fills = new Set<string>();
+ const halos = new Set<string>();
  for (const mode of ['기본', '다크', '자세히', '기본']) {
    await page.getByRole('button', { name: /^지도 조정 열기/ }).click();
    await page.getByRole('dialog').getByRole('button', { name: new RegExp(`^${mode}`) }).click();
@@ -93,14 +94,22 @@ test('테마별 점 윤곽을 유지하고 다른 장소의 기억 묶음을 한
        tiles => tiles.some(tile => (tile as HTMLImageElement).naturalWidth > 0)
      )).toBe(true);
    } else await expect(page.locator('.ulsan-urban-layers')).toBeVisible();
-   rims.add(await west.evaluate(el=>getComputedStyle(el).getPropertyValue('--atlas-dot-edge')));
+   const appearance = await west.evaluate(el => {
+     const style = getComputedStyle(el, '::after');
+     return { fill: style.backgroundColor, halo: style.boxShadow, outline: style.outlineStyle };
+   });
+   expect(appearance.halo).not.toBe('none');
+   expect(appearance.outline).toBe('none');
+   fills.add(appearance.fill);
+   halos.add(appearance.halo);
    await expect(west).toHaveAttribute('data-marker-detail', 'dot');
    const next = (await west.boundingBox())!;
    expect(Math.abs(anchor.x - next.x)).toBeLessThan(1);
    expect(Math.abs(anchor.y - next.y)).toBeLessThan(1);
    await page.screenshot({path:`test-results/screenshots/marker-theme-${mode}-${info.project.name}.png`,animations:'disabled'});
  }
- expect(rims.size).toBe(3);
+ expect(fills.size).toBe(3);
+ expect(halos.size).toBe(3);
  await west.click();
  await expect(west).not.toHaveAttribute('data-memory-ids', new RegExp(memoryId(8)));
  const view = page.locator('.ulsan-line-map');

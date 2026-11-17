@@ -4,6 +4,15 @@ import type { Emotion } from './model';
 /** Fictitious public fixtures. Never copy real users' stories into this catalog. */
 export type DemoMemoryRow = readonly [string, string, string, string, string, string | null, Emotion, 'public', boolean, 'exact', number, number];
 const id = (n: number) => `20000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
+/** This release adds only these records to existing version 5 browsers. */
+export const newDemoRows: DemoMemoryRow[] = [
+  [id(32),'demo-user-1','해가 질 때까지 접지 않은 책',demoJournalContent(id(32)),'장생포문화창고','2026-10-24','peaceful','public',true,'exact',35.5039,129.3683],
+  [id(33),'demo-user-2','돌담 끝에서 건넨 붕어빵',demoJournalContent(id(33)),'울산 경상좌도병영성','2025-12-07','happy','public',true,'exact',35.5771,129.3421],
+  [id(34),'demo-user-3','등이 젖을 때까지 앉아 있었다',demoJournalContent(id(34)),'태화루','2024-07-17','sad','public',true,'exact',35.5539,129.3146],
+  [id(35),'demo-user-1','새 신발의 끈을 다시 묶었다',demoJournalContent(id(35)),'선암호수공원','2026-04-11','excited','public',true,'exact',35.5169,129.3259],
+  [id(36),'demo-user-2','종이컵에 남은 온기',demoJournalContent(id(36)),'현대자동차 울산공장 인근','2023-11-09','love','public',true,'exact',35.5464,129.3741],
+];
+
 export const additionalDemoRows: DemoMemoryRow[] = [
   [id(20),'demo-user-1','강 건너로 천천히 번진 저녁',demoJournalContent(id(20)),'태화강 산책로','2026-10-10','peaceful','public',true,'exact',35.548,129.310],
   [id(21),'demo-user-2','바다 앞에서 약속한 다음 여행',demoJournalContent(id(21)),'대왕암공원','2024-06-15','excited','public',false,'exact',35.4928,129.4394],
@@ -17,6 +26,7 @@ export const additionalDemoRows: DemoMemoryRow[] = [
   [id(29),'demo-user-1','천천히 돌아가는 길',demoJournalContent(id(29)),'선암호수공원','2019-10-12','peaceful','public',true,'exact',35.5150,129.3288],
   [id(30),'demo-user-2','여름 끝의 파란 메모',demoJournalContent(id(30)),'슬도','2025-08-31','nostalgic','public',false,'exact',35.4820,129.4272],
   [id(31),'demo-user-3','정원을 다시 찾은 이유',demoJournalContent(id(31)),'태화강 국가정원 서쪽 산책길','2026-09-18','meaningful','public',true,'exact',35.5500,129.2800],
+  ...newDemoRows,
 ];
 
 export const demoPhotoAssets = {

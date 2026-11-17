@@ -63,39 +63,30 @@
 .atlas.memory-atlas .raster-memory-marker.atlas-stamp[data-marker-detail='photo'] { width: var(--stamp-photo-width); height: var(--stamp-photo-height); }
 
 .atlas.memory-atlas .raster-map {
-  --atlas-dot-edge: #243638;
-  --atlas-dot-light: 32%;
-  --atlas-dot-halo: 42%;
+  --atlas-dot-light: 48%;
+  --atlas-dot-halo: 50%;
 }
 .atlas.memory-atlas .raster-map.dark-mode {
-  --atlas-dot-edge: #abbac0;
-  --atlas-dot-light: 34%;
+  --atlas-dot-light: 28%;
   --atlas-dot-halo: 48%;
 }
 .atlas.memory-atlas .raster-map.detail-mode {
-  --atlas-dot-edge: #172226;
-  --atlas-dot-light: 38%;
-  --atlas-dot-halo: 50%;
+  --atlas-dot-light: 60%;
+  --atlas-dot-halo: 62%;
 }
 .atlas.memory-atlas .atlas-stamp {
-  --atlas-dot-size: 11px;
-  --atlas-dot-rim: 1.5px;
-  --atlas-dot-inner: 1.5px;
-  --atlas-dot-outer: 6px;
+  --atlas-dot-size: 12px;
+  --atlas-dot-spread: 5px;
 }
 .atlas.memory-atlas .atlas-stamp.is-stack {
-  --atlas-dot-size: 14px;
-  --atlas-dot-rim: 2px;
-  --atlas-dot-inner: 4px;
-  --atlas-dot-outer: 8px;
+  --atlas-dot-size: 16px;
+  --atlas-dot-spread: 8px;
 }
 .atlas.memory-atlas .atlas-stamp::after {
   content: ''; position: absolute; top: 50%; left: 50%; translate: -50% -50%;
   width: var(--atlas-dot-size); height: var(--atlas-dot-size); border-radius: 50%; pointer-events: none;
   background: color-mix(in srgb, var(--stamp-color), white var(--atlas-dot-light));
-  box-shadow: 0 0 0 var(--atlas-dot-rim) var(--atlas-dot-edge),
-    0 0 0 var(--atlas-dot-inner) color-mix(in srgb, var(--stamp-color) 78%, white),
-    0 0 0 var(--atlas-dot-outer) color-mix(in srgb, var(--stamp-color) var(--atlas-dot-halo), transparent);
+  box-shadow: 0 0 2px var(--atlas-dot-spread) color-mix(in srgb, var(--stamp-color) var(--atlas-dot-halo), transparent);
   opacity: 0; scale: .65;
   transition: opacity var(--stamp-motion) ease, scale var(--stamp-motion) var(--atlas-ease),
     width var(--stamp-motion) var(--atlas-ease), height var(--stamp-motion) var(--atlas-ease), box-shadow var(--stamp-motion) ease;

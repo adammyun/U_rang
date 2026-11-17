@@ -35,7 +35,9 @@ test('사진이 여러 장인 가상 기억을 바로 읽고 출처와 테이프
   const detail=page.getByRole('dialog',{name:'기억 상세'});
   await expect(detail.getByRole('heading',{level:2})).toHaveText('바다 앞에서 약속한 다음 여행');
   await expect(detail.locator('.atlas-taped-photo img')).toHaveCount(2);
-  for(const img of await detail.locator('.atlas-taped-photo img').all()) expect(await img.evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0)).toBe(true);
+  for (const img of await detail.locator('.atlas-taped-photo img').all()) {
+    await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+  }
   await expect(detail.getByLabel('사진 출처')).toContainText('CC BY-SA 4.0');
   await expect(detail).toContainText('다음 여행은 어디로 갈까');
   await expect(detail).not.toContainText(/시연용|가상의|실제 인물|관계없습니다/);
@@ -69,11 +71,11 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
       get.onsuccess=()=>{resolve({version:db.version,records:get.result});db.close();};get.onerror=()=>reject(get.error);
     };
   }));
-  expect(state.version).toBe(5);
+  expect(state.version).toBe(6);
   expect(state.records.find(r=>r.id.endsWith('000000000001'))?.content).toBe(demoJournalContent('20000000-0000-4000-8000-000000000001'));
   expect(state.records.find(r=>r.id.endsWith('000000000099'))?.content).toBe('직접 고친 나의 이야기');
   expect(state.records.find(r=>r.id==='migration-owner-fixture')).toMatchObject({title:'보존할 기존 기록',media:[{id:'existing-photo',dataUrl:'existing-private-bytes'}]});
-  expect(state.records.filter(r=>r.id.startsWith('20000000')).length).toBe(24);
+  expect(state.records.filter(r=>r.id.startsWith('20000000')).length).toBe(29);
   expect(state.records.filter(r=>r.id.startsWith('20000000')&&r.media.length).length).toBe(5);
   expect(state.records.find(r=>r.id.endsWith('000000000020'))?.media).toMatchObject([{dataUrl:'/yeoun_2/demo/taehwagang.png'}]);
   await page.getByRole('combobox', { name: '장소 이름' }).fill('태화강 산책로');
@@ -90,6 +92,48 @@ test('기존 브라우저 데이터는 보존하면서 새 예시와 사진만 �
   await expect(oldPhoto).toHaveAttribute('src','/U_rang/demo/taehwagang.png');
   await expect.poll(()=>oldPhoto.evaluate(image=>(image as HTMLImageElement).complete&&(image as HTMLImageElement).naturalWidth>0)).toBe(true);
 
+});
+
+test('현재 브라우저 저장소에 다섯 새 기억을 한 번만 추가한다', async ({page})=>{
+  await page.route('**/U_rang/', route => route.fulfill({contentType:'text/html',body:'<html><body>Version 5 fixture</body></html>'}));
+  await page.goto('./');
+  const saved = {id:'20000000-0000-4000-8000-000000000099',ownerId:'github-pages-user',title:'내가 지은 제목',content:'내가 고친 본문',visibility:'private',media:[{id:'stored-photo',dataUrl:'data:image/png;base64,saved-test-photo',sortOrder:0}]};
+  await page.evaluate(saved => new Promise<void>((resolve,reject)=>{
+    const open = indexedDB.open('yeoun_2',5);
+    open.onupgradeneeded = () => {
+      const db = open.result;
+      db.createObjectStore('comments',{keyPath:'id'}).createIndex('memoryId','memoryId');
+      db.createObjectStore('activity',{keyPath:'id'});
+      db.createObjectStore('memories',{keyPath:'id'}).add(saved);
+    };
+    open.onsuccess = () => { open.result.close(); resolve(); };
+    open.onerror = () => reject(open.error);
+  }),saved);
+  await page.unroute('**/U_rang/');
+  for(let n=0;n<2;n++){
+    await page.reload();
+    await expect(page.locator('.atlas-stamp').first()).toBeVisible();
+    const records = await page.evaluate(()=>new Promise<{id:string;title:string;content:string;visibility:string}[]>((resolve,reject)=>{
+      const open = indexedDB.open('yeoun_2');
+      open.onsuccess = () => {
+        const get = open.result.transaction('memories').objectStore('memories').getAll();
+        get.onsuccess = () => { open.result.close(); resolve(get.result); };
+        get.onerror = () => reject(get.error);
+      };
+      open.onerror = () => reject(open.error);
+    }));
+    expect(records).toHaveLength(6);
+    expect(records.find(record=>record.id===saved.id)).toEqual(saved);
+    expect(records.filter(record=>record.visibility==='public').map(record=>record.title)).toEqual([
+      '해가 질 때까지 접지 않은 책','돌담 끝에서 건넨 붕어빵','등이 젖을 때까지 앉아 있었다','새 신발의 끈을 다시 묶었다','종이컵에 남은 온기',
+    ]);
+  }
+  const marker = page.locator('.atlas-stamp[data-memory-ids~="20000000-0000-4000-8000-000000000033"]');
+  await marker.click();
+  await page.getByRole('button',{name:'선택한 기억 자세히 읽기'}).click();
+  const detail = page.getByRole('dialog',{name:'기억 상세'});
+  await expect(detail.getByRole('heading',{name:'돌담 끝에서 건넨 붕어빵'})).toBeVisible();
+  await expect(detail).toContainText('누가 이겼는지는 묻지 않았다.');
 });
 
 test('기본 사이트는 외부 이동 없이 게스트로 로그인하고 기존 기록을 이어서 본다',async({page},info)=>{

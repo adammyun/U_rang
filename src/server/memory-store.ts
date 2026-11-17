@@ -1,5 +1,5 @@
 import { demoJournalContent } from '@/src/features/memories/demo-journals';
-import { additionalDemoRows, demoMemoryPhotos, demoMediaId, demoPhotoAssets } from '@/src/features/memories/demo-catalog';
+import { additionalDemoRows, demoMemoryPhotos, demoMediaId, demoPhotoAssets, newDemoRows } from '@/src/features/memories/demo-catalog';
 import { env } from 'cloudflare:workers';
 import type { ChatGPTUser } from '@/app/chatgpt-auth';
 import type {
@@ -87,11 +87,15 @@ export function ensureSeedData() {
 
 async function seedDemoRows() {
   const expectedIds = Object.entries(demoMemoryPhotos).flatMap(([memoryId, photos]) => photos.map((_,index) => demoMediaId(memoryId,index)));
+  const newIds = newDemoRows.map(([id]) => id);
   const existing = await database()
     .prepare(`select (select count(*) from memory_media where id in (${expectedIds.map(() => '?').join(',')})) as count,
-      (select content from memories where id = ?) as journal`)
-    .bind(...expectedIds, '20000000-0000-4000-8000-000000000031').first<{ count: number; journal: string }>();
-  if (existing?.count === expectedIds.length && existing.journal === demoJournalContent('20000000-0000-4000-8000-000000000031')) return;
+      (select content from memories where id = ?) as journal,
+      (select count(*) from memories where id in (${newIds.map(() => '?').join(',')})) as new_count`)
+    .bind(...expectedIds, '20000000-0000-4000-8000-000000000031', ...newIds)
+    .first<{ count: number; journal: string; new_count: number }>();
+  if (existing?.count === expectedIds.length && existing.new_count === newIds.length &&
+      existing.journal === demoJournalContent('20000000-0000-4000-8000-000000000031')) return;
   const created = '2026-09-10T00:00:00.000Z';
   await database().batch(
     seedRows.map((row) => {

@@ -4,7 +4,7 @@ import { demoJournalContent } from '@/src/features/memories/demo-journals';
 import { isPagesAuthenticated } from '@/src/lib/runtime';
 import type { MemoryActivity, PersonalQuery, PersonalSpace } from './personal-model';
 import { emotions } from './model';
-import { additionalDemoRows, demoMemoryPhotos, demoMediaId, demoPhotoAssets } from './demo-catalog';
+import { additionalDemoRows, demoMemoryPhotos, demoMediaId, demoPhotoAssets, newDemoRows } from './demo-catalog';
 import type {
   Bounds,
   Emotion,
@@ -21,7 +21,7 @@ import type {
 } from './schemas';
 
 const DATABASE_NAME = 'yeoun_2';
-const DATABASE_VERSION = 5;
+const DATABASE_VERSION = 6;
 const COMMENTS_STORE = 'comments';
 const STORE_NAME = 'memories';
 const ACTIVITY_STORE = 'activity';
@@ -122,7 +122,7 @@ function database() {
   databasePromise ??= new Promise((resolve, reject) => {
     const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
     request.onerror = () => reject(request.error ?? new Error('브라우저 저장소를 열지 못했습니다.'));
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event) => {
       const db = request.result;
       if (!db.objectStoreNames.contains(COMMENTS_STORE)) {
         const comments=db.createObjectStore(COMMENTS_STORE,{keyPath:'id'});
@@ -132,13 +132,15 @@ function database() {
       const store = db.objectStoreNames.contains(STORE_NAME)
         ? request.transaction!.objectStore(STORE_NAME)
         : db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      for (const row of seedRows) {
+      // Version 5 already has the older examples. Only add missing new rows.
+      const addOnly = event.oldVersion >= 5;
+      for (const row of addOnly ? newDemoRows : seedRows) {
         const lookup = store.get(row[0]);
         lookup.onsuccess = () => {
           const existing = lookup.result as StoredMemory | undefined;
           const fixture = seedMemory(row);
           if (!existing) store.add(fixture);
-          else if (existing.ownerId === fixture.ownerId) {
+          else if (!addOnly && existing.ownerId === fixture.ownerId) {
             // Only untouched reserved examples receive new writing. User edits/photos survive.
             const untouched = existing.createdAt === fixture.createdAt && existing.updatedAt === existing.createdAt;
             const media = existing.ownerId !== LOCAL_USER_ID && !existing.media.length && fixture.media.length
