@@ -77,13 +77,14 @@ export default function MemoryStamp({ memory, detail, count, selected, grouped, 
     return () => window.clearTimeout(timeout);
   }, [visual]);
   const hasPaper = detail !== 'dot' || visual.leaving;
-  const tilt = hasPaper ? Array.from(memory.id).reduce((sum, char) => sum + char.charCodeAt(0), 0) : 0;
+  const seed = Array.from(memory.id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const tilt = hasPaper ? seed : 0;
   const papers = [visual.leaving, detail].filter((paper): paper is 'note' | 'photo' => paper === 'note' || paper === 'photo');
   return (
     <button
       type="button"
       className={`raster-memory-marker atlas-stamp${count>1?' is-stack':''}${hovered?' is-linked-hover':''}${selected ? ' selected' : grouped ? ' grouped' : ''}`}
-      style={{ left: x, top: y, '--stamp-tilt': `${count > 1 ? (tilt % 5) - 2 : (tilt % 11) - 5}deg`, '--stamp-color': emotion.color, '--stamp-motion': `${STAMP_MOTION_MS}ms` } as CSSProperties}
+      style={{ left: x, top: y, '--stamp-tilt': `${count > 1 ? (tilt % 5) - 2 : (tilt % 11) - 5}deg`, '--stamp-color': emotion.color, '--stamp-motion': `${STAMP_MOTION_MS}ms`, '--stamp-phase': `-${((seed * 37) % 60) / 10}s` } as CSSProperties}
       aria-label={count > 1 ? `${memory.location_name}의 기억 ${count}개` : memory.title}
       aria-description={detail !== 'dot' && memory.media.length > 0 ? '사진 있음' : undefined}
       aria-pressed={selected || grouped}
@@ -94,7 +95,7 @@ export default function MemoryStamp({ memory, detail, count, selected, grouped, 
       onMouseEnter={()=>onHover?.(memory.id)} onMouseLeave={()=>onHover?.(null)} onFocus={()=>onHover?.(memory.id)} onBlur={()=>onHover?.(null)}
       onClick={onSelect}
     >
-      {dailyTrace && detail === 'dot' && <span className="atlas-daily-glow" aria-hidden="true" />}
+      {detail === 'dot' && <span className={`atlas-dot-glow${dailyTrace ? ' atlas-daily-glow' : ''}`} aria-hidden="true" />}
       {papers.map(paper => (
         <StampPaper key={paper} detail={paper} leaving={paper !== detail} memory={memory} count={count} onExit={() => {
           setVisual(current => current === visual ? { detail: current.detail, leaving: null } : current);

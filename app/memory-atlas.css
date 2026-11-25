@@ -95,21 +95,33 @@
   opacity: 1; scale: 1;
   animation: atlas-stamp-dot-reveal var(--stamp-motion) var(--atlas-ease);
 }
-.atlas-daily-glow {
+.atlas-dot-glow {
   position: absolute; left: 50%; top: 50%; translate: -50% -50%;
   width: calc(var(--atlas-dot-size) + 16px); height: calc(var(--atlas-dot-size) + 16px);
   border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle, color-mix(in srgb, var(--stamp-color) 40%, white) 8%, color-mix(in srgb, var(--stamp-color) 38%, transparent) 38%, transparent 72%);
-  opacity: .3; animation: atlas-daily-breathe 6s ease-in-out 1.2s 3;
+  opacity: .3; animation: atlas-dot-breathe 6s ease-in-out var(--stamp-phase, 0s) infinite;
 }
-@keyframes atlas-daily-breathe {
+@keyframes atlas-dot-breathe {
   0%, 100% { opacity: .25; scale: 1; }
   50% { opacity: .55; scale: 1.14; }
 }
-.atlas-stamp:is(:hover,:focus-visible,.selected,.grouped) .atlas-daily-glow { animation-play-state: paused; }
-.raster-map.detail-mode .atlas-daily-glow { opacity: .45; }
+.atlas-daily-glow {
+  width: calc(var(--atlas-dot-size) + 32px); height: calc(var(--atlas-dot-size) + 32px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--stamp-color) 30%, white) 5%, color-mix(in srgb, var(--stamp-color) 65%, transparent) 34%, transparent 72%);
+  opacity: .65; animation-name: atlas-daily-breathe;
+}
+@keyframes atlas-daily-breathe {
+  0%, 100% { opacity: .5; scale: 1; }
+  50% { opacity: .9; scale: 1.2; }
+}
+.atlas.memory-atlas .atlas-stamp[data-daily-trace='true']::after {
+  background: color-mix(in srgb, var(--stamp-color), white calc(var(--atlas-dot-light) + 10%));
+}
+.atlas-stamp:is(:hover,:focus-visible,.selected,.grouped) .atlas-dot-glow { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .atlas-daily-glow { animation: none; opacity: .3; }
+  .atlas-dot-glow { animation: none; opacity: .3; }
+  .atlas-daily-glow { opacity: .65; }
 }
 @keyframes atlas-stamp-dot-reveal {
   from { transform: scale(.72); opacity: .35; }

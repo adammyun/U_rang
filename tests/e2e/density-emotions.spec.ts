@@ -94,6 +94,12 @@ test('테마별 감정색 점과 후광을 유지하고 다른 장소의 기억 
        tiles => tiles.some(tile => (tile as HTMLImageElement).naturalWidth > 0)
      )).toBe(true);
    } else await expect(page.locator('.ulsan-urban-layers')).toBeVisible();
+   // Compare settled theme colors, not an in-flight box-shadow transition.
+   await west.evaluate(async el => {
+     await Promise.all(el.getAnimations({subtree:true})
+       .filter(animation => animation.effect?.getTiming().iterations !== Infinity)
+       .map(animation => animation.finished.catch(() => undefined)));
+   });
    const appearance = await west.evaluate(el => {
      const style = getComputedStyle(el, '::after');
      return { fill: style.backgroundColor, halo: style.boxShadow, outline: style.outlineStyle };
@@ -225,17 +231,26 @@ test('하루의 조용한 빛은 공개 점 하나에만 붙고 세 테마와 �
   expect(await trace.evaluate(el=>getComputedStyle(el,'::after').width)).toBe(size);
   const glow=trace.locator('.atlas-daily-glow');
   await expect(glow).toHaveCSS('animation-name','atlas-daily-breathe');
-  await expect(glow).toHaveCSS('animation-iteration-count','3');
+  await expect(glow).toHaveCSS('animation-iteration-count','infinite');
+  const ordinary=page.locator('.atlas-stamp[data-marker-detail="dot"]:not([data-daily-trace]) .atlas-dot-glow').first();
+  await expect(ordinary).toHaveCSS('animation-name','atlas-dot-breathe');
+  await expect(ordinary).toHaveCSS('animation-iteration-count','infinite');
+  expect(await glow.evaluate(el=>el.clientWidth)).toBeGreaterThan(await ordinary.evaluate(el=>el.clientWidth)+10);
+  const core=await trace.evaluate(el=>el.getBoundingClientRect());
+  expect(core.width).toBeGreaterThanOrEqual(44);
+  const phases=await page.locator('.atlas-stamp[data-marker-detail="dot"]').evaluateAll(els=>new Set(els.map(el=>getComputedStyle(el).getPropertyValue('--stamp-phase'))).size);
+  expect(phases).toBeGreaterThan(1);
   await expect(glow).toHaveCSS('pointer-events','none');
   await page.mouse.move(2,2);
   await page.screenshot({path:`test-results/screenshots/daily-trace-${label}-${info.project.name}.png`,animations:'disabled'});
  }
  await page.emulateMedia({reducedMotion:'reduce'});
  await expect(trace.locator('.atlas-daily-glow')).toHaveCSS('animation-name','none');
+ await expect(page.locator('.atlas-stamp:not([data-daily-trace]) .atlas-dot-glow').first()).toHaveCSS('animation-name','none');
  await page.getByRole('combobox',{name:'장소 이름'}).fill('태화강');
  await page.getByRole('option',{name:/^태화강 국가정원 /}).click();
  await waitForMapZoom(page,14.2);
- await expect(page.locator('.atlas-daily-glow')).toHaveCount(0);
+ await expect(page.locator('.atlas-dot-glow')).toHaveCount(0);
 });
 
 test('당일 반응은 오래된 반응과 비공개를 앞서며 조회 후 지도에 반영된다',async({page})=>{
