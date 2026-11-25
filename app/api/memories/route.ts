@@ -1,3 +1,4 @@
+import { publicDailyInterest } from '@/src/server/personal-space';
 import { getChatGPTUser } from '@/app/chatgpt-auth';
 import { boundsSchema, createMemorySchema } from '@/src/features/memories/schemas';
 import { createMemory, listPublicMemories } from '@/src/server/memory-store';
@@ -9,7 +10,8 @@ export async function GET(request: Request) {
     const query = boundsSchema.parse(queryObject(request));
     const viewer = await getChatGPTUser();
     const result = await listPublicMemories(query, query, query.limit, viewer?.userId);
-    return Response.json({ data: result.memories, meta: { hasMore: result.hasMore } },{headers:{'cache-control':'private, no-store'}});
+    const interest = await publicDailyInterest(result.memories.map(memory => memory.id));
+    return Response.json({ data: result.memories.map(memory => ({...memory,dailyInterest:interest.get(memory.id)})), meta: { hasMore: result.hasMore } },{headers:{'cache-control':'private, no-store'}});
   } catch (error) { return errorResponse(error); }
 }
 

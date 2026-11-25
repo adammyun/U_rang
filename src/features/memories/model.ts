@@ -42,6 +42,7 @@ export type Memory = {
   created_at: string;
   owned: boolean;
   media: MemoryMedia[];
+  dailyInterest?: { day: string; score: number };
 };
 
 export type MemoryDraft = {

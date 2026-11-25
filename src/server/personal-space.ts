@@ -1,3 +1,4 @@
+import { memoryDayBounds, type DailyInterest } from '@/src/features/memories/daily-interest';
 import { database, ensureSeedData, getMemory, toMemories, type MemoryRow } from './memory-store';
 import type { MemoryActivity, PersonalQuery, PersonalSpace } from '@/src/features/memories/personal-model';
 import { emotions } from '@/src/features/memories/model';
@@ -33,7 +34,7 @@ export async function changeActivity(id: string, action: 'like'|'bookmark'|'view
     // No IP address, email or raw account identifier is stored in view records.
     const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(userId ? `account:${userId}` : `visitor:${visitorId}`));
     const key = Array.from(new Uint8Array(bytes), value=>value.toString(16).padStart(2,'0')).join('');
-    await database().prepare(`insert or ignore into memory_views(memory_id,viewer_key,created_at) values(?,?,?)`).bind(id,key,new Date().toISOString()).run();
+    await database().prepare(`insert into memory_views(memory_id,viewer_key,created_at) values(?,?,?) on conflict(memory_id,viewer_key) do update set created_at=excluded.created_at`).bind(id,key,new Date().toISOString()).run();
   } else {
     if (!userId) throw new Error('로그인이 필요합니다.');
     if (active) await database().prepare(`insert or ignore into memory_reactions(memory_id,user_id,kind,created_at) values(?,?,?,?)`).bind(id,userId,action,new Date().toISOString()).run();
@@ -88,4 +89,25 @@ export async function getPersonalSpace(userId: string, displayName: string, quer
   const preferences = await db.prepare(`select distinct emotion,location_name from memories where user_id=? limit 300`).bind(userId).all<{emotion:keyof typeof emotions;location_name:string}>();
   const recommendations = (await toMemories(candidates.results,userId)).map(memory=>({memory,reason:preferences.results.some(row=>row.location_name===memory.location_name) ? '내가 기록한 장소의 다른 이야기' : preferences.results.some(row=>row.emotion===memory.emotion) ? `내 기록과 닮은 ${emotions[memory.emotion].label}의 순간` : '울산에서 만나는 다른 이야기'}));
   return {displayName,totals,lists,mapMemories:await toMemories(mapped.results.slice(0,200),userId,true),hasMore:mapped.results.length>200,recommendations};
+}
+
+
+// Restrict aggregation to the already bounded public response; never send
+// viewer keys, reaction rows or private/unlisted counts to the browser.
+export async function publicDailyInterest(ids: string[]): Promise<Map<string, DailyInterest>> {
+  if (!ids.length) return new Map();
+  await ensureActivitySchema();
+  const { day, start, end } = memoryDayBounds();
+  const batches: string[][] = [];
+  for (let i=0;i<ids.length;i+=64) batches.push(ids.slice(i,i+64));
+  const results = await Promise.all(batches.map(async batch => {
+  const marks = batch.map(() => '?').join(',');
+  const rows = await database().prepare(`select m.id,
+    (select count(*) from memory_views v where v.memory_id=m.id and v.created_at>=? and v.created_at<?)
+    + 3 * (select count(*) from memory_reactions r where r.memory_id=m.id and r.kind='like' and r.created_at>=? and r.created_at<?) as score
+    from memories m where m.visibility='public' and m.id in (${marks})`)
+    .bind(start,end,start,end,...batch).all<{id:string;score:number}>();
+  return rows.results;
+  }));
+  return new Map(results.flat().map(row => [row.id,{day,score:row.score}]));
 }

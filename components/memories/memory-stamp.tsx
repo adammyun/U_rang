@@ -48,9 +48,10 @@ function StampPaper({ memory, count, detail, leaving, onExit }: {
 }
 
 /** Presentation only: coordinates, grouping and access policy stay in MemoryMap. */
-export default function MemoryStamp({ memory, detail, count, selected, grouped, x, y, onSelect, memberIds, hovered=false, onHover }: {
+export default function MemoryStamp({ memory, detail, count, selected, grouped, x, y, onSelect, memberIds, dailyTrace=false, hovered=false, onHover }: {
   memory: Memory;
   detail: StampDetail;
+  dailyTrace?: boolean;
   memberIds:string[];
   hovered?:boolean;
   onHover?:(id:string|null)=>void;
@@ -86,12 +87,14 @@ export default function MemoryStamp({ memory, detail, count, selected, grouped, 
       aria-label={count > 1 ? `${memory.location_name}의 기억 ${count}개` : memory.title}
       aria-description={detail !== 'dot' && memory.media.length > 0 ? '사진 있음' : undefined}
       aria-pressed={selected || grouped}
+      data-daily-trace={dailyTrace && detail === 'dot' ? 'true' : undefined}
       data-marker-detail={detail}
       data-memory-count={count}
       data-memory-ids={memberIds.join(' ')}
       onMouseEnter={()=>onHover?.(memory.id)} onMouseLeave={()=>onHover?.(null)} onFocus={()=>onHover?.(memory.id)} onBlur={()=>onHover?.(null)}
       onClick={onSelect}
     >
+      {dailyTrace && detail === 'dot' && <span className="atlas-daily-glow" aria-hidden="true" />}
       {papers.map(paper => (
         <StampPaper key={paper} detail={paper} leaving={paper !== detail} memory={memory} count={count} onExit={() => {
           setVisual(current => current === visual ? { detail: current.detail, leaving: null } : current);

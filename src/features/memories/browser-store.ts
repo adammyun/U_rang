@@ -1,3 +1,4 @@
+import { memoryDay } from './daily-interest';
 import { demoCommentsForMemory } from './demo-comments';
 import { COMMENT_PAGE_SIZE, encodeCommentCursor, type CommentCursor, type CommentPage, type MemoryComment, type PanoramaAnchor } from './comments-model';
 import { demoJournalContent } from '@/src/features/memories/demo-journals';
@@ -253,7 +254,18 @@ export async function listBrowserPublicMemories(
     .filter((row) => row.visibility === 'public' && inBounds(row, bounds) && matchesFilters(row, filters))
     .sort((a, b) => (b.memoryDate ?? b.createdAt).localeCompare(a.memoryDate ?? a.createdAt));
   checkAbort(signal);
-  return { memories: rows.slice(0, 200).map((row) => toMemory(row)), hasMore: rows.length > 200 };
+  const day = memoryDay();
+  const activity = new Map((await activityRecords()).map(row => [row.id, row]));
+  checkAbort(signal);
+  return {
+    memories: rows.slice(0, 200).map(row => {
+      const reactions = activity.get(row.id);
+      const score = Number(Boolean(reactions?.viewedAt && memoryDay(Date.parse(reactions.viewedAt)) === day))
+        + 3 * Number(Boolean(reactions?.liked && reactions.likedAt && memoryDay(Date.parse(reactions.likedAt)) === day));
+      return { ...toMemory(row), dailyInterest: { day, score } };
+    }),
+    hasMore: rows.length > 200,
+  };
 }
 
 export async function getBrowserPublicMemory(id: string, signal?: AbortSignal) {
@@ -416,7 +428,7 @@ export async function browserPlaceMemoryGroup(
   };
 }
 
-type StoredActivity = { id:string; liked:boolean; bookmarked:boolean; viewed:boolean };
+type StoredActivity = { id:string; liked:boolean; bookmarked:boolean; viewed:boolean; viewedAt?:string; likedAt?:string };
 async function activityRecords() {
   const db = await database();
   return requestResult(db.transaction(ACTIVITY_STORE).objectStore(ACTIVITY_STORE).getAll() as IDBRequest<StoredActivity[]>);
@@ -431,8 +443,12 @@ export async function browserActivity(id:string, action?:'like'|'bookmark'|'view
   const current=await requestResult(store.get(id) as IDBRequest<StoredActivity|undefined>);
   const next=current ?? {id,liked:false,bookmarked:false,viewed:false};
   if(action) {
-    if(action==='view') next.viewed=true;
-    else if(action==='like') next.liked=active;
+    if(action==='view') { next.viewed=true; next.viewedAt=new Date().toISOString(); }
+    else if(action==='like') {
+      if(active && !next.liked) next.likedAt=new Date().toISOString();
+      if(!active) delete next.likedAt;
+      next.liked=active;
+    }
     else next.bookmarked=active;
     await requestResult(store.put(next));
   }

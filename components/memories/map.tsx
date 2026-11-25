@@ -1,4 +1,5 @@
 'use client';
+import { dailyMemoryTrace, memoryDay } from '@/src/features/memories/daily-interest';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Map as LibreMap,
@@ -87,6 +88,7 @@ export default function MemoryMap({
   reserveIntroSpace = false,
   hideMemories = false,
   hideStories = false,
+  dailyTrace = false,
   discoveredStoryIds = [],
   onStory,
   storyScope,
@@ -110,6 +112,7 @@ export default function MemoryMap({
   reserveIntroSpace?: boolean;
   hideMemories?: boolean;
   hideStories?:boolean;
+  dailyTrace?:boolean;
   storyScope?:string[];
   hoveredMemoryId?:string|null;
   onHoverMemory?:(id:string|null)=>void;
@@ -383,6 +386,7 @@ export default function MemoryMap({
     view.center.lat >= lineData.bbox[1] && view.center.lat <= lineData.bbox[3];
   const showRasterTiles = !showLineArt && (mode === 'detail' || mode === 'calm' || mode === 'dark' || error || !ready || !tilesReady || rasterCompatibilityActive);
 
+  const traceId = useMemo(() => dailyTrace ? dailyMemoryTrace(memories, memoryDay()) : null, [memories, dailyTrace]);
   const stampDetail = view.zoom >= STAMP_PHOTO_ZOOM ? 'photo' : view.zoom >= STAMP_NOTE_ZOOM ? 'note' : 'dot';
   const worldMarkerGroups = useMemo(() => {
     const { width, height } = presentation === 'stamp' ? stampSpacing(view.zoom) : { width: 40, height: 40 };
@@ -490,6 +494,7 @@ export default function MemoryMap({
               memberIds={group.memories.map(item=>item.id)}
               hovered={group.memories.some(item=>item.id===hoveredMemoryId)}
               onHover={onHoverMemory}
+              dailyTrace={group.memories.some(item => item.id === traceId)}
               count={group.memories.length}
               selected={selected}
               grouped={grouped}

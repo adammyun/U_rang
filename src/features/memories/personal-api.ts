@@ -26,6 +26,6 @@ function visitorId() {
 }
 export async function setActivity(id:string,action:'like'|'bookmark'|'view',active=true) {
   const result=isPagesRuntime()?await browserActivity(id,action,active):await data<MemoryActivity>(await fetch(`/api/memories/${encodeURIComponent(id)}/activity`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(action==='view'?{action,visitorId:visitorId()}:{action,active})}));
-  if(action!=='view') window.dispatchEvent(new Event(ACTIVITY_CHANGED_EVENT));
+  window.dispatchEvent(new Event(ACTIVITY_CHANGED_EVENT));
   return result;
 }

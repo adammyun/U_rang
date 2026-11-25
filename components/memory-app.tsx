@@ -1,4 +1,5 @@
 'use client';
+import { memoryDay, memoryDayBounds } from '@/src/features/memories/daily-interest';
 import {DEFAULT_EMOTION_MENU} from '@/src/features/memories/emotion-preferences';
 import {fetchEmotionPreferences,updateEmotionPreferences} from '@/src/features/memories/emotion-preferences-api';
 
@@ -295,6 +296,20 @@ export default function MemoryApp({
     }
     return Array.from(byId.values());
   }, [bounds, createdRows, filters, publicRows, personalMode]);
+
+  useEffect(()=>{
+    let day = memoryDay();
+    let timer: ReturnType<typeof setTimeout>;
+    const check = () => {
+      const next = memoryDay();
+      if (next !== day) { day = next; setRevision(value => value + 1); }
+      clearTimeout(timer);
+      timer = setTimeout(check, Math.max(1000, Date.parse(memoryDayBounds().end) - Date.now() + 100));
+    };
+    check();
+    document.addEventListener('visibilitychange', check);
+    return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', check); };
+  }, []);
 
   useEffect(()=>{
     const changed=()=>setRevision(value=>value+1);
@@ -621,6 +636,7 @@ export default function MemoryApp({
         memories={memories}
         mode={mapMode}
         presentation="stamp"
+        dailyTrace={!personalMode}
         hideMemories={Boolean(pendingLocation || draftLocation)}
         reserveIntroSpace={!personalMode && !profileOpen && !selected && !placeAnchor && !expanded && !pendingLocation && !selectedPlace}
         mapRef={mapRef}

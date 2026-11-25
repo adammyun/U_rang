@@ -209,3 +209,62 @@ test('마이페이지의 감정 메뉴 설정이 저장되고 새로고침 뒤�
  await expect(settings.getByRole('checkbox',{name:'슬픔',exact:true})).toBeChecked();
  await expect(settings.getByRole('checkbox',{name:'행복',exact:true})).not.toBeChecked();
 });
+
+test('하루의 조용한 빛은 공개 점 하나에만 붙고 세 테마와 움직임 줄이기를 지킨다', async ({page},info)=>{
+ await page.goto('./');
+ const trace=page.locator('.atlas-stamp[data-daily-trace="true"]');
+ await expect(trace).toHaveCount(1);
+ const ids=await trace.getAttribute('data-memory-ids');
+ const size=await trace.evaluate(el=>getComputedStyle(el,'::after').width);
+ for(const label of ['다크','자세히','기본']){
+  await page.getByRole('button',{name:/^지도 조정 열기/}).click();
+  await page.getByRole('dialog').getByRole('button',{name:new RegExp('^'+label)}).click();
+  await page.getByRole('button',{name:'지도 조정 닫기'}).click();
+  await expect(trace).toHaveCount(1);
+  await expect(trace).toHaveAttribute('data-memory-ids',ids!);
+  expect(await trace.evaluate(el=>getComputedStyle(el,'::after').width)).toBe(size);
+  const glow=trace.locator('.atlas-daily-glow');
+  await expect(glow).toHaveCSS('animation-name','atlas-daily-breathe');
+  await expect(glow).toHaveCSS('animation-iteration-count','3');
+  await expect(glow).toHaveCSS('pointer-events','none');
+  await page.mouse.move(2,2);
+  await page.screenshot({path:`test-results/screenshots/daily-trace-${label}-${info.project.name}.png`,animations:'disabled'});
+ }
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await expect(trace.locator('.atlas-daily-glow')).toHaveCSS('animation-name','none');
+ await page.getByRole('combobox',{name:'장소 이름'}).fill('태화강');
+ await page.getByRole('option',{name:/^태화강 국가정원 /}).click();
+ await waitForMapZoom(page,14.2);
+ await expect(page.locator('.atlas-daily-glow')).toHaveCount(0);
+});
+
+test('당일 반응은 오래된 반응과 비공개를 앞서며 조회 후 지도에 반영된다',async({page})=>{
+ await page.goto('./');
+ await expect(page.locator('.atlas-stamp').first()).toBeVisible();
+ const target='20000000-0000-4000-8000-000000000029';
+ await page.evaluate(async target=>{
+  const db=await new Promise<IDBDatabase>((resolve,reject)=>{
+   const open=indexedDB.open('yeoun_2');open.onsuccess=()=>resolve(open.result);open.onerror=()=>reject(open.error);
+  });
+  await new Promise<void>((resolve,reject)=>{
+   const tx=db.transaction('activity','readwrite');
+   const store=tx.objectStore('activity');
+   store.put({id:target,liked:true,bookmarked:false,viewed:false,likedAt:new Date().toISOString()});
+   store.put({id:'20000000-0000-4000-8000-000000000031',liked:true,bookmarked:false,viewed:true,likedAt:'2000-01-01T00:00:00Z',viewedAt:'2000-01-01T00:00:00Z'});
+   store.put({id:'20000000-0000-4000-8000-000000000099',liked:true,bookmarked:false,viewed:true,likedAt:new Date().toISOString(),viewedAt:new Date().toISOString()});
+   tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);
+  });db.close();
+  window.dispatchEvent(new Event('yurang:activity-changed'));
+ },target);
+ await expect(page.locator('.atlas-stamp[data-daily-trace="true"]')).toHaveAttribute('data-memory-ids',new RegExp(target));
+ await focusSeongnam(page);
+ await page.getByRole('button',{name:'골목의 작은 불빛',exact:true}).click();
+ await page.getByRole('button',{name:'선택한 기억 자세히 읽기'}).click();
+ await expect(page.getByRole('dialog',{name:'기억 상세'})).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>new Promise<string|undefined>(resolve=>{
+  const open=indexedDB.open('yeoun_2');open.onsuccess=()=>{
+   const get=open.result.transaction('activity').objectStore('activity').get('20000000-0000-4000-8000-000000000010');
+   get.onsuccess=()=>{resolve(get.result?.viewedAt);open.result.close();};
+  };
+ }))).toBeTruthy();
+});
